@@ -10,6 +10,11 @@ interface NoteCardProps {
 }
 
 export const NoteCard = ({ note, onOpen, onRequestDelete }: NoteCardProps) => {
+  const isEdited = note.updatedOn !== note.postedOn;
+  const timeLabel = isEdited
+    ? `Edited ${getRelativeTime(note.updatedOn)}`
+    : getRelativeTime(note.postedOn);
+
   const handleDelete = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     onRequestDelete(note);
@@ -29,7 +34,7 @@ export const NoteCard = ({ note, onOpen, onRequestDelete }: NoteCardProps) => {
       <p className="card-text text-body-large">{note.text}</p>
       <div className="wrapper">
         <span className="card-time text-label-large">
-          {getRelativeTime(note.postedOn)}
+          {timeLabel}
         </span>
         <IconButton
           icon="delete"

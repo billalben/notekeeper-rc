@@ -4,6 +4,7 @@ export interface Note {
   title: string;
   text: string;
   postedOn: number;
+  updatedOn: number;
 }
 
 export interface Notebook {

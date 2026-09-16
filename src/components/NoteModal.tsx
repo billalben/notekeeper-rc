@@ -1,18 +1,21 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { getRelativeTime } from "../utils";
 import { IconButton } from "./IconButton";
 
 interface NoteModalProps {
   title?: string;
   text?: string;
-  time?: string;
+  postedOn?: number;
+  updatedOn?: number;
   onSubmit: (noteData: { title: string; text: string }) => void;
   onClose: () => void;
 }
 
 export const NoteModal = ({
-  title: initialTitle = "Untitled",
-  text: initialText = "add your note ...",
-  time = "",
+  title: initialTitle = "",
+  text: initialText = "",
+  postedOn,
+  updatedOn,
   onSubmit,
   onClose,
 }: NoteModalProps) => {
@@ -20,6 +23,23 @@ export const NoteModal = ({
   const [text, setText] = useState(initialText);
 
   const isSubmitDisabled = !title.trim() && !text.trim();
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  const timeLabel = postedOn
+    ? `Created ${getRelativeTime(postedOn)}${
+        updatedOn && updatedOn !== postedOn
+          ? ` · Edited ${getRelativeTime(updatedOn)}`
+          : ""
+      }`
+    : "";
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -56,7 +76,7 @@ export const NoteModal = ({
         />
 
         <div className="modal-footer">
-          <span className="time text-label-large">{time}</span>
+          <span className="time text-label-large">{timeLabel}</span>
           <button
             className="btn text"
             type="submit"

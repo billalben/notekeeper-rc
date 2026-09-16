@@ -7,8 +7,8 @@ import { NoteModal } from "./components/NoteModal";
 import { Sidebar } from "./components/Sidebar";
 import { useNoteStore } from "./store/useNoteStore";
 import { useThemeStore } from "./store/useThemeStore";
+import { useUIStore } from "./store/useUIStore";
 import type { Note, Notebook } from "./types";
-import { getRelativeTime } from "./utils";
 
 type NoteModalState = { type: "create" } | { type: "edit"; note: Note };
 
@@ -26,6 +26,8 @@ const App = () => {
   const updateNote = useNoteStore((state) => state.updateNote);
   const deleteNote = useNoteStore((state) => state.deleteNote);
   const deleteNotebook = useNoteStore((state) => state.deleteNotebook);
+
+  const startAddingNotebook = useUIStore((state) => state.startAddingNotebook);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [noteModal, setNoteModal] = useState<NoteModalState | null>(null);
@@ -121,11 +123,33 @@ const App = () => {
           {activeNotebook?.name ?? ""}
         </h2>
 
-        <NoteList
-          notes={activeNotebook?.notes ?? []}
-          onOpen={openEditNote}
-          onRequestDelete={requestDeleteNote}
-        />
+        {notebooks.length === 0 ? (
+          <div className="note-list" data-note-panel>
+            <div className="empty-notes">
+              <span className="material-symbols-rounded" aria-hidden="true">
+                note_stack
+              </span>
+              <div className="text-headline-small">No notebooks yet</div>
+              <button
+                className="btn fill"
+                type="button"
+                onClick={() => {
+                  startAddingNotebook();
+                  setSidebarOpen(true);
+                }}
+              >
+                <span className="text-label-large">Create notebook</span>
+                <div className="state-layer" />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <NoteList
+            notes={activeNotebook?.notes ?? []}
+            onOpen={openEditNote}
+            onRequestDelete={requestDeleteNote}
+          />
+        )}
 
         <Fab
           label="New note"
@@ -138,10 +162,11 @@ const App = () => {
         <NoteModal
           title={noteModal.type === "edit" ? noteModal.note.title : undefined}
           text={noteModal.type === "edit" ? noteModal.note.text : undefined}
-          time={
-            noteModal.type === "edit"
-              ? getRelativeTime(noteModal.note.postedOn)
-              : undefined
+          postedOn={
+            noteModal.type === "edit" ? noteModal.note.postedOn : undefined
+          }
+          updatedOn={
+            noteModal.type === "edit" ? noteModal.note.updatedOn : undefined
           }
           onSubmit={handleNoteSubmit}
           onClose={() => setNoteModal(null)}

@@ -4,7 +4,7 @@ import type { Note, Notebook } from "../types";
 import { generateID } from "../utils";
 
 const STORAGE_KEY = "noteKeeperDB";
-const STORAGE_VERSION = 1;
+const STORAGE_VERSION = 2;
 
 interface NoteStore {
   notebooks: Notebook[];
@@ -22,6 +22,19 @@ interface NoteStore {
 }
 
 /**
+ * Notes created before version 2 only had `postedOn` (the creation time).
+ * Backfill `updatedOn` so older notes keep working.
+ */
+const withUpdatedOn = (notebooks: Notebook[]): Notebook[] =>
+  notebooks.map((notebook) => ({
+    ...notebook,
+    notes: notebook.notes.map((note) => ({
+      ...note,
+      updatedOn: note.updatedOn ?? note.postedOn,
+    })),
+  }));
+
+/**
  * The legacy app stored `{ notebooks: [...] }` directly under `noteKeeperDB`.
  * Zustand's persist middleware expects `{ state, version }`, so convert the
  * old shape once on startup to keep existing notes.
@@ -33,7 +46,7 @@ const migrateLegacyStorage = () => {
 
     const parsed = JSON.parse(raw);
     if (parsed && Array.isArray(parsed.notebooks) && !("state" in parsed)) {
-      const notebooks = parsed.notebooks as Notebook[];
+      const notebooks = withUpdatedOn(parsed.notebooks as Notebook[]);
       localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify({
@@ -104,11 +117,13 @@ export const useNoteStore = create<NoteStore>()(
       setActiveNotebook: (notebookId) => set({ activeNotebookId: notebookId }),
 
       addNote: (notebookId, data) => {
+        const now = new Date().getTime();
         const note: Note = {
           id: generateID(),
           notebookId,
           ...data,
-          postedOn: new Date().getTime(),
+          postedOn: now,
+          updatedOn: now,
         };
 
         set((state) => ({
@@ -127,7 +142,9 @@ export const useNoteStore = create<NoteStore>()(
           notebooks: state.notebooks.map((notebook) => ({
             ...notebook,
             notes: notebook.notes.map((note) =>
-              note.id === noteId ? { ...note, ...data } : note,
+              note.id === noteId
+                ? { ...note, ...data, updatedOn: new Date().getTime() }
+                : note,
             ),
           })),
         }));
@@ -149,6 +166,17 @@ export const useNoteStore = create<NoteStore>()(
     {
       name: STORAGE_KEY,
       version: STORAGE_VERSION,
+      migrate: (persistedState) => {
+        const state = persistedState as {
+          notebooks?: Notebook[];
+          activeNotebookId?: string | null;
+        };
+
+        return {
+          notebooks: withUpdatedOn(state.notebooks ?? []),
+          activeNotebookId: state.activeNotebookId ?? null,
+        };
+      },
       partialize: (state) => ({
         notebooks: state.notebooks,
         activeNotebookId: state.activeNotebookId,

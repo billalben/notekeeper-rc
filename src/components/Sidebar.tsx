@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNoteStore } from "../store/useNoteStore";
+import { useUIStore } from "../store/useUIStore";
 import type { Notebook } from "../types";
 import { Fab } from "./Fab";
 import { IconButton } from "./IconButton";
@@ -26,7 +27,10 @@ export const Sidebar = ({
   const addNotebook = useNoteStore((state) => state.addNotebook);
   const renameNotebook = useNoteStore((state) => state.renameNotebook);
 
-  const [isAdding, setIsAdding] = useState(false);
+  const isAdding = useUIStore((state) => state.isAddingNotebook);
+  const startAddingNotebook = useUIStore((state) => state.startAddingNotebook);
+  const stopAddingNotebook = useUIStore((state) => state.stopAddingNotebook);
+
   const [newName, setNewName] = useState("");
   const addInputRef = useRef<HTMLInputElement>(null);
   const hasCommittedRef = useRef(false);
@@ -38,7 +42,7 @@ export const Sidebar = ({
   const startAdd = () => {
     hasCommittedRef.current = false;
     setNewName("");
-    setIsAdding(true);
+    startAddingNotebook();
   };
 
   const commitAdd = () => {
@@ -46,13 +50,13 @@ export const Sidebar = ({
     hasCommittedRef.current = true;
 
     const name = newName.trim();
-    setIsAdding(false);
+    stopAddingNotebook();
     if (name) addNotebook(name);
   };
 
   const cancelAdd = () => {
     hasCommittedRef.current = true;
-    setIsAdding(false);
+    stopAddingNotebook();
   };
 
   return (

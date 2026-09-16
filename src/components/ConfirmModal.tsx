@@ -1,9 +1,20 @@
+import { useEffect } from "react";
+
 interface ConfirmModalProps {
   title: string;
   onConfirm: (isConfirm: boolean) => void;
 }
 
 export const ConfirmModal = ({ title, onConfirm }: ConfirmModalProps) => {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onConfirm(false);
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onConfirm]);
+
   return (
     <>
       <div className="modal">

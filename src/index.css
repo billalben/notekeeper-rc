@@ -349,7 +349,11 @@ body {
   width: 1em;
   height: 1em;
   display: block;
-  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
 }
 :has(> .state-layer) {
   position: relative;
@@ -468,6 +472,11 @@ body {
 }
 .fab:hover {
   box-shadow: var(--shadow-2);
+}
+.fab:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 .fab .text {
   padding-inline-end: var(--spacing-2);
@@ -652,6 +661,7 @@ body {
   transition-property: visibility, transform;
   box-shadow: var(--shadow-3);
   border-radius: 0 var(--radius-large) var(--radius-large) 0;
+  border-inline-end: 1px solid var(--outline-variant);
 }
 .sidebar.active {
   visibility: visible;
@@ -679,6 +689,9 @@ body {
 }
 .sidebar .nav {
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
 }
 .nav-item {
   color: var(--on-surface-variant);
@@ -726,7 +739,8 @@ body {
 
 /* ?=== #MAIN === */
 .main {
-  padding-inline: var(--spacing-4);
+  --main-padding-inline: var(--spacing-4);
+  padding-inline: var(--main-padding-inline);
   padding-block-end: var(--spacing-4);
   display: flex;
   flex-direction: column;
@@ -736,7 +750,10 @@ body {
   display: flex;
   align-items: flex-start;
   gap: var(--spacing-2);
+  margin-inline: calc(var(--main-padding-inline) * -1);
   padding-block: var(--spacing-4);
+  padding-inline: var(--main-padding-inline);
+  border-block-end: 1px solid var(--outline-variant);
 }
 .main .header .wrapper {
   flex-grow: 1;
@@ -781,6 +798,7 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   color: var(--on-surface-variant);
+  text-align: center;
   -webkit-user-select: none;
   user-select: none;
 }
@@ -790,13 +808,17 @@ body {
   margin-block-end: var(--spacing-4);
   margin-inline: auto;
 }
+.empty-notes .btn {
+  margin-block-start: var(--spacing-4);
+  margin-inline: auto;
+}
 
 /* ?=== #MEDIA QUERIES === */
 /* Responsive for larger than 768px screen */
 @media (min-width: 768px) {
   /* ?=== #MAIN === */
   .main {
-    padding-inline: var(--spacing-6);
+    --main-padding-inline: var(--spacing-6);
   }
 }
 
@@ -830,7 +852,7 @@ body {
 
   /* ?=== #MAIN === */
   .main {
-    padding-inline: var(--spacing-10);
+    --main-padding-inline: var(--spacing-10);
   }
   .menu-btn,
   .main .fab {
