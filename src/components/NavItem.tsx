@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import { useSettingsStore } from "../store/useSettingsStore";
 import { toast } from "../store/useToastStore";
 import type { Notebook } from "../types";
 import type { MoveDirection, MoveFlags } from "../utils";
+import { downloadNotebookFile } from "../utils/export";
 import { ItemMenu } from "./ItemMenu";
 
 interface NavItemProps {
@@ -27,6 +29,7 @@ export const NavItem = ({
   onMove,
   onRequestDelete,
 }: NavItemProps) => {
+  const exportFormat = useSettingsStore((state) => state.export.defaultFormat);
   const { canMoveUp, canMoveDown } = notebook;
   const [isEditing, setIsEditing] = useState(false);
   const [draftName, setDraftName] = useState("");
@@ -52,6 +55,14 @@ export const NavItem = ({
 
   const cancelRename = () => {
     setIsEditing(false);
+  };
+
+  const exportNotebook = () => {
+    try {
+      downloadNotebookFile(notebook, exportFormat);
+    } catch {
+      toast.error("Couldn't export the notebook");
+    }
   };
 
   return (
@@ -125,11 +136,17 @@ export const NavItem = ({
             onSelect: () => onTogglePin(notebook),
           },
           {
+            key: "export",
+            label: "Export notebook",
+            icon: "download",
+            separatorBefore: true,
+            onSelect: exportNotebook,
+          },
+          {
             key: "up",
             label: "Move up",
             icon: "keyboard_arrow_up",
             disabled: !canMoveUp,
-            separatorBefore: true,
             onSelect: () => onMove(notebook, "up"),
           },
           {

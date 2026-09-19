@@ -1,8 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useNoteStore } from "../../store/useNoteStore";
-import { useSettingsStore } from "../../store/useSettingsStore";
+import {
+  useSettingsStore,
+  type ExportFormat,
+} from "../../store/useSettingsStore";
 import { toast } from "../../store/useToastStore";
 import { TRASH_RETENTION_OPTIONS } from "../../utils";
+import {
+  downloadBackupFile,
+  downloadNotebookFile,
+} from "../../utils/export";
 import {
   ComingSoon,
   SettingsGroup,
@@ -26,6 +33,7 @@ const ACTION_LABELS: Record<DeleteScope, string> = {
 
 export const SettingsData = () => {
   const notebooks = useNoteStore((state) => state.notebooks);
+  const tags = useNoteStore((state) => state.tags);
   const deleteAllNotes = useNoteStore((state) => state.deleteAllNotes);
   const deleteAllNotebooks = useNoteStore((state) => state.deleteAllNotebooks);
   const deleteAllData = useNoteStore((state) => state.deleteAllData);
@@ -34,10 +42,24 @@ export const SettingsData = () => {
   const setTrashSettings = useSettingsStore(
     (state) => state.setTrashSettings,
   );
+  const exportFormat = useSettingsStore((state) => state.export.defaultFormat);
+  const setExportSettings = useSettingsStore(
+    (state) => state.setExportSettings,
+  );
 
   const [pending, setPending] = useState<DeleteScope | null>(null);
   const [confirmText, setConfirmText] = useState("");
+  const [exportNotebookId, setExportNotebookId] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const visibleNotebooks = notebooks.filter(
+    (notebook) => notebook.deletedAt === null,
+  );
+  const selectedExportId = visibleNotebooks.some(
+    (notebook) => notebook.id === exportNotebookId,
+  )
+    ? exportNotebookId
+    : (visibleNotebooks[0]?.id ?? "");
 
   const noteCount = notebooks.reduce(
     (total, notebook) => total + notebook.notes.length,
@@ -85,6 +107,29 @@ export const SettingsData = () => {
     cancel();
   };
 
+  const exportAll = () => {
+    if (visibleNotebooks.length === 0) return;
+
+    try {
+      downloadBackupFile(notebooks, tags);
+    } catch {
+      toast.error("Couldn't export your data");
+    }
+  };
+
+  const exportNotebook = () => {
+    const notebook = visibleNotebooks.find(
+      (item) => item.id === selectedExportId,
+    );
+    if (!notebook) return;
+
+    try {
+      downloadNotebookFile(notebook, exportFormat);
+    } catch {
+      toast.error("Couldn't export the notebook");
+    }
+  };
+
   const describe = (scope: DeleteScope): string => {
     const notes = `${noteCount} note${noteCount === 1 ? "" : "s"}`;
     const books = `${notebookCount} notebook${
@@ -104,10 +149,62 @@ export const SettingsData = () => {
     <>
       <SettingsGroup title="Backup">
         <SettingsRow
-          title="Export notes"
-          description="Download all data, a notebook, or the current note."
+          title="Default export format"
+          description="Used when downloading a note or a notebook from the app."
         >
-          <ComingSoon />
+          <SettingsSelect
+            label="Default export format"
+            value={exportFormat}
+            options={[
+              { value: "json", label: "JSON" },
+              { value: "md", label: "Markdown" },
+            ]}
+            onChange={(value) =>
+              setExportSettings({ defaultFormat: value as ExportFormat })
+            }
+          />
+        </SettingsRow>
+        <SettingsRow
+          title="Export all data"
+          description="Download every notebook and note as a versioned JSON backup."
+        >
+          <button
+            className="btn fill"
+            type="button"
+            disabled={visibleNotebooks.length === 0}
+            onClick={exportAll}
+          >
+            <span className="text-label-large">Export all</span>
+            <div className="state-layer" />
+          </button>
+        </SettingsRow>
+        <SettingsRow
+          title="Export a notebook"
+          description={`Download a single notebook as ${
+            exportFormat === "md" ? "Markdown" : "JSON"
+          }.`}
+        >
+          <div className="settings-export-controls">
+            <SettingsSelect
+              label="Notebook to export"
+              value={selectedExportId}
+              disabled={visibleNotebooks.length === 0}
+              options={visibleNotebooks.map((notebook) => ({
+                value: notebook.id,
+                label: notebook.name,
+              }))}
+              onChange={setExportNotebookId}
+            />
+            <button
+              className="btn text"
+              type="button"
+              disabled={!selectedExportId}
+              onClick={exportNotebook}
+            >
+              <span className="text-label-large">Export</span>
+              <div className="state-layer" />
+            </button>
+          </div>
         </SettingsRow>
         <SettingsRow
           title="Import notes"

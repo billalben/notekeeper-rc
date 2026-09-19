@@ -1,5 +1,8 @@
+import { toast } from "../store/useToastStore";
+import { useSettingsStore } from "../store/useSettingsStore";
 import type { Note } from "../types";
 import { getRelativeTime, type MoveDirection } from "../utils";
+import { downloadNoteFile } from "../utils/export";
 import { ItemMenu } from "./ItemMenu";
 import { MarkdownContent } from "./MarkdownContent";
 
@@ -30,10 +33,19 @@ export const NoteCard = ({
   onRequestMove,
   onRequestDelete,
 }: NoteCardProps) => {
+  const exportFormat = useSettingsStore((state) => state.export.defaultFormat);
   const isEdited = note.updatedOn !== note.postedOn;
   const timeLabel = isEdited
     ? `Edited ${getRelativeTime(note.updatedOn)}`
     : getRelativeTime(note.postedOn);
+
+  const download = (format: "md" | "json") => {
+    try {
+      downloadNoteFile(note, notebookName ?? null, format);
+    } catch {
+      toast.error("Couldn't export the note");
+    }
+  };
 
   return (
     <div
@@ -108,6 +120,15 @@ export const NoteCard = ({
               label: note.favorite ? "Unfavorite note" : "Favorite note",
               icon: note.favorite ? "star" : "star_border",
               onSelect: () => onToggleFavorite(note),
+            },
+            {
+              key: "download",
+              label: `Download as ${
+                exportFormat === "md" ? "Markdown" : "JSON"
+              }`,
+              icon: "download",
+              separatorBefore: true,
+              onSelect: () => download(exportFormat),
             },
             {
               key: "move",

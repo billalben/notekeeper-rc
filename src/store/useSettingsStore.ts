@@ -59,6 +59,26 @@ export const DEFAULT_TRASH_SETTINGS: TrashSettings = {
 const isRetentionOption = (value: unknown): value is TrashRetentionDays =>
   TRASH_RETENTION_OPTIONS.some((option) => option.value === value);
 
+export type ExportFormat = "md" | "json";
+
+export interface ExportSettings {
+  defaultFormat: ExportFormat;
+}
+
+export const DEFAULT_EXPORT_SETTINGS: ExportSettings = {
+  defaultFormat: "json",
+};
+
+const EXPORT_FORMATS: ExportFormat[] = ["md", "json"];
+
+const normalizeExportSettings = (
+  settings: Partial<ExportSettings> | undefined,
+): ExportSettings => ({
+  defaultFormat: EXPORT_FORMATS.includes(settings?.defaultFormat as ExportFormat)
+    ? (settings?.defaultFormat as ExportFormat)
+    : DEFAULT_EXPORT_SETTINGS.defaultFormat,
+});
+
 export const SIDEBAR_WIDTH_MIN = 280;
 export const SIDEBAR_WIDTH_MAX = 480;
 export const SIDEBAR_WIDTH_DEFAULT = 360;
@@ -218,6 +238,7 @@ interface SettingsStore {
   sidebar: SidebarSettings;
   motion: MotionPreference;
   appearance: AppearanceSettings;
+  export: ExportSettings;
   setMotion: (motion: MotionPreference) => void;
   setAppearanceSettings: (partial: Partial<AppearanceSettings>) => void;
   resetAppearanceSettings: () => void;
@@ -227,10 +248,11 @@ interface SettingsStore {
   resetEditorSettings: () => void;
   setTrashSettings: (partial: Partial<TrashSettings>) => void;
   setSidebarSettings: (partial: Partial<SidebarSettings>) => void;
+  setExportSettings: (partial: Partial<ExportSettings>) => void;
 }
 
 const STORAGE_KEY = "settings";
-const STORAGE_VERSION = 11;
+const STORAGE_VERSION = 12;
 
 export const useSettingsStore = create<SettingsStore>()(
   persist(
@@ -241,6 +263,7 @@ export const useSettingsStore = create<SettingsStore>()(
       sidebar: DEFAULT_SIDEBAR_SETTINGS,
       motion: DEFAULT_MOTION,
       appearance: DEFAULT_APPEARANCE_SETTINGS,
+      export: DEFAULT_EXPORT_SETTINGS,
 
       setMotion: (motion) => set({ motion: normalizeMotion(motion) }),
 
@@ -275,6 +298,11 @@ export const useSettingsStore = create<SettingsStore>()(
         set((state) => ({
           sidebar: normalizeSidebarSettings({ ...state.sidebar, ...partial }),
         })),
+
+      setExportSettings: (partial) =>
+        set((state) => ({
+          export: normalizeExportSettings({ ...state.export, ...partial }),
+        })),
     }),
     {
       name: STORAGE_KEY,
@@ -286,6 +314,7 @@ export const useSettingsStore = create<SettingsStore>()(
         sidebar: state.sidebar,
         motion: state.motion,
         appearance: state.appearance,
+        export: state.export,
       }),
       migrate: (persistedState) => {
         const state = persistedState as
@@ -296,6 +325,7 @@ export const useSettingsStore = create<SettingsStore>()(
               sidebar?: Partial<SidebarSettings>;
               motion?: unknown;
               appearance?: Partial<AppearanceSettings>;
+              export?: Partial<ExportSettings>;
             }
           | undefined;
         return {
@@ -305,6 +335,7 @@ export const useSettingsStore = create<SettingsStore>()(
           sidebar: normalizeSidebarSettings(state?.sidebar),
           motion: normalizeMotion(state?.motion),
           appearance: normalizeAppearance(state?.appearance),
+          export: normalizeExportSettings(state?.export),
         };
       },
       merge: (persistedState, currentState) => {
@@ -316,6 +347,7 @@ export const useSettingsStore = create<SettingsStore>()(
               sidebar?: Partial<SidebarSettings>;
               motion?: unknown;
               appearance?: Partial<AppearanceSettings>;
+              export?: Partial<ExportSettings>;
             }
           | undefined;
         return {
@@ -326,6 +358,7 @@ export const useSettingsStore = create<SettingsStore>()(
           sidebar: normalizeSidebarSettings(state?.sidebar),
           motion: normalizeMotion(state?.motion),
           appearance: normalizeAppearance(state?.appearance),
+          export: normalizeExportSettings(state?.export),
         };
       },
     },

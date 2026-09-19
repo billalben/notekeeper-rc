@@ -7,7 +7,9 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import { addTag, countWords, getRelativeTime, hasTag, removeTag } from "../utils";
+import { downloadNoteFile } from "../utils/export";
 import { useSettingsStore } from "../store/useSettingsStore";
+import { toast } from "../store/useToastStore";
 import { useAutoSave } from "../hooks/useAutoSave";
 import { ConfirmModal } from "./ConfirmModal";
 import { IconButton } from "./IconButton";
@@ -31,6 +33,7 @@ interface NoteModalProps {
   tags?: string[];
   tagSuggestions: string[];
   tagUsage: Record<string, number>;
+  notebookName?: string | null;
   isNew: boolean;
   onCreateTag: (tag: string) => void;
   onDeleteTag: (tag: string) => void;
@@ -48,6 +51,7 @@ export const NoteModal = ({
   tags: initialTags = [],
   tagSuggestions,
   tagUsage,
+  notebookName,
   isNew,
   onCreateTag,
   onDeleteTag,
@@ -66,6 +70,7 @@ export const NoteModal = ({
   const defaultMode = useSettingsStore((state) => state.editor.defaultMode);
   const presentation = useSettingsStore((state) => state.editor.presentation);
   const showWordCount = useSettingsStore((state) => state.editor.showWordCount);
+  const exportFormat = useSettingsStore((state) => state.export.defaultFormat);
 
   const [mode, setMode] = useState<"edit" | "preview">(defaultMode);
   const [isFull, setIsFull] = useState(presentation === "full");
@@ -173,6 +178,25 @@ export const NoteModal = ({
     setTags((current) => removeTag(current, tag));
   };
 
+  const download = (format: "md" | "json") => {
+    const now = Date.now();
+    try {
+      downloadNoteFile(
+        {
+          title,
+          text,
+          tags,
+          postedOn: postedOn ?? now,
+          updatedOn: updatedOn ?? now,
+        },
+        notebookName ?? null,
+        format,
+      );
+    } catch {
+      toast.error("Couldn't export the note");
+    }
+  };
+
   const handleTagInputKeyDown = (
     event: ReactKeyboardEvent<HTMLInputElement>,
   ) => {
@@ -251,6 +275,14 @@ export const NoteModal = ({
             label={isFull ? "Shrink editor" : "Expand editor"}
             aria-pressed={isFull}
             onClick={() => setIsFull((current) => !current)}
+          />
+          <IconButton
+            type="button"
+            icon="download"
+            label={`Download as ${
+              exportFormat === "md" ? "Markdown" : "JSON"
+            }`}
+            onClick={() => download(exportFormat)}
           />
           <IconButton
             type="button"

@@ -54,8 +54,7 @@ export const Sidebar = ({
   const { isResizing, startResize } = useSidebarResize(collapsed);
 
   const isDesktop =
-    typeof window !== "undefined" &&
-    window.matchMedia(DESKTOP_QUERY).matches;
+    typeof window !== "undefined" && window.matchMedia(DESKTOP_QUERY).matches;
 
   const visibleNotebooks = withMoveFlags(
     sortByPinned(notebooks.filter((notebook) => notebook.deletedAt === null)),
@@ -64,16 +63,14 @@ export const Sidebar = ({
     notebooks.filter((notebook) => notebook.deletedAt !== null).length +
     visibleNotebooks.reduce(
       (total, notebook) =>
-        total +
-        notebook.notes.filter((note) => note.deletedAt !== null).length,
+        total + notebook.notes.filter((note) => note.deletedAt !== null).length,
       0,
     );
   const favoriteCount = visibleNotebooks.reduce(
     (total, notebook) =>
       total +
-      notebook.notes.filter(
-        (note) => note.deletedAt === null && note.favorite,
-      ).length,
+      notebook.notes.filter((note) => note.deletedAt === null && note.favorite)
+        .length,
     0,
   );
 
@@ -173,7 +170,9 @@ export const Sidebar = ({
             onSelect={selectNotebook}
             onRename={renameNotebook}
             onTogglePin={onTogglePin}
-            onMove={(notebook, direction) => moveNotebook(notebook.id, direction)}
+            onMove={(notebook, direction) =>
+              moveNotebook(notebook.id, direction)
+            }
             onRequestDelete={onRequestDeleteNotebook}
           />
         ))}
@@ -236,14 +235,6 @@ export const Sidebar = ({
         )}
         <div className="state-layer" />
       </button>
-
-      <div className="cp-info">
-        <span className="text-label-large">
-          Copyright{" "}
-          <span className="current-yr-cp">{new Date().getFullYear()}</span>{" "}
-          <strong>Billal Benz</strong>
-        </span>
-      </div>
 
       <div
         className={`sidebar-resizer${isResizing ? " resizing" : ""}`}

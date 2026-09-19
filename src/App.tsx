@@ -389,6 +389,11 @@ const App = () => {
           tags={noteModal.type === "edit" ? noteModal.note.tags : undefined}
           tagSuggestions={allTags}
           tagUsage={tagUsage}
+          notebookName={
+            noteModal.type === "edit"
+              ? notebookNames[noteModal.note.notebookId]
+              : activeNotebook?.name
+          }
           isNew={noteModal.type === "create"}
           onCreateTag={createTag}
           onDeleteTag={handleDeleteTag}

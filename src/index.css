@@ -1549,17 +1549,6 @@ button.tag-chip {
   opacity: 1;
   visibility: visible;
 }
-.sidebar .cp-info {
-  height: 56px;
-  display: flex;
-  align-items: center;
-  padding-inline: var(--spacing-4);
-  color: var(--on-surface-variant);
-  transition: color var(--tr-duration-short) var(--tr-easing-linear);
-}
-.cp-info span {
-  display: inline-block;
-}
 .trash-nav-item,
 .favorite-nav-item {
   width: 100%;
@@ -1732,6 +1721,7 @@ button.tag-chip {
 
 /* ?=== #SETTINGS === */
 .settings-modal {
+  --settings-header-height: 52px;
   max-width: 880px;
   width: calc(100% - var(--spacing-8));
   height: min(640px, calc(100svh - var(--spacing-8)));
@@ -1761,7 +1751,9 @@ button.tag-chip {
 .settings-sidebar-header {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   gap: var(--spacing-2);
+  height: var(--settings-header-height);
   padding-inline: var(--spacing-2);
   color: var(--on-surface);
 }
@@ -1777,8 +1769,9 @@ button.tag-chip {
 .settings-nav-item {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   gap: var(--spacing-3);
-  height: 48px;
+  height: var(--settings-header-height);
   padding-inline: var(--spacing-3);
   color: var(--on-surface-variant);
   --state-layer-bg: var(--on-surface-variant);
@@ -1802,8 +1795,9 @@ button.tag-chip {
 .settings-main-header {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   gap: var(--spacing-2);
-  height: 64px;
+  height: var(--settings-header-height);
   padding-inline: var(--spacing-4);
   border-block-end: 1px solid var(--outline-variant);
   color: var(--on-surface);
@@ -1863,6 +1857,17 @@ button.tag-chip {
 }
 .settings-row-control {
   flex-shrink: 0;
+}
+.settings-export-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+}
+.settings-export-controls .settings-select-wrap {
+  max-width: 220px;
+  overflow: hidden;
 }
 .settings-badge {
   display: inline-block;
@@ -2231,11 +2236,17 @@ html[data-motion="reduce"] {
   --tr-duration-long: 0.01ms;
   scroll-behavior: auto;
 }
-html[data-motion="reduce"] .modal-footer .save-status.saving .material-symbols-rounded {
+html[data-motion="reduce"]
+  .modal-footer
+  .save-status.saving
+  .material-symbols-rounded {
   animation: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  html:not([data-motion="full"]) .modal-footer .save-status.saving .material-symbols-rounded {
+  html:not([data-motion="full"])
+    .modal-footer
+    .save-status.saving
+    .material-symbols-rounded {
     animation: none;
   }
 }
