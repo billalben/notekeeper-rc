@@ -8,6 +8,7 @@ interface NavItemProps {
   isActive: boolean;
   onSelect: (notebookId: string) => void;
   onRename: (notebookId: string, name: string) => void;
+  onTogglePin: (notebook: Notebook) => void;
   onRequestDelete: (notebook: Notebook) => void;
 }
 
@@ -16,6 +17,7 @@ export const NavItem = ({
   isActive,
   onSelect,
   onRename,
+  onTogglePin,
   onRequestDelete,
 }: NavItemProps) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -50,6 +52,11 @@ export const NavItem = ({
     onRequestDelete(notebook);
   };
 
+  const handleTogglePin = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    onTogglePin(notebook);
+  };
+
   return (
     <div
       className={`nav-item${isActive ? " active" : ""}`}
@@ -59,6 +66,7 @@ export const NavItem = ({
       onKeyDown={(event) => {
         if (event.key === "Enter") onSelect(notebook.id);
       }}
+      data-pinned={notebook.pinned ? "true" : undefined}
     >
       <span
         className="material-symbols-rounded nav-item-icon"
@@ -85,7 +93,23 @@ export const NavItem = ({
             {notebook.name}
           </span>
         )}
+        {notebook.pinned && (
+          <span
+            className="material-symbols-rounded pin-badge"
+            aria-label="Pinned"
+            title="Pinned"
+          >
+            push_pin
+          </span>
+        )}
       </span>
+      <IconButton
+        icon="push_pin"
+        size="small"
+        tooltip={notebook.pinned ? "Unpin notebook" : "Pin notebook"}
+        label={notebook.pinned ? "Unpin notebook" : "Pin notebook"}
+        onClick={handleTogglePin}
+      />
       <IconButton
         icon="edit"
         size="small"

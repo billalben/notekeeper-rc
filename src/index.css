@@ -531,6 +531,22 @@ body {
 .card .card-title {
   color: var(--on-surface);
 }
+.card .card-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+}
+.card .card-title-row .card-title {
+  min-width: 0;
+}
+.pin-badge {
+  flex-shrink: 0;
+  color: var(--primary);
+  font-size: 18px;
+  cursor: default;
+  transform: rotate(45deg);
+}
 .card .card-text {
   color: var(--on-surface-variant);
   margin-block: var(--spacing-4);
@@ -562,11 +578,13 @@ body {
 }
 .card .wrapper {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
+  gap: var(--spacing-1);
   margin-block-start: auto;
 }
 .card .card-time {
+  flex-grow: 1;
   color: var(--on-surface-variant);
 }
 .card .icon-btn {
@@ -969,7 +987,12 @@ body {
   flex-grow: 1;
   display: flex;
   align-items: center;
+  gap: var(--spacing-1);
   min-width: 0;
+}
+.nav-item-label .pin-badge {
+  font-size: 16px;
+  transform: rotate(45deg);
 }
 .nav-item .text {
   flex-grow: 1;

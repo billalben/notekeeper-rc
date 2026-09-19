@@ -5,6 +5,7 @@ import { useSettingsStore } from "../store/useSettingsStore";
 import { toast } from "../store/useToastStore";
 import { useUIStore } from "../store/useUIStore";
 import type { Notebook } from "../types";
+import { sortByPinned } from "../utils";
 import { Fab } from "./Fab";
 import { IconButton } from "./IconButton";
 import { NavItem } from "./NavItem";
@@ -15,6 +16,7 @@ interface SidebarProps {
   open: boolean;
   onClose: () => void;
   onNewNote: () => void;
+  onTogglePin: (notebook: Notebook) => void;
   onRequestDeleteNotebook: (notebook: Notebook) => void;
 }
 
@@ -24,6 +26,7 @@ export const Sidebar = ({
   open,
   onClose,
   onNewNote,
+  onTogglePin,
   onRequestDeleteNotebook,
 }: SidebarProps) => {
   const notebooks = useNoteStore((state) => state.notebooks);
@@ -50,8 +53,8 @@ export const Sidebar = ({
     typeof window !== "undefined" &&
     window.matchMedia(DESKTOP_QUERY).matches;
 
-  const visibleNotebooks = notebooks.filter(
-    (notebook) => notebook.deletedAt === null,
+  const visibleNotebooks = sortByPinned(
+    notebooks.filter((notebook) => notebook.deletedAt === null),
   );
   const trashedCount =
     notebooks.filter((notebook) => notebook.deletedAt !== null).length +
@@ -152,6 +155,7 @@ export const Sidebar = ({
             isActive={notebook.id === activeNotebookId && view === "notes"}
             onSelect={selectNotebook}
             onRename={renameNotebook}
+            onTogglePin={onTogglePin}
             onRequestDelete={onRequestDeleteNotebook}
           />
         ))}

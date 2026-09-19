@@ -4,10 +4,16 @@ import { NoteCard } from "./NoteCard";
 interface NoteListProps {
   notes: Note[];
   onOpen: (note: Note) => void;
+  onTogglePin: (note: Note) => void;
   onRequestDelete: (note: Note) => void;
 }
 
-export const NoteList = ({ notes, onOpen, onRequestDelete }: NoteListProps) => {
+export const NoteList = ({
+  notes,
+  onOpen,
+  onTogglePin,
+  onRequestDelete,
+}: NoteListProps) => {
   return (
     <div className="note-list" data-note-panel>
       {notes.length > 0 ? (
@@ -16,6 +22,7 @@ export const NoteList = ({ notes, onOpen, onRequestDelete }: NoteListProps) => {
             key={note.id}
             note={note}
             onOpen={onOpen}
+            onTogglePin={onTogglePin}
             onRequestDelete={onRequestDelete}
           />
         ))

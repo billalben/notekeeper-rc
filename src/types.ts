@@ -6,6 +6,7 @@ export interface Note {
   postedOn: number;
   updatedOn: number;
   deletedAt: number | null;
+  pinned: boolean;
 }
 
 export interface Notebook {
@@ -13,6 +14,7 @@ export interface Notebook {
   name: string;
   notes: Note[];
   deletedAt: number | null;
+  pinned: boolean;
 }
 
 export type ToastType = "success" | "error" | "info";

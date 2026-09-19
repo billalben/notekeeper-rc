@@ -14,7 +14,7 @@ import { useThemeStore } from "./store/useThemeStore";
 import { useUIStore } from "./store/useUIStore";
 import { toast } from "./store/useToastStore";
 import type { Note, Notebook } from "./types";
-import { trashRetentionMs } from "./utils";
+import { sortByPinned, trashRetentionMs } from "./utils";
 
 type NoteModalState = { type: "create" } | { type: "edit"; note: Note };
 
@@ -28,9 +28,11 @@ const App = () => {
   const setActiveNotebook = useNoteStore((state) => state.setActiveNotebook);
   const addNote = useNoteStore((state) => state.addNote);
   const updateNote = useNoteStore((state) => state.updateNote);
+  const toggleNotePin = useNoteStore((state) => state.toggleNotePin);
   const deleteNote = useNoteStore((state) => state.deleteNote);
   const restoreNote = useNoteStore((state) => state.restoreNote);
   const deleteNotebook = useNoteStore((state) => state.deleteNotebook);
+  const toggleNotebookPin = useNoteStore((state) => state.toggleNotebookPin);
   const restoreNotebook = useNoteStore((state) => state.restoreNotebook);
   const purgeExpiredTrash = useNoteStore((state) => state.purgeExpiredTrash);
 
@@ -73,8 +75,9 @@ const App = () => {
   const activeNotebook =
     visibleNotebooks.find((notebook) => notebook.id === activeNotebookId) ??
     null;
-  const activeNotes =
-    activeNotebook?.notes.filter((note) => note.deletedAt === null) ?? [];
+  const activeNotes = sortByPinned(
+    activeNotebook?.notes.filter((note) => note.deletedAt === null) ?? [],
+  );
 
   const openCreateNote = () => {
     if (visibleNotebooks.length === 0) return;
@@ -101,6 +104,10 @@ const App = () => {
     setNoteModal(null);
   };
 
+  const handleToggleNotePin = (note: Note) => {
+    toggleNotePin(note.notebookId, note.id);
+  };
+
   const handleDeleteNote = (note: Note) => {
     deleteNote(note.notebookId, note.id);
     toast.success("Note moved to Trash", {
@@ -121,6 +128,10 @@ const App = () => {
       notebookId: notebook.id,
       title: notebook.name,
     });
+  };
+
+  const handleToggleNotebookPin = (notebook: Notebook) => {
+    toggleNotebookPin(notebook.id);
   };
 
   const handleConfirm = (isConfirm: boolean) => {
@@ -148,6 +159,7 @@ const App = () => {
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         onNewNote={openCreateNote}
+        onTogglePin={handleToggleNotebookPin}
         onRequestDeleteNotebook={requestDeleteNotebook}
       />
 
@@ -191,6 +203,7 @@ const App = () => {
               <NoteList
                 notes={activeNotes}
                 onOpen={openEditNote}
+                onTogglePin={handleToggleNotePin}
                 onRequestDelete={handleDeleteNote}
               />
             )}

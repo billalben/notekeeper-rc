@@ -67,3 +67,6 @@ export const trashRetentionMs = (
 
 export const isTrashed = (item: { deletedAt: number | null }): boolean =>
   item.deletedAt !== null;
+
+export const sortByPinned = <T extends { pinned: boolean }>(items: T[]): T[] =>
+  [...items].sort((a, b) => Number(b.pinned) - Number(a.pinned));

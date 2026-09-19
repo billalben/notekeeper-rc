@@ -6,7 +6,7 @@ import { createLocalStorage, isQuotaExceededError } from "./persistStorage";
 import { toast } from "./useToastStore";
 
 const STORAGE_KEY = "noteKeeperDB";
-const STORAGE_VERSION = 3;
+const STORAGE_VERSION = 4;
 
 const STORAGE_ERROR_COOLDOWN = 10_000;
 let lastStorageErrorAt = 0;
@@ -34,6 +34,7 @@ interface NoteStore {
   activeNotebookId: string | null;
   addNotebook: (name: string) => Notebook;
   renameNotebook: (notebookId: string, name: string) => void;
+  toggleNotebookPin: (notebookId: string) => void;
   deleteNotebook: (notebookId: string) => void;
   restoreNotebook: (notebookId: string) => void;
   permanentlyDeleteNotebook: (notebookId: string) => void;
@@ -43,6 +44,7 @@ interface NoteStore {
     data: Pick<Note, "title" | "text">,
   ) => Note | undefined;
   updateNote: (noteId: string, data: Pick<Note, "title" | "text">) => void;
+  toggleNotePin: (notebookId: string, noteId: string) => void;
   deleteNote: (notebookId: string, noteId: string) => void;
   restoreNote: (noteId: string) => void;
   permanentlyDeleteNote: (notebookId: string, noteId: string) => void;
@@ -55,16 +57,18 @@ interface NoteStore {
 
 /**
  * Backfill fields added after a note/notebook was first created:
- * `updatedOn` (v2) and `deletedAt` (v3).
+ * `updatedOn` (v2), `deletedAt` (v3), and `pinned` (v4).
  */
 const withDefaults = (notebooks: Notebook[]): Notebook[] =>
   notebooks.map((notebook) => ({
     ...notebook,
     deletedAt: notebook.deletedAt ?? null,
+    pinned: notebook.pinned ?? false,
     notes: notebook.notes.map((note) => ({
       ...note,
       updatedOn: note.updatedOn ?? note.postedOn,
       deletedAt: note.deletedAt ?? null,
+      pinned: note.pinned ?? false,
     })),
   }));
 
@@ -138,6 +142,7 @@ export const useNoteStore = create<NoteStore>()(
           name: name || "Untitled",
           notes: [],
           deletedAt: null,
+          pinned: false,
         };
 
         set((state) => ({
@@ -152,6 +157,16 @@ export const useNoteStore = create<NoteStore>()(
         set((state) => ({
           notebooks: state.notebooks.map((notebook) =>
             notebook.id === notebookId ? { ...notebook, name } : notebook,
+          ),
+        }));
+      },
+
+      toggleNotebookPin: (notebookId) => {
+        set((state) => ({
+          notebooks: state.notebooks.map((notebook) =>
+            notebook.id === notebookId
+              ? { ...notebook, pinned: !notebook.pinned }
+              : notebook,
           ),
         }));
       },
@@ -211,6 +226,7 @@ export const useNoteStore = create<NoteStore>()(
           postedOn: now,
           updatedOn: now,
           deletedAt: null,
+          pinned: false,
         };
 
         set((state) => ({
@@ -234,6 +250,23 @@ export const useNoteStore = create<NoteStore>()(
                 : note,
             ),
           })),
+        }));
+      },
+
+      toggleNotePin: (notebookId, noteId) => {
+        set((state) => ({
+          notebooks: state.notebooks.map((notebook) =>
+            notebook.id === notebookId
+              ? {
+                  ...notebook,
+                  notes: notebook.notes.map((note) =>
+                    note.id === noteId
+                      ? { ...note, pinned: !note.pinned }
+                      : note,
+                  ),
+                }
+              : notebook,
+          ),
         }));
       },
 
