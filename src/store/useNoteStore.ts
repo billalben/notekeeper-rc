@@ -1,12 +1,22 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { Note, Notebook } from "../types";
-import { generateID, moveWithinGroup, type MoveDirection } from "../utils";
+import {
+  collectTags,
+  generateID,
+  hasTag,
+  mergeTags,
+  moveWithinGroup,
+  normalizeTag,
+  removeTag,
+  sortTags,
+  type MoveDirection,
+} from "../utils";
 import { createLocalStorage, isQuotaExceededError } from "./persistStorage";
 import { toast } from "./useToastStore";
 
 const STORAGE_KEY = "noteKeeperDB";
-const STORAGE_VERSION = 4;
+const STORAGE_VERSION = 6;
 
 const STORAGE_ERROR_COOLDOWN = 10_000;
 let lastStorageErrorAt = 0;
@@ -29,9 +39,14 @@ const handleStorageError = (error: unknown) => {
   });
 };
 
+type NoteInput = Pick<Note, "title" | "text"> & { tags?: string[] };
+
 interface NoteStore {
   notebooks: Notebook[];
+  tags: string[];
   activeNotebookId: string | null;
+  createTag: (tag: string) => void;
+  deleteTag: (tag: string) => void;
   addNotebook: (name: string) => Notebook;
   renameNotebook: (notebookId: string, name: string) => void;
   toggleNotebookPin: (notebookId: string) => void;
@@ -40,11 +55,8 @@ interface NoteStore {
   restoreNotebook: (notebookId: string) => void;
   permanentlyDeleteNotebook: (notebookId: string) => void;
   setActiveNotebook: (notebookId: string | null) => void;
-  addNote: (
-    notebookId: string,
-    data: Pick<Note, "title" | "text">,
-  ) => Note | undefined;
-  updateNote: (noteId: string, data: Pick<Note, "title" | "text">) => void;
+  addNote: (notebookId: string, data: NoteInput) => Note | undefined;
+  updateNote: (noteId: string, data: NoteInput) => void;
   toggleNotePin: (notebookId: string, noteId: string) => void;
   moveNote: (
     notebookId: string,
@@ -69,7 +81,8 @@ interface NoteStore {
 
 /**
  * Backfill fields added after a note/notebook was first created:
- * `updatedOn` (v2), `deletedAt` (v3), and `pinned` (v4).
+ * `updatedOn` (v2), `deletedAt` (v3), `pinned` (v4), and `tags` (v5). The
+ * store-level tag registry added in v6 is seeded separately in `migrate`.
  */
 const withDefaults = (notebooks: Notebook[]): Notebook[] =>
   notebooks.map((notebook) => ({
@@ -81,6 +94,7 @@ const withDefaults = (notebooks: Notebook[]): Notebook[] =>
       updatedOn: note.updatedOn ?? note.postedOn,
       deletedAt: note.deletedAt ?? null,
       pinned: note.pinned ?? false,
+      tags: Array.isArray(note.tags) ? note.tags : [],
     })),
   }));
 
@@ -129,6 +143,7 @@ const migrateLegacyStorage = () => {
         JSON.stringify({
           state: {
             notebooks,
+            tags: collectTags(notebooks),
             activeNotebookId: notebooks[0]?.id ?? null,
           },
           version: STORAGE_VERSION,
@@ -146,7 +161,34 @@ export const useNoteStore = create<NoteStore>()(
   persist(
     (set) => ({
       notebooks: [],
+      tags: [],
       activeNotebookId: null,
+
+      createTag: (raw) => {
+        const tag = normalizeTag(raw);
+        if (!tag) return;
+        set((state) =>
+          hasTag(state.tags, tag)
+            ? state
+            : { tags: sortTags([...state.tags, tag]) },
+        );
+      },
+
+      deleteTag: (tag) => {
+        set((state) => ({
+          tags: state.tags.filter(
+            (item) => item.toLowerCase() !== tag.toLowerCase(),
+          ),
+          notebooks: state.notebooks.map((notebook) => ({
+            ...notebook,
+            notes: notebook.notes.map((note) =>
+              hasTag(note.tags, tag)
+                ? { ...note, tags: removeTag(note.tags, tag) }
+                : note,
+            ),
+          })),
+        }));
+      },
 
       addNotebook: (name) => {
         const notebook: Notebook = {
@@ -240,7 +282,9 @@ export const useNoteStore = create<NoteStore>()(
         const note: Note = {
           id: generateID(),
           notebookId,
-          ...data,
+          title: data.title,
+          text: data.text,
+          tags: data.tags ?? [],
           postedOn: now,
           updatedOn: now,
           deletedAt: null,
@@ -248,6 +292,7 @@ export const useNoteStore = create<NoteStore>()(
         };
 
         set((state) => ({
+          tags: sortTags(mergeTags(state.tags, note.tags)),
           notebooks: state.notebooks.map((notebook) =>
             notebook.id === notebookId
               ? { ...notebook, notes: [note, ...notebook.notes] }
@@ -260,6 +305,9 @@ export const useNoteStore = create<NoteStore>()(
 
       updateNote: (noteId, data) => {
         set((state) => ({
+          tags: data.tags
+            ? sortTags(mergeTags(state.tags, data.tags))
+            : state.tags,
           notebooks: state.notebooks.map((notebook) => ({
             ...notebook,
             notes: notebook.notes.map((note) =>
@@ -402,7 +450,8 @@ export const useNoteStore = create<NoteStore>()(
       },
 
       deleteAllNotebooks: () => set({ notebooks: [], activeNotebookId: null }),
-      deleteAllData: () => set({ notebooks: [], activeNotebookId: null }),
+      deleteAllData: () =>
+        set({ notebooks: [], tags: [], activeNotebookId: null }),
     }),
     {
       name: STORAGE_KEY,
@@ -411,16 +460,22 @@ export const useNoteStore = create<NoteStore>()(
       migrate: (persistedState) => {
         const state = persistedState as {
           notebooks?: Notebook[];
+          tags?: string[];
           activeNotebookId?: string | null;
         };
+        const notebooks = withDefaults(state.notebooks ?? []);
 
         return {
-          notebooks: withDefaults(state.notebooks ?? []),
+          notebooks,
+          tags: Array.isArray(state.tags)
+            ? sortTags(state.tags)
+            : collectTags(notebooks),
           activeNotebookId: state.activeNotebookId ?? null,
         };
       },
       partialize: (state) => ({
         notebooks: state.notebooks,
+        tags: state.tags,
         activeNotebookId: state.activeNotebookId,
       }),
     },

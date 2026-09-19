@@ -1,3 +1,5 @@
+import type { Note, Notebook } from "./types";
+
 export const generateID = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
@@ -70,6 +72,112 @@ export const isTrashed = (item: { deletedAt: number | null }): boolean =>
 
 export const sortByPinned = <T extends { pinned: boolean }>(items: T[]): T[] =>
   [...items].sort((a, b) => Number(b.pinned) - Number(a.pinned));
+
+export const TAG_MAX_LENGTH = 50;
+
+/**
+ * Normalize a raw tag string: trim, drop a single leading `#`, and collapse
+ * internal whitespace to single spaces.
+ */
+export const normalizeTag = (raw: string): string =>
+  raw.trim().replace(/^#/, "").trim().replace(/\s+/g, " ").slice(0, TAG_MAX_LENGTH);
+
+export const hasTag = (tags: string[], tag: string): boolean =>
+  tags.some((item) => item.toLowerCase() === tag.toLowerCase());
+
+/**
+ * Add a tag if it is non-empty and not already present (case-insensitive).
+ * Returns a new array, or the original array when nothing changed.
+ */
+export const addTag = (tags: string[], raw: string): string[] => {
+  const tag = normalizeTag(raw);
+  if (!tag || hasTag(tags, tag)) return tags;
+  return [...tags, tag];
+};
+
+export const removeTag = (tags: string[], tag: string): string[] =>
+  tags.filter((item) => item.toLowerCase() !== tag.toLowerCase());
+
+export const noteHasTag = (note: Note, tag: string): boolean =>
+  hasTag(note.tags, tag);
+
+export const sortTags = (tags: string[]): string[] =>
+  [...tags].sort((a, b) =>
+    a.localeCompare(b, undefined, { sensitivity: "base" }),
+  );
+
+/** Add each incoming tag (deduped case-insensitively) to the existing list. */
+export const mergeTags = (existing: string[], incoming: string[]): string[] =>
+  incoming.reduce((acc, tag) => addTag(acc, tag), existing);
+
+/**
+ * Collect every tag used by notes across all notebooks (including trashed
+ * ones), deduplicated case-insensitively and sorted. Used to seed the tag
+ * registry during migration.
+ */
+export const collectTags = (notebooks: Notebook[]): string[] => {
+  const seen = new Map<string, string>();
+
+  notebooks.forEach((notebook) => {
+    notebook.notes.forEach((note) => {
+      note.tags.forEach((tag) => {
+        const key = tag.toLowerCase();
+        if (!seen.has(key)) seen.set(key, tag);
+      });
+    });
+  });
+
+  return sortTags([...seen.values()]);
+};
+
+/** How many notes (including trashed) carry `tag`. */
+export const countTagUsage = (notebooks: Notebook[], tag: string): number =>
+  notebooks.reduce(
+    (total, notebook) =>
+      total + notebook.notes.filter((note) => noteHasTag(note, tag)).length,
+    0,
+  );
+
+/**
+ * Usage count per tag, keyed by lowercased tag name, across all notes
+ * (including trashed ones).
+ */
+export const countTagUsageMap = (
+  notebooks: Notebook[],
+): Record<string, number> => {
+  const counts: Record<string, number> = {};
+
+  notebooks.forEach((notebook) =>
+    notebook.notes.forEach((note) =>
+      note.tags.forEach((tag) => {
+        const key = tag.toLowerCase();
+        counts[key] = (counts[key] ?? 0) + 1;
+      }),
+    ),
+  );
+
+  return counts;
+};
+
+/**
+ * Every visible note (across visible notebooks) that carries **all** of the
+ * given tags, case-insensitively. An empty tag list matches nothing.
+ */
+export const filterNotesByTags = (
+  notebooks: Notebook[],
+  tags: string[],
+): Note[] => {
+  if (tags.length === 0) return [];
+
+  return notebooks
+    .filter((notebook) => notebook.deletedAt === null)
+    .flatMap((notebook) =>
+      notebook.notes.filter(
+        (note) =>
+          note.deletedAt === null && tags.every((tag) => noteHasTag(note, tag)),
+      ),
+    );
+};
 
 export type MoveDirection = "up" | "down";
 

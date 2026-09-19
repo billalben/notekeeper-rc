@@ -3,10 +3,15 @@ import { useSettingsStore } from "../store/useSettingsStore";
 
 interface ConfirmModalProps {
   title: string;
+  description?: string;
   onConfirm: (isConfirm: boolean) => void;
 }
 
-export const ConfirmModal = ({ title, onConfirm }: ConfirmModalProps) => {
+export const ConfirmModal = ({
+  title,
+  description,
+  onConfirm,
+}: ConfirmModalProps) => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onConfirm(false);
@@ -22,6 +27,9 @@ export const ConfirmModal = ({ title, onConfirm }: ConfirmModalProps) => {
         <h3 className="modal-title text-title-medium">
           Are you sure you want to delete <strong>"{title}"</strong> ?
         </h3>
+        {description && (
+          <p className="modal-description text-body-medium">{description}</p>
+        )}
         <div className="modal-footer">
           <button
             className="btn text"

@@ -8,6 +8,7 @@ interface NoteCardProps {
   canMoveUp: boolean;
   canMoveDown: boolean;
   canMoveToNotebook: boolean;
+  notebookName?: string;
   onOpen: (note: Note) => void;
   onTogglePin: (note: Note) => void;
   onMove: (note: Note, direction: MoveDirection) => void;
@@ -20,6 +21,7 @@ export const NoteCard = ({
   canMoveUp,
   canMoveDown,
   canMoveToNotebook,
+  notebookName,
   onOpen,
   onTogglePin,
   onMove,
@@ -58,6 +60,23 @@ export const NoteCard = ({
         text={note.text}
         className="card-text markdown-body text-body-large"
       />
+      {(note.tags.length > 0 || notebookName) && (
+        <div className="card-tags">
+          {notebookName && (
+            <span className="card-notebook text-label-large">
+              <span className="material-symbols-rounded" aria-hidden="true">
+                folder
+              </span>
+              {notebookName}
+            </span>
+          )}
+          {note.tags.map((tag) => (
+            <span key={tag} className="tag-chip">
+              <span className="text-label-large">#{tag}</span>
+            </span>
+          ))}
+        </div>
+      )}
       <div className="wrapper">
         <span className="card-time text-label-large">{timeLabel}</span>
         <ItemMenu

@@ -47,6 +47,7 @@ export const Sidebar = ({
   const view = useUIStore((state) => state.view);
   const openTrash = useUIStore((state) => state.openTrash);
   const showNotes = useUIStore((state) => state.showNotes);
+  const clearTagFilter = useUIStore((state) => state.clearTagFilter);
 
   const { isResizing, startResize } = useSidebarResize(collapsed);
 
@@ -68,6 +69,7 @@ export const Sidebar = ({
 
   const selectNotebook = (notebookId: string) => {
     setActiveNotebook(notebookId);
+    clearTagFilter();
     showNotes();
   };
 

@@ -10,6 +10,8 @@ interface NoteCardWithFlags extends Note {
 interface NoteListProps {
   notes: NoteCardWithFlags[];
   canMoveToNotebook: boolean;
+  notebookNames?: Record<string, string>;
+  emptyMessage?: string;
   onOpen: (note: Note) => void;
   onTogglePin: (note: Note) => void;
   onMove: (note: Note, direction: MoveDirection) => void;
@@ -20,6 +22,8 @@ interface NoteListProps {
 export const NoteList = ({
   notes,
   canMoveToNotebook,
+  notebookNames,
+  emptyMessage = "No notes",
   onOpen,
   onTogglePin,
   onMove,
@@ -36,6 +40,7 @@ export const NoteList = ({
             canMoveUp={note.canMoveUp}
             canMoveDown={note.canMoveDown}
             canMoveToNotebook={canMoveToNotebook}
+            notebookName={notebookNames?.[note.notebookId]}
             onOpen={onOpen}
             onTogglePin={onTogglePin}
             onMove={onMove}
@@ -48,7 +53,7 @@ export const NoteList = ({
           <span className="material-symbols-rounded" aria-hidden="true">
             note_stack
           </span>
-          <div className="text-headline-small">No notes</div>
+          <div className="text-headline-small">{emptyMessage}</div>
         </div>
       )}
     </div>

@@ -7,6 +7,7 @@ import { NoteModal } from "./components/NoteModal";
 import { MoveNoteModal } from "./components/MoveNoteModal";
 import { SettingsModal } from "./components/settings/SettingsModal";
 import { Sidebar } from "./components/Sidebar";
+import { TagFilterBar } from "./components/TagFilterBar";
 import { ToastRegion } from "./components/ToastRegion";
 import { TrashView } from "./components/TrashView";
 import { useNoteStore } from "./store/useNoteStore";
@@ -16,6 +17,8 @@ import { useUIStore } from "./store/useUIStore";
 import { toast } from "./store/useToastStore";
 import type { Note, Notebook } from "./types";
 import {
+  countTagUsageMap,
+  filterNotesByTags,
   sortByPinned,
   trashRetentionMs,
   withMoveFlags,
@@ -30,6 +33,9 @@ const App = () => {
   const theme = useThemeStore((state) => state.theme);
 
   const notebooks = useNoteStore((state) => state.notebooks);
+  const allTags = useNoteStore((state) => state.tags);
+  const createTag = useNoteStore((state) => state.createTag);
+  const deleteTag = useNoteStore((state) => state.deleteTag);
   const activeNotebookId = useNoteStore((state) => state.activeNotebookId);
   const setActiveNotebook = useNoteStore((state) => state.setActiveNotebook);
   const addNote = useNoteStore((state) => state.addNote);
@@ -53,6 +59,9 @@ const App = () => {
   const closeSettings = useUIStore((state) => state.closeSettings);
   const view = useUIStore((state) => state.view);
   const showNotes = useUIStore((state) => state.showNotes);
+  const activeTags = useUIStore((state) => state.activeTags);
+  const toggleTag = useUIStore((state) => state.toggleTag);
+  const removeTagFilter = useUIStore((state) => state.removeTagFilter);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [noteModal, setNoteModal] = useState<NoteModalState | null>(null);
@@ -87,11 +96,24 @@ const App = () => {
   const activeNotebook =
     visibleNotebooks.find((notebook) => notebook.id === activeNotebookId) ??
     null;
-  const activeNotes = withMoveFlags(
-    sortByPinned(
-      activeNotebook?.notes.filter((note) => note.deletedAt === null) ?? [],
-    ),
+
+  const notebookNames = Object.fromEntries(
+    visibleNotebooks.map((notebook) => [notebook.id, notebook.name]),
   );
+
+  const isFiltering = activeTags.length > 0;
+  const tagFilterLabel = activeTags.map((tag) => `#${tag}`).join(", ");
+  const activeNotes = isFiltering
+    ? sortByPinned(filterNotesByTags(notebooks, activeTags)).map((note) => ({
+        ...note,
+        canMoveUp: false,
+        canMoveDown: false,
+      }))
+    : withMoveFlags(
+        sortByPinned(
+          activeNotebook?.notes.filter((note) => note.deletedAt === null) ?? [],
+        ),
+      );
 
   const openCreateNote = () => {
     if (visibleNotebooks.length === 0) return;
@@ -102,7 +124,11 @@ const App = () => {
     setNoteModal({ type: "edit", note });
   };
 
-  const handleNoteSubmit = (noteData: { title: string; text: string }) => {
+  const handleNoteSubmit = (noteData: {
+    title: string;
+    text: string;
+    tags: string[];
+  }) => {
     if (!noteModal) return;
 
     if (noteModal.type === "create") {
@@ -215,6 +241,14 @@ const App = () => {
     setConfirm(null);
   };
 
+  const handleDeleteTag = (tag: string) => {
+    deleteTag(tag);
+    removeTagFilter(tag);
+    toast.success(`Tag #${tag} deleted`);
+  };
+
+  const tagUsage = countTagUsageMap(notebooks);
+
   return (
     <>
       <Sidebar
@@ -238,8 +272,16 @@ const App = () => {
         ) : (
           <>
             <h2 className="title text-title-medium" data-note-panel-title>
-              {activeNotebook?.name ?? ""}
+              {isFiltering
+                ? `Notes tagged ${tagFilterLabel}`
+                : (activeNotebook?.name ?? "")}
             </h2>
+
+            <TagFilterBar
+              tags={allTags}
+              activeTags={activeTags}
+              onToggle={toggleTag}
+            />
 
             {visibleNotebooks.length === 0 ? (
               <div className="note-list" data-note-panel>
@@ -265,6 +307,12 @@ const App = () => {
               <NoteList
                 notes={activeNotes}
                 canMoveToNotebook={visibleNotebooks.length > 1}
+                notebookNames={isFiltering ? notebookNames : undefined}
+                emptyMessage={
+                  isFiltering
+                    ? `No notes tagged ${tagFilterLabel}`
+                    : "No notes"
+                }
                 onOpen={openEditNote}
                 onTogglePin={handleToggleNotePin}
                 onMove={handleMoveNote}
@@ -286,6 +334,11 @@ const App = () => {
         <NoteModal
           title={noteModal.type === "edit" ? noteModal.note.title : undefined}
           text={noteModal.type === "edit" ? noteModal.note.text : undefined}
+          tags={noteModal.type === "edit" ? noteModal.note.tags : undefined}
+          tagSuggestions={allTags}
+          tagUsage={tagUsage}
+          onCreateTag={createTag}
+          onDeleteTag={handleDeleteTag}
           postedOn={
             noteModal.type === "edit" ? noteModal.note.postedOn : undefined
           }
