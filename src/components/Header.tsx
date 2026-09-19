@@ -9,6 +9,7 @@ interface HeaderProps {
 
 export const Header = ({ onOpenSidebar }: HeaderProps) => {
   const openSettings = useUIStore((state) => state.openSettings);
+  const openSearch = useUIStore((state) => state.openSearch);
 
   const [greeting] = useState(() => getGreetingMsg(new Date().getHours()));
   const [date] = useState(() => new Date().toDateString().replace(" ", ", "));
@@ -23,6 +24,14 @@ export const Header = ({ onOpenSidebar }: HeaderProps) => {
           {date}
         </span>
       </div>
+
+      <IconButton
+        icon="search"
+        tooltip="Search notes (⌘K)"
+        label="Search notes"
+        className="search-btn"
+        onClick={openSearch}
+      />
 
       <IconButton
         icon="settings"

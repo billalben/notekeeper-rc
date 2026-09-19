@@ -5,6 +5,7 @@ import { Header } from "./components/Header";
 import { NoteList } from "./components/NoteList";
 import { NoteModal, type NoteSaveInput } from "./components/NoteModal";
 import { MoveNoteModal } from "./components/MoveNoteModal";
+import { SearchPalette } from "./components/SearchPalette";
 import { SettingsModal } from "./components/settings/SettingsModal";
 import { Sidebar } from "./components/Sidebar";
 import { TagFilterBar } from "./components/TagFilterBar";
@@ -64,11 +65,15 @@ const App = () => {
   const startAddingNotebook = useUIStore((state) => state.startAddingNotebook);
   const isSettingsOpen = useUIStore((state) => state.isSettingsOpen);
   const closeSettings = useUIStore((state) => state.closeSettings);
+  const isSearchOpen = useUIStore((state) => state.isSearchOpen);
+  const openSearch = useUIStore((state) => state.openSearch);
+  const closeSearch = useUIStore((state) => state.closeSearch);
   const view = useUIStore((state) => state.view);
   const showNotes = useUIStore((state) => state.showNotes);
   const activeTags = useUIStore((state) => state.activeTags);
   const toggleTag = useUIStore((state) => state.toggleTag);
   const removeTagFilter = useUIStore((state) => state.removeTagFilter);
+  const clearTagFilter = useUIStore((state) => state.clearTagFilter);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [noteModal, setNoteModal] = useState<NoteModalState | null>(null);
@@ -100,6 +105,34 @@ const App = () => {
   useEffect(() => {
     purgeExpiredTrash(trashRetentionMs(retentionDays));
   }, [retentionDays, purgeExpiredTrash]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const mod = event.ctrlKey || event.metaKey;
+      if (!mod || event.key.toLowerCase() !== "k") return;
+      if (
+        isSettingsOpen ||
+        isSearchOpen ||
+        noteModal ||
+        confirm ||
+        moveNoteTarget
+      ) {
+        return;
+      }
+      event.preventDefault();
+      openSearch();
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [
+    isSettingsOpen,
+    isSearchOpen,
+    noteModal,
+    confirm,
+    moveNoteTarget,
+    openSearch,
+  ]);
 
   useEffect(() => {
     const visible = notebooks.filter((notebook) => notebook.deletedAt === null);
@@ -153,6 +186,14 @@ const App = () => {
 
   const openEditNote = (note: Note) => {
     setNoteModal({ type: "edit", note });
+  };
+
+  const openSearchNote = (note: Note) => {
+    setActiveNotebook(note.notebookId);
+    showNotes();
+    clearTagFilter();
+    setNoteModal({ type: "edit", note });
+    closeSearch();
   };
 
   const handleNoteSave = (noteData: NoteSaveInput): Note | undefined => {
@@ -447,6 +488,10 @@ const App = () => {
       )}
 
       {isSettingsOpen && <SettingsModal onClose={closeSettings} />}
+
+      {isSearchOpen && (
+        <SearchPalette onOpenNote={openSearchNote} onClose={closeSearch} />
+      )}
 
       <ToastRegion />
     </>

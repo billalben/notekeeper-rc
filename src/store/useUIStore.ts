@@ -9,6 +9,9 @@ interface UIStore {
   isSettingsOpen: boolean;
   openSettings: () => void;
   closeSettings: () => void;
+  isSearchOpen: boolean;
+  openSearch: () => void;
+  closeSearch: () => void;
   view: MainView;
   openTrash: () => void;
   openFavorites: () => void;
@@ -26,6 +29,9 @@ export const useUIStore = create<UIStore>((set) => ({
   isSettingsOpen: false,
   openSettings: () => set({ isSettingsOpen: true }),
   closeSettings: () => set({ isSettingsOpen: false }),
+  isSearchOpen: false,
+  openSearch: () => set({ isSearchOpen: true }),
+  closeSearch: () => set({ isSearchOpen: false }),
   view: "notes",
   openTrash: () => set({ view: "trash", activeTags: [] }),
   openFavorites: () => set({ view: "favorites", activeTags: [] }),
