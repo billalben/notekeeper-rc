@@ -14,7 +14,12 @@ import { useThemeStore } from "./store/useThemeStore";
 import { useUIStore } from "./store/useUIStore";
 import { toast } from "./store/useToastStore";
 import type { Note, Notebook } from "./types";
-import { sortByPinned, trashRetentionMs } from "./utils";
+import {
+  sortByPinned,
+  trashRetentionMs,
+  withMoveFlags,
+  type MoveDirection,
+} from "./utils";
 
 type NoteModalState = { type: "create" } | { type: "edit"; note: Note };
 
@@ -29,6 +34,7 @@ const App = () => {
   const addNote = useNoteStore((state) => state.addNote);
   const updateNote = useNoteStore((state) => state.updateNote);
   const toggleNotePin = useNoteStore((state) => state.toggleNotePin);
+  const moveNote = useNoteStore((state) => state.moveNote);
   const deleteNote = useNoteStore((state) => state.deleteNote);
   const restoreNote = useNoteStore((state) => state.restoreNote);
   const deleteNotebook = useNoteStore((state) => state.deleteNotebook);
@@ -75,8 +81,10 @@ const App = () => {
   const activeNotebook =
     visibleNotebooks.find((notebook) => notebook.id === activeNotebookId) ??
     null;
-  const activeNotes = sortByPinned(
-    activeNotebook?.notes.filter((note) => note.deletedAt === null) ?? [],
+  const activeNotes = withMoveFlags(
+    sortByPinned(
+      activeNotebook?.notes.filter((note) => note.deletedAt === null) ?? [],
+    ),
   );
 
   const openCreateNote = () => {
@@ -106,6 +114,10 @@ const App = () => {
 
   const handleToggleNotePin = (note: Note) => {
     toggleNotePin(note.notebookId, note.id);
+  };
+
+  const handleMoveNote = (note: Note, direction: MoveDirection) => {
+    moveNote(note.notebookId, note.id, direction);
   };
 
   const handleDeleteNote = (note: Note) => {
@@ -204,6 +216,7 @@ const App = () => {
                 notes={activeNotes}
                 onOpen={openEditNote}
                 onTogglePin={handleToggleNotePin}
+                onMove={handleMoveNote}
                 onRequestDelete={handleDeleteNote}
               />
             )}

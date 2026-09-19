@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { Note, Notebook } from "../types";
-import { generateID } from "../utils";
+import { generateID, moveWithinGroup, type MoveDirection } from "../utils";
 import { createLocalStorage, isQuotaExceededError } from "./persistStorage";
 import { toast } from "./useToastStore";
 
@@ -35,6 +35,7 @@ interface NoteStore {
   addNotebook: (name: string) => Notebook;
   renameNotebook: (notebookId: string, name: string) => void;
   toggleNotebookPin: (notebookId: string) => void;
+  moveNotebook: (notebookId: string, direction: MoveDirection) => void;
   deleteNotebook: (notebookId: string) => void;
   restoreNotebook: (notebookId: string) => void;
   permanentlyDeleteNotebook: (notebookId: string) => void;
@@ -45,6 +46,11 @@ interface NoteStore {
   ) => Note | undefined;
   updateNote: (noteId: string, data: Pick<Note, "title" | "text">) => void;
   toggleNotePin: (notebookId: string, noteId: string) => void;
+  moveNote: (
+    notebookId: string,
+    noteId: string,
+    direction: MoveDirection,
+  ) => void;
   deleteNote: (notebookId: string, noteId: string) => void;
   restoreNote: (noteId: string) => void;
   permanentlyDeleteNote: (notebookId: string, noteId: string) => void;
@@ -171,6 +177,12 @@ export const useNoteStore = create<NoteStore>()(
         }));
       },
 
+      moveNotebook: (notebookId, direction) => {
+        set((state) => ({
+          notebooks: moveWithinGroup(state.notebooks, notebookId, direction),
+        }));
+      },
+
       deleteNotebook: (notebookId) => {
         const now = new Date().getTime();
         set((state) => {
@@ -264,6 +276,19 @@ export const useNoteStore = create<NoteStore>()(
                       ? { ...note, pinned: !note.pinned }
                       : note,
                   ),
+                }
+              : notebook,
+          ),
+        }));
+      },
+
+      moveNote: (notebookId, noteId, direction) => {
+        set((state) => ({
+          notebooks: state.notebooks.map((notebook) =>
+            notebook.id === notebookId
+              ? {
+                  ...notebook,
+                  notes: moveWithinGroup(notebook.notes, noteId, direction),
                 }
               : notebook,
           ),

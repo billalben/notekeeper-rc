@@ -70,3 +70,75 @@ export const isTrashed = (item: { deletedAt: number | null }): boolean =>
 
 export const sortByPinned = <T extends { pinned: boolean }>(items: T[]): T[] =>
   [...items].sort((a, b) => Number(b.pinned) - Number(a.pinned));
+
+export type MoveDirection = "up" | "down";
+
+interface Movable {
+  id: string;
+  pinned: boolean;
+  deletedAt: number | null;
+}
+
+/**
+ * Swap an item with its nearest visible (non-trashed) neighbour in the given
+ * direction. Movement is confined to the item's own pinned group so pinned
+ * items always stay above unpinned ones. Returns a new array, or the original
+ * array unchanged when no valid move exists.
+ */
+export const moveWithinGroup = <T extends Movable>(
+  items: T[],
+  id: string,
+  direction: MoveDirection,
+): T[] => {
+  const index = items.findIndex((item) => item.id === id);
+  if (index === -1) return items;
+
+  const target = items[index];
+  const isVisible = (item: Movable) => item.deletedAt === null;
+  const isSameGroup = (item: Movable) => item.pinned === target.pinned;
+
+  const step = direction === "up" ? -1 : 1;
+  let neighbourIndex = -1;
+  for (let i = index + step; i >= 0 && i < items.length; i += step) {
+    const candidate = items[i];
+    if (isVisible(candidate) && isSameGroup(candidate)) {
+      neighbourIndex = i;
+      break;
+    }
+    if (isVisible(candidate) && !isSameGroup(candidate)) break;
+  }
+
+  if (neighbourIndex === -1) return items;
+
+  const next = [...items];
+  next[index] = next[neighbourIndex];
+  next[neighbourIndex] = target;
+  return next;
+};
+
+export interface MoveFlags {
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+}
+
+/**
+ * Compute per-item move availability from a list already ordered for display
+ * (pinned first). Only same-pinned-state, visible neighbours count.
+ */
+export const withMoveFlags = <T extends Movable>(
+  items: T[],
+): (T & MoveFlags)[] =>
+  items.map((item, index) => {
+    const prev = items[index - 1];
+    const next = items[index + 1];
+    const sameGroup = (other: Movable | undefined) =>
+      other !== undefined &&
+      other.deletedAt === null &&
+      other.pinned === item.pinned;
+
+    return {
+      ...item,
+      canMoveUp: sameGroup(prev),
+      canMoveDown: sameGroup(next),
+    };
+  });

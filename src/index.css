@@ -484,6 +484,9 @@ body {
 .icon-btn.small .material-symbols-rounded {
   font-size: 1.8rem;
 }
+.icon-btn:disabled {
+  opacity: 0.38;
+}
 
 /* * FAB (Floating Action Button) */
 .fab {
@@ -903,6 +906,66 @@ body {
   100% {
     opacity: 1;
   }
+}
+
+/* * Item menu (three-dot actions) */
+.item-menu-trigger.active,
+.item-menu-trigger:hover {
+  color: var(--on-surface);
+}
+.item-menu-trigger.active {
+  background-color: var(--surface-container-highest);
+}
+.item-menu {
+  position: fixed;
+  z-index: 30;
+  min-width: 180px;
+  max-width: 260px;
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-1);
+  background-color: var(--surface-container-highest);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-3);
+  animation: fade var(--tr-duration-short) var(--tr-easing-linear) forwards;
+}
+.item-menu-action {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-small);
+  color: var(--on-surface);
+  --state-layer-bg: var(--on-surface);
+  text-align: start;
+  white-space: nowrap;
+}
+.item-menu-action .material-symbols-rounded {
+  flex-shrink: 0;
+  font-size: 20px;
+  color: var(--on-surface-variant);
+}
+.item-menu-action.separated {
+  margin-block-start: var(--spacing-1);
+  border-block-start: 1px solid var(--outline-variant);
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+  padding-block-start: calc(var(--spacing-2) + var(--spacing-1));
+}
+.item-menu-action.danger {
+  color: var(--danger);
+  --state-layer-bg: var(--danger);
+}
+.item-menu-action.danger .material-symbols-rounded {
+  color: var(--danger);
+}
+.item-menu-action:disabled {
+  opacity: 0.38;
+}
+.item-menu-action:disabled .material-symbols-rounded {
+  color: var(--on-surface-variant);
 }
 
 /* ?=== #SIDEBAR === */

@@ -1,14 +1,16 @@
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "../store/useToastStore";
 import type { Notebook } from "../types";
-import { IconButton } from "./IconButton";
+import type { MoveDirection, MoveFlags } from "../utils";
+import { ItemMenu } from "./ItemMenu";
 
 interface NavItemProps {
-  notebook: Notebook;
+  notebook: Notebook & MoveFlags;
   isActive: boolean;
   onSelect: (notebookId: string) => void;
   onRename: (notebookId: string, name: string) => void;
   onTogglePin: (notebook: Notebook) => void;
+  onMove: (notebook: Notebook, direction: MoveDirection) => void;
   onRequestDelete: (notebook: Notebook) => void;
 }
 
@@ -18,8 +20,10 @@ export const NavItem = ({
   onSelect,
   onRename,
   onTogglePin,
+  onMove,
   onRequestDelete,
 }: NavItemProps) => {
+  const { canMoveUp, canMoveDown } = notebook;
   const [isEditing, setIsEditing] = useState(false);
   const [draftName, setDraftName] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -28,8 +32,7 @@ export const NavItem = ({
     if (isEditing) inputRef.current?.focus();
   }, [isEditing]);
 
-  const startEditing = (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
+  const startEditing = () => {
     setDraftName(notebook.name);
     setIsEditing(true);
   };
@@ -45,16 +48,6 @@ export const NavItem = ({
 
   const cancelRename = () => {
     setIsEditing(false);
-  };
-
-  const requestDelete = (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-    onRequestDelete(notebook);
-  };
-
-  const handleTogglePin = (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-    onTogglePin(notebook);
   };
 
   return (
@@ -103,26 +96,45 @@ export const NavItem = ({
           </span>
         )}
       </span>
-      <IconButton
-        icon="push_pin"
-        size="small"
-        tooltip={notebook.pinned ? "Unpin notebook" : "Pin notebook"}
-        label={notebook.pinned ? "Unpin notebook" : "Pin notebook"}
-        onClick={handleTogglePin}
-      />
-      <IconButton
-        icon="edit"
-        size="small"
-        tooltip="Edit notebook"
-        label="Edit notebook"
-        onClick={startEditing}
-      />
-      <IconButton
-        icon="delete"
-        size="small"
-        tooltip="Delete notebook"
-        label="Delete notebook"
-        onClick={requestDelete}
+      <ItemMenu
+        label="Notebook actions"
+        items={[
+          {
+            key: "rename",
+            label: "Rename",
+            icon: "edit",
+            onSelect: startEditing,
+          },
+          {
+            key: "pin",
+            label: notebook.pinned ? "Unpin notebook" : "Pin notebook",
+            icon: "push_pin",
+            onSelect: () => onTogglePin(notebook),
+          },
+          {
+            key: "up",
+            label: "Move up",
+            icon: "keyboard_arrow_up",
+            disabled: !canMoveUp,
+            separatorBefore: true,
+            onSelect: () => onMove(notebook, "up"),
+          },
+          {
+            key: "down",
+            label: "Move down",
+            icon: "keyboard_arrow_down",
+            disabled: !canMoveDown,
+            onSelect: () => onMove(notebook, "down"),
+          },
+          {
+            key: "delete",
+            label: "Delete notebook",
+            icon: "delete",
+            danger: true,
+            separatorBefore: true,
+            onSelect: () => onRequestDelete(notebook),
+          },
+        ]}
       />
       <div className="state-layer" />
     </div>

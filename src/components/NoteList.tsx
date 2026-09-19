@@ -1,10 +1,17 @@
 import type { Note } from "../types";
+import type { MoveDirection } from "../utils";
 import { NoteCard } from "./NoteCard";
 
+interface NoteCardWithFlags extends Note {
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+}
+
 interface NoteListProps {
-  notes: Note[];
+  notes: NoteCardWithFlags[];
   onOpen: (note: Note) => void;
   onTogglePin: (note: Note) => void;
+  onMove: (note: Note, direction: MoveDirection) => void;
   onRequestDelete: (note: Note) => void;
 }
 
@@ -12,6 +19,7 @@ export const NoteList = ({
   notes,
   onOpen,
   onTogglePin,
+  onMove,
   onRequestDelete,
 }: NoteListProps) => {
   return (
@@ -21,8 +29,11 @@ export const NoteList = ({
           <NoteCard
             key={note.id}
             note={note}
+            canMoveUp={note.canMoveUp}
+            canMoveDown={note.canMoveDown}
             onOpen={onOpen}
             onTogglePin={onTogglePin}
+            onMove={onMove}
             onRequestDelete={onRequestDelete}
           />
         ))

@@ -1,36 +1,31 @@
-import type { MouseEvent } from "react";
 import type { Note } from "../types";
-import { getRelativeTime } from "../utils";
-import { IconButton } from "./IconButton";
+import { getRelativeTime, type MoveDirection } from "../utils";
+import { ItemMenu } from "./ItemMenu";
 import { MarkdownContent } from "./MarkdownContent";
 
 interface NoteCardProps {
   note: Note;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
   onOpen: (note: Note) => void;
   onTogglePin: (note: Note) => void;
+  onMove: (note: Note, direction: MoveDirection) => void;
   onRequestDelete: (note: Note) => void;
 }
 
 export const NoteCard = ({
   note,
+  canMoveUp,
+  canMoveDown,
   onOpen,
   onTogglePin,
+  onMove,
   onRequestDelete,
 }: NoteCardProps) => {
   const isEdited = note.updatedOn !== note.postedOn;
   const timeLabel = isEdited
     ? `Edited ${getRelativeTime(note.updatedOn)}`
     : getRelativeTime(note.postedOn);
-
-  const handleDelete = (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-    onRequestDelete(note);
-  };
-
-  const handleTogglePin = (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-    onTogglePin(note);
-  };
 
   return (
     <div
@@ -61,17 +56,39 @@ export const NoteCard = ({
       />
       <div className="wrapper">
         <span className="card-time text-label-large">{timeLabel}</span>
-        <IconButton
-          icon="push_pin"
-          tooltip={note.pinned ? "Unpin Note" : "Pin Note"}
-          label={note.pinned ? "Unpin Note" : "Pin Note"}
-          onClick={handleTogglePin}
-        />
-        <IconButton
-          icon="delete"
-          tooltip="Delete Note"
-          label="Delete Note"
-          onClick={handleDelete}
+        <ItemMenu
+          label="Note actions"
+          items={[
+            {
+              key: "pin",
+              label: note.pinned ? "Unpin note" : "Pin note",
+              icon: "push_pin",
+              onSelect: () => onTogglePin(note),
+            },
+            {
+              key: "up",
+              label: "Move up",
+              icon: "keyboard_arrow_up",
+              disabled: !canMoveUp,
+              separatorBefore: true,
+              onSelect: () => onMove(note, "up"),
+            },
+            {
+              key: "down",
+              label: "Move down",
+              icon: "keyboard_arrow_down",
+              disabled: !canMoveDown,
+              onSelect: () => onMove(note, "down"),
+            },
+            {
+              key: "delete",
+              label: "Delete note",
+              icon: "delete",
+              danger: true,
+              separatorBefore: true,
+              onSelect: () => onRequestDelete(note),
+            },
+          ]}
         />
       </div>
       <div className="state-layer" />

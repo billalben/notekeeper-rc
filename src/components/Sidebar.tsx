@@ -5,7 +5,7 @@ import { useSettingsStore } from "../store/useSettingsStore";
 import { toast } from "../store/useToastStore";
 import { useUIStore } from "../store/useUIStore";
 import type { Notebook } from "../types";
-import { sortByPinned } from "../utils";
+import { sortByPinned, withMoveFlags } from "../utils";
 import { Fab } from "./Fab";
 import { IconButton } from "./IconButton";
 import { NavItem } from "./NavItem";
@@ -34,6 +34,7 @@ export const Sidebar = ({
   const setActiveNotebook = useNoteStore((state) => state.setActiveNotebook);
   const addNotebook = useNoteStore((state) => state.addNotebook);
   const renameNotebook = useNoteStore((state) => state.renameNotebook);
+  const moveNotebook = useNoteStore((state) => state.moveNotebook);
 
   const collapsed = useSettingsStore((state) => state.sidebar.collapsed);
   const setSidebarSettings = useSettingsStore(
@@ -53,8 +54,8 @@ export const Sidebar = ({
     typeof window !== "undefined" &&
     window.matchMedia(DESKTOP_QUERY).matches;
 
-  const visibleNotebooks = sortByPinned(
-    notebooks.filter((notebook) => notebook.deletedAt === null),
+  const visibleNotebooks = withMoveFlags(
+    sortByPinned(notebooks.filter((notebook) => notebook.deletedAt === null)),
   );
   const trashedCount =
     notebooks.filter((notebook) => notebook.deletedAt !== null).length +
@@ -156,6 +157,7 @@ export const Sidebar = ({
             onSelect={selectNotebook}
             onRename={renameNotebook}
             onTogglePin={onTogglePin}
+            onMove={(notebook, direction) => moveNotebook(notebook.id, direction)}
             onRequestDelete={onRequestDeleteNotebook}
           />
         ))}
