@@ -12,8 +12,10 @@ interface NoteListProps {
   canMoveToNotebook: boolean;
   notebookNames?: Record<string, string>;
   emptyMessage?: string;
+  emptyIcon?: string;
   onOpen: (note: Note) => void;
   onTogglePin: (note: Note) => void;
+  onToggleFavorite: (note: Note) => void;
   onMove: (note: Note, direction: MoveDirection) => void;
   onRequestMove: (note: Note) => void;
   onRequestDelete: (note: Note) => void;
@@ -24,8 +26,10 @@ export const NoteList = ({
   canMoveToNotebook,
   notebookNames,
   emptyMessage = "No notes",
+  emptyIcon = "note_stack",
   onOpen,
   onTogglePin,
+  onToggleFavorite,
   onMove,
   onRequestMove,
   onRequestDelete,
@@ -43,6 +47,7 @@ export const NoteList = ({
             notebookName={notebookNames?.[note.notebookId]}
             onOpen={onOpen}
             onTogglePin={onTogglePin}
+            onToggleFavorite={onToggleFavorite}
             onMove={onMove}
             onRequestMove={onRequestMove}
             onRequestDelete={onRequestDelete}
@@ -51,7 +56,7 @@ export const NoteList = ({
       ) : (
         <div className="empty-notes">
           <span className="material-symbols-rounded" aria-hidden="true">
-            note_stack
+            {emptyIcon}
           </span>
           <div className="text-headline-small">{emptyMessage}</div>
         </div>

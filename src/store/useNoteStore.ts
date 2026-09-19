@@ -16,7 +16,7 @@ import { createLocalStorage, isQuotaExceededError } from "./persistStorage";
 import { toast } from "./useToastStore";
 
 const STORAGE_KEY = "noteKeeperDB";
-const STORAGE_VERSION = 6;
+const STORAGE_VERSION = 7;
 
 const STORAGE_ERROR_COOLDOWN = 10_000;
 let lastStorageErrorAt = 0;
@@ -58,6 +58,7 @@ interface NoteStore {
   addNote: (notebookId: string, data: NoteInput) => Note | undefined;
   updateNote: (noteId: string, data: NoteInput) => void;
   toggleNotePin: (notebookId: string, noteId: string) => void;
+  toggleNoteFavorite: (notebookId: string, noteId: string) => void;
   moveNote: (
     notebookId: string,
     noteId: string,
@@ -81,8 +82,9 @@ interface NoteStore {
 
 /**
  * Backfill fields added after a note/notebook was first created:
- * `updatedOn` (v2), `deletedAt` (v3), `pinned` (v4), and `tags` (v5). The
- * store-level tag registry added in v6 is seeded separately in `migrate`.
+ * `updatedOn` (v2), `deletedAt` (v3), `pinned` (v4), `tags` (v5), and
+ * `favorite` (v7). The store-level tag registry added in v6 is seeded
+ * separately in `migrate`.
  */
 const withDefaults = (notebooks: Notebook[]): Notebook[] =>
   notebooks.map((notebook) => ({
@@ -94,6 +96,7 @@ const withDefaults = (notebooks: Notebook[]): Notebook[] =>
       updatedOn: note.updatedOn ?? note.postedOn,
       deletedAt: note.deletedAt ?? null,
       pinned: note.pinned ?? false,
+      favorite: note.favorite ?? false,
       tags: Array.isArray(note.tags) ? note.tags : [],
     })),
   }));
@@ -289,6 +292,7 @@ export const useNoteStore = create<NoteStore>()(
           updatedOn: now,
           deletedAt: null,
           pinned: false,
+          favorite: false,
         };
 
         set((state) => ({
@@ -328,6 +332,23 @@ export const useNoteStore = create<NoteStore>()(
                   notes: notebook.notes.map((note) =>
                     note.id === noteId
                       ? { ...note, pinned: !note.pinned }
+                      : note,
+                  ),
+                }
+              : notebook,
+          ),
+        }));
+      },
+
+      toggleNoteFavorite: (notebookId, noteId) => {
+        set((state) => ({
+          notebooks: state.notebooks.map((notebook) =>
+            notebook.id === notebookId
+              ? {
+                  ...notebook,
+                  notes: notebook.notes.map((note) =>
+                    note.id === noteId
+                      ? { ...note, favorite: !note.favorite }
                       : note,
                   ),
                 }

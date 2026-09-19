@@ -179,6 +179,20 @@ export const filterNotesByTags = (
     );
 };
 
+/**
+ * Every visible (non-trashed) favorite note across visible notebooks, most
+ * recently updated first.
+ */
+export const collectFavoriteNotes = (notebooks: Notebook[]): Note[] =>
+  notebooks
+    .filter((notebook) => notebook.deletedAt === null)
+    .flatMap((notebook) =>
+      notebook.notes.filter(
+        (note) => note.deletedAt === null && note.favorite,
+      ),
+    )
+    .sort((a, b) => b.updatedOn - a.updatedOn);
+
 export type MoveDirection = "up" | "down";
 
 interface Movable {

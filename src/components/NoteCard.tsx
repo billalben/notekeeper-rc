@@ -11,6 +11,7 @@ interface NoteCardProps {
   notebookName?: string;
   onOpen: (note: Note) => void;
   onTogglePin: (note: Note) => void;
+  onToggleFavorite: (note: Note) => void;
   onMove: (note: Note, direction: MoveDirection) => void;
   onRequestMove: (note: Note) => void;
   onRequestDelete: (note: Note) => void;
@@ -24,6 +25,7 @@ export const NoteCard = ({
   notebookName,
   onOpen,
   onTogglePin,
+  onToggleFavorite,
   onMove,
   onRequestMove,
   onRequestDelete,
@@ -46,13 +48,26 @@ export const NoteCard = ({
     >
       <div className="card-title-row">
         <h3 className="card-title text-title-medium">{note.title}</h3>
-        {note.pinned && (
-          <span
-            className="material-symbols-rounded pin-badge"
-            aria-label="Pinned"
-            title="Pinned"
-          >
-            push_pin
+        {(note.pinned || note.favorite) && (
+          <span className="card-badges">
+            {note.pinned && (
+              <span
+                className="material-symbols-rounded pin-badge"
+                aria-label="Pinned"
+                title="Pinned"
+              >
+                push_pin
+              </span>
+            )}
+            {note.favorite && (
+              <span
+                className="material-symbols-rounded card-favorite-badge"
+                aria-label="Favorite"
+                title="Favorite"
+              >
+                star
+              </span>
+            )}
           </span>
         )}
       </div>
@@ -87,6 +102,12 @@ export const NoteCard = ({
               label: note.pinned ? "Unpin note" : "Pin note",
               icon: "push_pin",
               onSelect: () => onTogglePin(note),
+            },
+            {
+              key: "favorite",
+              label: note.favorite ? "Unfavorite note" : "Favorite note",
+              icon: note.favorite ? "star" : "star_border",
+              onSelect: () => onToggleFavorite(note),
             },
             {
               key: "move",

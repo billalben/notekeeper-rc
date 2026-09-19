@@ -17,6 +17,7 @@ import { useUIStore } from "./store/useUIStore";
 import { toast } from "./store/useToastStore";
 import type { Note, Notebook } from "./types";
 import {
+  collectFavoriteNotes,
   countTagUsageMap,
   filterNotesByTags,
   sortByPinned,
@@ -41,6 +42,9 @@ const App = () => {
   const addNote = useNoteStore((state) => state.addNote);
   const updateNote = useNoteStore((state) => state.updateNote);
   const toggleNotePin = useNoteStore((state) => state.toggleNotePin);
+  const toggleNoteFavorite = useNoteStore(
+    (state) => state.toggleNoteFavorite,
+  );
   const moveNote = useNoteStore((state) => state.moveNote);
   const moveNoteToNotebook = useNoteStore(
     (state) => state.moveNoteToNotebook,
@@ -115,6 +119,12 @@ const App = () => {
         ),
       );
 
+  const favoriteNotes = collectFavoriteNotes(notebooks).map((note) => ({
+    ...note,
+    canMoveUp: false,
+    canMoveDown: false,
+  }));
+
   const openCreateNote = () => {
     if (visibleNotebooks.length === 0) return;
     setNoteModal({ type: "create" });
@@ -146,6 +156,10 @@ const App = () => {
 
   const handleToggleNotePin = (note: Note) => {
     toggleNotePin(note.notebookId, note.id);
+  };
+
+  const handleToggleNoteFavorite = (note: Note) => {
+    toggleNoteFavorite(note.notebookId, note.id);
   };
 
   const handleMoveNote = (note: Note, direction: MoveDirection) => {
@@ -269,6 +283,26 @@ const App = () => {
 
         {view === "trash" ? (
           <TrashView />
+        ) : view === "favorites" ? (
+          <>
+            <h2 className="title text-title-medium" data-note-panel-title>
+              Favorites
+            </h2>
+
+            <NoteList
+              notes={favoriteNotes}
+              canMoveToNotebook={visibleNotebooks.length > 1}
+              notebookNames={notebookNames}
+              emptyMessage="No favorites yet"
+              emptyIcon="star"
+              onOpen={openEditNote}
+              onTogglePin={handleToggleNotePin}
+              onToggleFavorite={handleToggleNoteFavorite}
+              onMove={handleMoveNote}
+              onRequestMove={setMoveNoteTarget}
+              onRequestDelete={handleDeleteNote}
+            />
+          </>
         ) : (
           <>
             <h2 className="title text-title-medium" data-note-panel-title>
@@ -315,6 +349,7 @@ const App = () => {
                 }
                 onOpen={openEditNote}
                 onTogglePin={handleToggleNotePin}
+                onToggleFavorite={handleToggleNoteFavorite}
                 onMove={handleMoveNote}
                 onRequestMove={setMoveNoteTarget}
                 onRequestDelete={handleDeleteNote}

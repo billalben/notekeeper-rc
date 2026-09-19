@@ -37,6 +37,7 @@ export const Sidebar = ({
   const moveNotebook = useNoteStore((state) => state.moveNotebook);
 
   const collapsed = useSettingsStore((state) => state.sidebar.collapsed);
+  const showCounts = useSettingsStore((state) => state.sidebar.showCounts);
   const setSidebarSettings = useSettingsStore(
     (state) => state.setSidebarSettings,
   );
@@ -46,6 +47,7 @@ export const Sidebar = ({
   const stopAddingNotebook = useUIStore((state) => state.stopAddingNotebook);
   const view = useUIStore((state) => state.view);
   const openTrash = useUIStore((state) => state.openTrash);
+  const openFavorites = useUIStore((state) => state.openFavorites);
   const showNotes = useUIStore((state) => state.showNotes);
   const clearTagFilter = useUIStore((state) => state.clearTagFilter);
 
@@ -66,6 +68,14 @@ export const Sidebar = ({
         notebook.notes.filter((note) => note.deletedAt !== null).length,
       0,
     );
+  const favoriteCount = visibleNotebooks.reduce(
+    (total, notebook) =>
+      total +
+      notebook.notes.filter(
+        (note) => note.deletedAt === null && note.favorite,
+      ).length,
+    0,
+  );
 
   const selectNotebook = (notebookId: string) => {
     setActiveNotebook(notebookId);
@@ -156,6 +166,10 @@ export const Sidebar = ({
             key={notebook.id}
             notebook={notebook}
             isActive={notebook.id === activeNotebookId && view === "notes"}
+            noteCount={
+              notebook.notes.filter((note) => note.deletedAt === null).length
+            }
+            showCounts={showCounts}
             onSelect={selectNotebook}
             onRename={renameNotebook}
             onTogglePin={onTogglePin}
@@ -185,6 +199,28 @@ export const Sidebar = ({
 
       <button
         type="button"
+        className={`nav-item favorite-nav-item${
+          view === "favorites" ? " active" : ""
+        }`}
+        onClick={() => {
+          openFavorites();
+          onClose();
+        }}
+      >
+        <span className="material-symbols-rounded" aria-hidden="true">
+          star
+        </span>
+        <span className="text text-label-large">Favorites</span>
+        {showCounts && favoriteCount > 0 && (
+          <span className="favorite-badge text-label-small">
+            {favoriteCount}
+          </span>
+        )}
+        <div className="state-layer" />
+      </button>
+
+      <button
+        type="button"
         className={`nav-item trash-nav-item${view === "trash" ? " active" : ""}`}
         onClick={() => {
           openTrash();
@@ -195,7 +231,7 @@ export const Sidebar = ({
           delete
         </span>
         <span className="text text-label-large">Trash</span>
-        {trashedCount > 0 && (
+        {showCounts && trashedCount > 0 && (
           <span className="trash-badge text-label-small">{trashedCount}</span>
         )}
         <div className="state-layer" />

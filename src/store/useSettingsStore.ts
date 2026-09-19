@@ -56,11 +56,13 @@ export const SIDEBAR_WIDTH_DEFAULT = 360;
 export interface SidebarSettings {
   collapsed: boolean;
   width: number;
+  showCounts: boolean;
 }
 
 export const DEFAULT_SIDEBAR_SETTINGS: SidebarSettings = {
   collapsed: false,
   width: SIDEBAR_WIDTH_DEFAULT,
+  showCounts: true,
 };
 
 export const clamp = (value: number, min: number, max: number): number =>
@@ -110,6 +112,7 @@ const normalizeSidebarSettings = (
     SIDEBAR_WIDTH_MIN,
     SIDEBAR_WIDTH_MAX,
   ),
+  showCounts: settings?.showCounts ?? DEFAULT_SIDEBAR_SETTINGS.showCounts,
 });
 
 interface SettingsStore {
@@ -126,7 +129,7 @@ interface SettingsStore {
 }
 
 const STORAGE_KEY = "settings";
-const STORAGE_VERSION = 5;
+const STORAGE_VERSION = 6;
 
 export const useSettingsStore = create<SettingsStore>()(
   persist(

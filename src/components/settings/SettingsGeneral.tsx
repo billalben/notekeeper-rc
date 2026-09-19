@@ -14,6 +14,12 @@ export const SettingsGeneral = () => {
   const setEditorSettings = useSettingsStore(
     (state) => state.setEditorSettings,
   );
+  const showSidebarCounts = useSettingsStore(
+    (state) => state.sidebar.showCounts,
+  );
+  const setSidebarSettings = useSettingsStore(
+    (state) => state.setSidebarSettings,
+  );
 
   return (
     <>
@@ -52,6 +58,21 @@ export const SettingsGeneral = () => {
             label="Close modals when clicking outside"
             onChange={(checked) =>
               setEditorSettings({ closeModalOnBackdropClick: checked })
+            }
+          />
+        </SettingsRow>
+      </SettingsGroup>
+
+      <SettingsGroup title="Sidebar">
+        <SettingsRow
+          title="Show counts"
+          description="Show how many notes are in each notebook, Favorites, and Trash."
+        >
+          <SettingsSwitch
+            checked={showSidebarCounts}
+            label="Show sidebar counts"
+            onChange={(checked) =>
+              setSidebarSettings({ showCounts: checked })
             }
           />
         </SettingsRow>

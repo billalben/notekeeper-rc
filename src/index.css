@@ -543,12 +543,24 @@ body {
 .card .card-title-row .card-title {
   min-width: 0;
 }
+.card-badges {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--spacing-1);
+}
 .pin-badge {
   flex-shrink: 0;
   color: var(--primary);
   font-size: 18px;
   cursor: default;
   transform: rotate(45deg);
+}
+.card-favorite-badge {
+  flex-shrink: 0;
+  color: var(--primary);
+  font-size: 18px;
+  cursor: default;
 }
 .card .card-text {
   color: var(--on-surface-variant);
@@ -774,7 +786,8 @@ button.tag-chip {
   opacity: 0;
   transition: opacity var(--tr-duration-short) var(--tr-easing-linear);
 }
-.tag-suggestion-row:where(:hover, .active, :focus-within) .tag-suggestion-delete {
+.tag-suggestion-row:where(:hover, .active, :focus-within)
+  .tag-suggestion-delete {
   opacity: 1;
 }
 .tag-suggestion-delete .material-symbols-rounded {
@@ -954,8 +967,8 @@ button.tag-chip {
 }
 .markdown-body code {
   display: inline;
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
-    monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   font-size: 0.875em;
   background-color: var(--surface-container-highest);
   border-radius: var(--radius-extra-small);
@@ -988,22 +1001,76 @@ button.tag-chip {
   color: var(--code-comment);
   font-style: italic;
 }
-.markdown-body pre code :where(.hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-doctag, .hljs-name) {
+.markdown-body
+  pre
+  code
+  :where(
+    .hljs-keyword,
+    .hljs-selector-tag,
+    .hljs-literal,
+    .hljs-doctag,
+    .hljs-name
+  ) {
   color: var(--code-keyword);
 }
-.markdown-body pre code :where(.hljs-string, .hljs-regexp, .hljs-symbol, .hljs-bullet, .hljs-addition) {
+.markdown-body
+  pre
+  code
+  :where(
+    .hljs-string,
+    .hljs-regexp,
+    .hljs-symbol,
+    .hljs-bullet,
+    .hljs-addition
+  ) {
   color: var(--code-string);
 }
-.markdown-body pre code :where(.hljs-number, .hljs-meta, .hljs-built_in, .hljs-builtin-name, .hljs-link) {
+.markdown-body
+  pre
+  code
+  :where(
+    .hljs-number,
+    .hljs-meta,
+    .hljs-built_in,
+    .hljs-builtin-name,
+    .hljs-link
+  ) {
   color: var(--code-number);
 }
-.markdown-body pre code :where(.hljs-title, .hljs-title.function_, .hljs-section, .hljs-function .hljs-title) {
+.markdown-body
+  pre
+  code
+  :where(
+    .hljs-title,
+    .hljs-title.function_,
+    .hljs-section,
+    .hljs-function .hljs-title
+  ) {
   color: var(--code-function);
 }
-.markdown-body pre code :where(.hljs-attr, .hljs-attribute, .hljs-selector-attr, .hljs-selector-class, .hljs-selector-id, .hljs-property) {
+.markdown-body
+  pre
+  code
+  :where(
+    .hljs-attr,
+    .hljs-attribute,
+    .hljs-selector-attr,
+    .hljs-selector-class,
+    .hljs-selector-id,
+    .hljs-property
+  ) {
   color: var(--code-attr);
 }
-.markdown-body pre code :where(.hljs-variable, .hljs-template-variable, .hljs-params, .hljs-type, .hljs-tag) {
+.markdown-body
+  pre
+  code
+  :where(
+    .hljs-variable,
+    .hljs-template-variable,
+    .hljs-params,
+    .hljs-type,
+    .hljs-tag
+  ) {
   color: var(--code-variable);
 }
 .markdown-body pre code :where(.hljs-emphasis) {
@@ -1269,7 +1336,7 @@ button.tag-chip {
   height: 56px;
   display: flex;
   align-items: center;
-  gap: var(--spacing-05);
+  gap: var(--spacing-3);
   padding-inline: var(--spacing-4) var(--spacing-6);
   cursor: pointer;
   border-radius: var(--radius-full);
@@ -1324,7 +1391,8 @@ button.tag-chip {
 .cp-info span {
   display: inline-block;
 }
-.trash-nav-item {
+.trash-nav-item,
+.favorite-nav-item {
   width: 100%;
   border: none;
   background: transparent;
@@ -1332,10 +1400,13 @@ button.tag-chip {
   text-align: start;
   margin-block-start: var(--spacing-2);
 }
-.trash-nav-item .material-symbols-rounded {
+.trash-nav-item .material-symbols-rounded,
+.favorite-nav-item .material-symbols-rounded {
   flex-shrink: 0;
 }
-.trash-badge {
+.trash-badge,
+.favorite-badge,
+.notebook-count {
   min-width: 20px;
   height: 20px;
   padding-inline: var(--spacing-1);
@@ -1344,6 +1415,17 @@ button.tag-chip {
   border-radius: var(--radius-full);
   background-color: var(--primary);
   color: var(--on-primary);
+  opacity: 0;
+  transition: opacity var(--tr-duration-short) var(--tr-easing-linear);
+}
+.notebook-count {
+  flex-shrink: 0;
+  margin-inline-start: var(--spacing-1);
+}
+.nav-item:where(:hover, :focus-within) .notebook-count,
+.trash-nav-item:where(:hover, :focus-visible) .trash-badge,
+.favorite-nav-item:where(:hover, :focus-visible) .favorite-badge {
+  opacity: 1;
 }
 
 /* ?=== #MAIN === */
@@ -1841,8 +1923,7 @@ button.tag-chip {
   animation: toast-in var(--tr-duration-medium) var(--tr-easing-emphasized);
 }
 .toast.exiting {
-  animation: toast-out var(--tr-duration-short) var(--tr-easing-linear)
-    forwards;
+  animation: toast-out var(--tr-duration-short) var(--tr-easing-linear) forwards;
 }
 @keyframes toast-in {
   0% {
@@ -2035,7 +2116,8 @@ button.tag-chip {
   .sidebar.collapsed .cp-info,
   .sidebar.collapsed .nav-item .text,
   .sidebar.collapsed .nav-item .nav-item-label,
-  .sidebar.collapsed .nav-item .icon-btn {
+  .sidebar.collapsed .nav-item .icon-btn,
+  .sidebar.collapsed .notebook-count {
     display: none;
   }
   .sidebar.collapsed .wrapper-2 {
@@ -2047,14 +2129,17 @@ button.tag-chip {
     padding-inline: 0;
   }
   .sidebar.collapsed .nav-item-icon,
-  .sidebar.collapsed .trash-nav-item > .material-symbols-rounded {
+  .sidebar.collapsed .trash-nav-item > .material-symbols-rounded,
+  .sidebar.collapsed .favorite-nav-item > .material-symbols-rounded {
     margin-inline: auto;
   }
-  .sidebar.collapsed .trash-nav-item {
+  .sidebar.collapsed .trash-nav-item,
+  .sidebar.collapsed .favorite-nav-item {
     justify-content: center;
     padding-inline: 0;
   }
-  .sidebar.collapsed .trash-badge {
+  .sidebar.collapsed .trash-badge,
+  .sidebar.collapsed .favorite-badge {
     position: absolute;
     top: 6px;
     inset-inline-end: 14px;
@@ -2062,7 +2147,8 @@ button.tag-chip {
     height: 16px;
     font-size: 10px;
   }
-  .sidebar.collapsed .trash-nav-item {
+  .sidebar.collapsed .trash-nav-item,
+  .sidebar.collapsed .favorite-nav-item {
     position: relative;
   }
   .sidebar.collapsed .fab {

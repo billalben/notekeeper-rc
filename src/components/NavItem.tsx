@@ -7,6 +7,8 @@ import { ItemMenu } from "./ItemMenu";
 interface NavItemProps {
   notebook: Notebook & MoveFlags;
   isActive: boolean;
+  noteCount: number;
+  showCounts: boolean;
   onSelect: (notebookId: string) => void;
   onRename: (notebookId: string, name: string) => void;
   onTogglePin: (notebook: Notebook) => void;
@@ -17,6 +19,8 @@ interface NavItemProps {
 export const NavItem = ({
   notebook,
   isActive,
+  noteCount,
+  showCounts,
   onSelect,
   onRename,
   onTogglePin,
@@ -96,6 +100,15 @@ export const NavItem = ({
           </span>
         )}
       </span>
+      {showCounts && noteCount > 0 && (
+        <span
+          className="notebook-count text-label-small"
+          aria-label={`${noteCount} notes`}
+          title={`${noteCount} notes`}
+        >
+          {noteCount}
+        </span>
+      )}
       <ItemMenu
         label="Notebook actions"
         items={[
