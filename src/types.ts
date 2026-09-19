@@ -5,12 +5,14 @@ export interface Note {
   text: string;
   postedOn: number;
   updatedOn: number;
+  deletedAt: number | null;
 }
 
 export interface Notebook {
   id: string;
   name: string;
   notes: Note[];
+  deletedAt: number | null;
 }
 
 export type ToastType = "success" | "error" | "info";

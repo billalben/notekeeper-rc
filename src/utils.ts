@@ -44,3 +44,26 @@ export const getRelativeTime = (milliSeconds: number): string => {
           ? `${day} day ago`
           : `${day} days ago`;
 };
+
+export const DAY_MS = 24 * 60 * 60 * 1000;
+
+export const TRASH_RETENTION_DAYS = 30;
+
+export type TrashRetentionDays = number | null;
+
+export const TRASH_RETENTION_OPTIONS: {
+  value: TrashRetentionDays;
+  label: string;
+}[] = [
+  { value: 7, label: "7 days" },
+  { value: TRASH_RETENTION_DAYS, label: "30 days" },
+  { value: 90, label: "90 days" },
+  { value: null, label: "Forever" },
+];
+
+export const trashRetentionMs = (
+  days: TrashRetentionDays,
+): number | null => (days === null ? null : days * DAY_MS);
+
+export const isTrashed = (item: { deletedAt: number | null }): boolean =>
+  item.deletedAt !== null;

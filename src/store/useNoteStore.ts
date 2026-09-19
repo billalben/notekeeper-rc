@@ -6,7 +6,7 @@ import { createLocalStorage, isQuotaExceededError } from "./persistStorage";
 import { toast } from "./useToastStore";
 
 const STORAGE_KEY = "noteKeeperDB";
-const STORAGE_VERSION = 2;
+const STORAGE_VERSION = 3;
 
 const STORAGE_ERROR_COOLDOWN = 10_000;
 let lastStorageErrorAt = 0;
@@ -35,6 +35,8 @@ interface NoteStore {
   addNotebook: (name: string) => Notebook;
   renameNotebook: (notebookId: string, name: string) => void;
   deleteNotebook: (notebookId: string) => void;
+  restoreNotebook: (notebookId: string) => void;
+  permanentlyDeleteNotebook: (notebookId: string) => void;
   setActiveNotebook: (notebookId: string | null) => void;
   addNote: (
     notebookId: string,
@@ -42,23 +44,56 @@ interface NoteStore {
   ) => Note | undefined;
   updateNote: (noteId: string, data: Pick<Note, "title" | "text">) => void;
   deleteNote: (notebookId: string, noteId: string) => void;
+  restoreNote: (noteId: string) => void;
+  permanentlyDeleteNote: (notebookId: string, noteId: string) => void;
+  emptyTrash: () => void;
+  purgeExpiredTrash: (retentionMs: number | null) => void;
   deleteAllNotes: () => void;
   deleteAllNotebooks: () => void;
   deleteAllData: () => void;
 }
 
 /**
- * Notes created before version 2 only had `postedOn` (the creation time).
- * Backfill `updatedOn` so older notes keep working.
+ * Backfill fields added after a note/notebook was first created:
+ * `updatedOn` (v2) and `deletedAt` (v3).
  */
-const withUpdatedOn = (notebooks: Notebook[]): Notebook[] =>
+const withDefaults = (notebooks: Notebook[]): Notebook[] =>
   notebooks.map((notebook) => ({
     ...notebook,
+    deletedAt: notebook.deletedAt ?? null,
     notes: notebook.notes.map((note) => ({
       ...note,
       updatedOn: note.updatedOn ?? note.postedOn,
+      deletedAt: note.deletedAt ?? null,
     })),
   }));
+
+/**
+ * Remove trashed items. With a `cutoff` timestamp, only items deleted at or
+ * before it are removed; with `null`, everything in the trash is removed.
+ */
+const removeExpired = (
+  state: { notebooks: Notebook[]; activeNotebookId: string | null },
+  cutoff: number | null,
+) => {
+  const isExpired = (deletedAt: number | null) =>
+    deletedAt !== null && (cutoff === null || deletedAt <= cutoff);
+
+  const notebooks = state.notebooks
+    .filter((notebook) => !isExpired(notebook.deletedAt))
+    .map((notebook) => ({
+      ...notebook,
+      notes: notebook.notes.filter((note) => !isExpired(note.deletedAt)),
+    }));
+
+  const activeNotebookId = notebooks.some(
+    (notebook) => notebook.id === state.activeNotebookId,
+  )
+    ? state.activeNotebookId
+    : (notebooks[0]?.id ?? null);
+
+  return { notebooks, activeNotebookId };
+};
 
 /**
  * The legacy app stored `{ notebooks: [...] }` directly under `noteKeeperDB`.
@@ -72,7 +107,7 @@ const migrateLegacyStorage = () => {
 
     const parsed = JSON.parse(raw);
     if (parsed && Array.isArray(parsed.notebooks) && !("state" in parsed)) {
-      const notebooks = withUpdatedOn(parsed.notebooks as Notebook[]);
+      const notebooks = withDefaults(parsed.notebooks as Notebook[]);
       localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify({
@@ -93,7 +128,7 @@ migrateLegacyStorage();
 
 export const useNoteStore = create<NoteStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       notebooks: [],
       activeNotebookId: null,
 
@@ -102,6 +137,7 @@ export const useNoteStore = create<NoteStore>()(
           id: generateID(),
           name: name || "Untitled",
           notes: [],
+          deletedAt: null,
         };
 
         set((state) => ({
@@ -121,23 +157,47 @@ export const useNoteStore = create<NoteStore>()(
       },
 
       deleteNotebook: (notebookId) => {
-        const { notebooks, activeNotebookId } = get();
-        const index = notebooks.findIndex(
-          (notebook) => notebook.id === notebookId,
-        );
+        const now = new Date().getTime();
+        set((state) => {
+          const visible = state.notebooks.filter(
+            (notebook) => notebook.deletedAt === null,
+          );
+          const notebooks = state.notebooks.map((notebook) =>
+            notebook.id === notebookId ? { ...notebook, deletedAt: now } : notebook,
+          );
 
-        const remaining = notebooks.filter(
-          (notebook) => notebook.id !== notebookId,
-        );
+          let nextActiveId = state.activeNotebookId;
+          if (state.activeNotebookId === notebookId) {
+            const index = visible.findIndex(
+              (notebook) => notebook.id === notebookId,
+            );
+            const neighbour = visible[index + 1] ?? visible[index - 1] ?? null;
+            nextActiveId = neighbour?.id ?? null;
+          }
 
-        let nextActiveId = activeNotebookId;
-        if (activeNotebookId === notebookId) {
-          const neighbour =
-            notebooks[index + 1] ?? notebooks[index - 1] ?? null;
-          nextActiveId = neighbour?.id ?? null;
-        }
+          return { notebooks, activeNotebookId: nextActiveId };
+        });
+      },
 
-        set({ notebooks: remaining, activeNotebookId: nextActiveId });
+      restoreNotebook: (notebookId) => {
+        set((state) => ({
+          notebooks: state.notebooks.map((notebook) =>
+            notebook.id === notebookId ? { ...notebook, deletedAt: null } : notebook,
+          ),
+        }));
+      },
+
+      permanentlyDeleteNotebook: (notebookId) => {
+        set((state) => {
+          const notebooks = state.notebooks.filter(
+            (notebook) => notebook.id !== notebookId,
+          );
+          const activeNotebookId =
+            state.activeNotebookId === notebookId
+              ? (notebooks[0]?.id ?? null)
+              : state.activeNotebookId;
+          return { notebooks, activeNotebookId };
+        });
       },
 
       setActiveNotebook: (notebookId) => set({ activeNotebookId: notebookId }),
@@ -150,6 +210,7 @@ export const useNoteStore = create<NoteStore>()(
           ...data,
           postedOn: now,
           updatedOn: now,
+          deletedAt: null,
         };
 
         set((state) => ({
@@ -177,6 +238,33 @@ export const useNoteStore = create<NoteStore>()(
       },
 
       deleteNote: (notebookId, noteId) => {
+        const now = new Date().getTime();
+        set((state) => ({
+          notebooks: state.notebooks.map((notebook) =>
+            notebook.id === notebookId
+              ? {
+                  ...notebook,
+                  notes: notebook.notes.map((note) =>
+                    note.id === noteId ? { ...note, deletedAt: now } : note,
+                  ),
+                }
+              : notebook,
+          ),
+        }));
+      },
+
+      restoreNote: (noteId) => {
+        set((state) => ({
+          notebooks: state.notebooks.map((notebook) => ({
+            ...notebook,
+            notes: notebook.notes.map((note) =>
+              note.id === noteId ? { ...note, deletedAt: null } : note,
+            ),
+          })),
+        }));
+      },
+
+      permanentlyDeleteNote: (notebookId, noteId) => {
         set((state) => ({
           notebooks: state.notebooks.map((notebook) =>
             notebook.id === notebookId
@@ -187,6 +275,15 @@ export const useNoteStore = create<NoteStore>()(
               : notebook,
           ),
         }));
+      },
+
+      emptyTrash: () => {
+        set((state) => removeExpired(state, null));
+      },
+
+      purgeExpiredTrash: (retentionMs) => {
+        if (retentionMs === null) return;
+        set((state) => removeExpired(state, Date.now() - retentionMs));
       },
 
       deleteAllNotes: () => {
@@ -212,7 +309,7 @@ export const useNoteStore = create<NoteStore>()(
         };
 
         return {
-          notebooks: withUpdatedOn(state.notebooks ?? []),
+          notebooks: withDefaults(state.notebooks ?? []),
           activeNotebookId: state.activeNotebookId ?? null,
         };
       },

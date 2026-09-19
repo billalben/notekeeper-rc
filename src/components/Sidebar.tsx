@@ -31,6 +31,26 @@ export const Sidebar = ({
   const isAdding = useUIStore((state) => state.isAddingNotebook);
   const startAddingNotebook = useUIStore((state) => state.startAddingNotebook);
   const stopAddingNotebook = useUIStore((state) => state.stopAddingNotebook);
+  const view = useUIStore((state) => state.view);
+  const openTrash = useUIStore((state) => state.openTrash);
+  const showNotes = useUIStore((state) => state.showNotes);
+
+  const visibleNotebooks = notebooks.filter(
+    (notebook) => notebook.deletedAt === null,
+  );
+  const trashedCount =
+    notebooks.filter((notebook) => notebook.deletedAt !== null).length +
+    visibleNotebooks.reduce(
+      (total, notebook) =>
+        total +
+        notebook.notes.filter((note) => note.deletedAt !== null).length,
+      0,
+    );
+
+  const selectNotebook = (notebookId: string) => {
+    setActiveNotebook(notebookId);
+    showNotes();
+  };
 
   const [newName, setNewName] = useState("");
   const addInputRef = useRef<HTMLInputElement>(null);
@@ -81,7 +101,7 @@ export const Sidebar = ({
 
       <Fab
         text="New note"
-        disabled={notebooks.length === 0}
+        disabled={visibleNotebooks.length === 0}
         onClick={onNewNote}
       />
 
@@ -97,12 +117,12 @@ export const Sidebar = ({
       </div>
 
       <nav className="nav custom-scrollbar" data-sidebar-list>
-        {notebooks.map((notebook) => (
+        {visibleNotebooks.map((notebook) => (
           <NavItem
             key={notebook.id}
             notebook={notebook}
-            isActive={notebook.id === activeNotebookId}
-            onSelect={setActiveNotebook}
+            isActive={notebook.id === activeNotebookId && view === "notes"}
+            onSelect={selectNotebook}
             onRename={renameNotebook}
             onRequestDelete={onRequestDeleteNotebook}
           />
@@ -126,6 +146,24 @@ export const Sidebar = ({
           </div>
         )}
       </nav>
+
+      <button
+        type="button"
+        className={`nav-item trash-nav-item${view === "trash" ? " active" : ""}`}
+        onClick={() => {
+          openTrash();
+          onClose();
+        }}
+      >
+        <span className="material-symbols-rounded" aria-hidden="true">
+          delete
+        </span>
+        <span className="text text-label-large">Trash</span>
+        {trashedCount > 0 && (
+          <span className="trash-badge text-label-small">{trashedCount}</span>
+        )}
+        <div className="state-layer" />
+      </button>
 
       <div className="cp-info">
         <span className="text-label-large">

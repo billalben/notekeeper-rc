@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useNoteStore } from "../../store/useNoteStore";
+import { useSettingsStore } from "../../store/useSettingsStore";
 import { toast } from "../../store/useToastStore";
+import { TRASH_RETENTION_OPTIONS } from "../../utils";
 import { ComingSoon, SettingsGroup, SettingsRow } from "./SettingsSection";
 import { StorageMeter } from "./StorageMeter";
 
@@ -23,6 +25,11 @@ export const SettingsData = () => {
   const deleteAllNotebooks = useNoteStore((state) => state.deleteAllNotebooks);
   const deleteAllData = useNoteStore((state) => state.deleteAllData);
 
+  const retentionDays = useSettingsStore((state) => state.trash.retentionDays);
+  const setTrashSettings = useSettingsStore(
+    (state) => state.setTrashSettings,
+  );
+
   const [pending, setPending] = useState<DeleteScope | null>(null);
   const [confirmText, setConfirmText] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -32,6 +39,13 @@ export const SettingsData = () => {
     0,
   );
   const notebookCount = notebooks.length;
+  const trashedCount = notebooks.reduce(
+    (total, notebook) =>
+      total +
+      (notebook.deletedAt !== null ? 1 : 0) +
+      notebook.notes.filter((note) => note.deletedAt !== null).length,
+    0,
+  );
   const isActive = pending !== null;
   const canConfirm = isActive && confirmText.trim() === CONFIRM_WORD;
 
@@ -100,6 +114,42 @@ export const SettingsData = () => {
 
       <SettingsGroup title="Storage">
         <StorageMeter />
+      </SettingsGroup>
+
+      <SettingsGroup title="Trash">
+        <SettingsRow
+          title="Keep deleted items for"
+          description={
+            trashedCount > 0
+              ? `${trashedCount} item${
+                  trashedCount === 1 ? "" : "s"
+                } currently in Trash. Deleted notes and notebooks move to Trash first.`
+              : "Deleted notes and notebooks move to Trash before being removed."
+          }
+        >
+          <select
+            className="settings-select"
+            aria-label="Trash retention"
+            value={retentionDays === null ? "forever" : String(retentionDays)}
+            onChange={(event) =>
+              setTrashSettings({
+                retentionDays:
+                  event.target.value === "forever"
+                    ? null
+                    : Number(event.target.value),
+              })
+            }
+          >
+            {TRASH_RETENTION_OPTIONS.map((option) => (
+              <option
+                key={option.label}
+                value={option.value === null ? "forever" : String(option.value)}
+              >
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </SettingsRow>
       </SettingsGroup>
 
       <SettingsGroup title="Danger zone">

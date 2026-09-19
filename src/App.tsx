@@ -7,17 +7,18 @@ import { NoteModal } from "./components/NoteModal";
 import { SettingsModal } from "./components/settings/SettingsModal";
 import { Sidebar } from "./components/Sidebar";
 import { ToastRegion } from "./components/ToastRegion";
+import { TrashView } from "./components/TrashView";
 import { useNoteStore } from "./store/useNoteStore";
+import { useSettingsStore } from "./store/useSettingsStore";
 import { useThemeStore } from "./store/useThemeStore";
 import { useUIStore } from "./store/useUIStore";
 import { toast } from "./store/useToastStore";
 import type { Note, Notebook } from "./types";
+import { trashRetentionMs } from "./utils";
 
 type NoteModalState = { type: "create" } | { type: "edit"; note: Note };
 
-type ConfirmState =
-  | { kind: "note"; notebookId: string; noteId: string; title: string }
-  | { kind: "notebook"; notebookId: string; title: string };
+type ConfirmState = { notebookId: string; title: string };
 
 const App = () => {
   const theme = useThemeStore((state) => state.theme);
@@ -28,11 +29,17 @@ const App = () => {
   const addNote = useNoteStore((state) => state.addNote);
   const updateNote = useNoteStore((state) => state.updateNote);
   const deleteNote = useNoteStore((state) => state.deleteNote);
+  const restoreNote = useNoteStore((state) => state.restoreNote);
   const deleteNotebook = useNoteStore((state) => state.deleteNotebook);
+  const restoreNotebook = useNoteStore((state) => state.restoreNotebook);
+  const purgeExpiredTrash = useNoteStore((state) => state.purgeExpiredTrash);
+
+  const retentionDays = useSettingsStore((state) => state.trash.retentionDays);
 
   const startAddingNotebook = useUIStore((state) => state.startAddingNotebook);
   const isSettingsOpen = useUIStore((state) => state.isSettingsOpen);
   const closeSettings = useUIStore((state) => state.closeSettings);
+  const view = useUIStore((state) => state.view);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [noteModal, setNoteModal] = useState<NoteModalState | null>(null);
@@ -43,23 +50,34 @@ const App = () => {
   }, [theme]);
 
   useEffect(() => {
-    if (notebooks.length === 0) {
+    purgeExpiredTrash(trashRetentionMs(retentionDays));
+  }, [retentionDays, purgeExpiredTrash]);
+
+  useEffect(() => {
+    const visible = notebooks.filter((notebook) => notebook.deletedAt === null);
+    if (visible.length === 0) {
       if (activeNotebookId !== null) setActiveNotebook(null);
       return;
     }
     if (
       !activeNotebookId ||
-      !notebooks.some((nb) => nb.id === activeNotebookId)
+      !visible.some((notebook) => notebook.id === activeNotebookId)
     ) {
-      setActiveNotebook(notebooks[0].id);
+      setActiveNotebook(visible[0].id);
     }
   }, [notebooks, activeNotebookId, setActiveNotebook]);
 
+  const visibleNotebooks = notebooks.filter(
+    (notebook) => notebook.deletedAt === null,
+  );
   const activeNotebook =
-    notebooks.find((notebook) => notebook.id === activeNotebookId) ?? null;
+    visibleNotebooks.find((notebook) => notebook.id === activeNotebookId) ??
+    null;
+  const activeNotes =
+    activeNotebook?.notes.filter((note) => note.deletedAt === null) ?? [];
 
   const openCreateNote = () => {
-    if (notebooks.length === 0) return;
+    if (visibleNotebooks.length === 0) return;
     setNoteModal({ type: "create" });
   };
 
@@ -83,18 +101,23 @@ const App = () => {
     setNoteModal(null);
   };
 
-  const requestDeleteNote = (note: Note) => {
-    setConfirm({
-      kind: "note",
-      notebookId: note.notebookId,
-      noteId: note.id,
-      title: note.title,
+  const handleDeleteNote = (note: Note) => {
+    deleteNote(note.notebookId, note.id);
+    toast.success("Note moved to Trash", {
+      description: "You can restore it from the Trash view.",
+      duration: 6000,
+      action: {
+        label: "Undo",
+        onClick: () => {
+          restoreNote(note.id);
+          toast.success("Note restored");
+        },
+      },
     });
   };
 
   const requestDeleteNotebook = (notebook: Notebook) => {
     setConfirm({
-      kind: "notebook",
       notebookId: notebook.id,
       title: notebook.name,
     });
@@ -102,13 +125,19 @@ const App = () => {
 
   const handleConfirm = (isConfirm: boolean) => {
     if (confirm && isConfirm) {
-      if (confirm.kind === "note") {
-        deleteNote(confirm.notebookId, confirm.noteId);
-        toast.success("Note deleted");
-      } else {
-        deleteNotebook(confirm.notebookId);
-        toast.success("Notebook deleted");
-      }
+      const { notebookId } = confirm;
+      deleteNotebook(notebookId);
+      toast.success("Notebook moved to Trash", {
+        description: "You can restore it from the Trash view.",
+        duration: 6000,
+        action: {
+          label: "Undo",
+          onClick: () => {
+            restoreNotebook(notebookId);
+            toast.success("Notebook restored");
+          },
+        },
+      });
     }
     setConfirm(null);
   };
@@ -130,43 +159,49 @@ const App = () => {
       <main className="main">
         <Header onOpenSidebar={() => setSidebarOpen(true)} />
 
-        <h2 className="title text-title-medium" data-note-panel-title>
-          {activeNotebook?.name ?? ""}
-        </h2>
-
-        {notebooks.length === 0 ? (
-          <div className="note-list" data-note-panel>
-            <div className="empty-notes">
-              <span className="material-symbols-rounded" aria-hidden="true">
-                note_stack
-              </span>
-              <div className="text-headline-small">No notebooks yet</div>
-              <button
-                className="btn fill"
-                type="button"
-                onClick={() => {
-                  startAddingNotebook();
-                  setSidebarOpen(true);
-                }}
-              >
-                <span className="text-label-large">Create notebook</span>
-                <div className="state-layer" />
-              </button>
-            </div>
-          </div>
+        {view === "trash" ? (
+          <TrashView />
         ) : (
-          <NoteList
-            notes={activeNotebook?.notes ?? []}
-            onOpen={openEditNote}
-            onRequestDelete={requestDeleteNote}
-          />
-        )}
+          <>
+            <h2 className="title text-title-medium" data-note-panel-title>
+              {activeNotebook?.name ?? ""}
+            </h2>
 
-        <Fab
-          label="New note"
-          disabled={notebooks.length === 0}
-          onClick={openCreateNote}
-        />
+            {visibleNotebooks.length === 0 ? (
+              <div className="note-list" data-note-panel>
+                <div className="empty-notes">
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    note_stack
+                  </span>
+                  <div className="text-headline-small">No notebooks yet</div>
+                  <button
+                    className="btn fill"
+                    type="button"
+                    onClick={() => {
+                      startAddingNotebook();
+                      setSidebarOpen(true);
+                    }}
+                  >
+                    <span className="text-label-large">Create notebook</span>
+                    <div className="state-layer" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <NoteList
+                notes={activeNotes}
+                onOpen={openEditNote}
+                onRequestDelete={handleDeleteNote}
+              />
+            )}
+
+            <Fab
+              label="New note"
+              disabled={visibleNotebooks.length === 0}
+              onClick={openCreateNote}
+            />
+          </>
+        )}
       </main>
 
       {noteModal && (

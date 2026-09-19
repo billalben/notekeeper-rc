@@ -1,6 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { ToastPosition } from "../types";
+import {
+  TRASH_RETENTION_DAYS,
+  TRASH_RETENTION_OPTIONS,
+  type TrashRetentionDays,
+} from "../utils";
 
 export const TOAST_DURATION_MIN = 1000;
 export const TOAST_DURATION_MAX = 6000;
@@ -31,6 +36,17 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
   showWordCount: true,
 };
 
+export interface TrashSettings {
+  retentionDays: TrashRetentionDays;
+}
+
+export const DEFAULT_TRASH_SETTINGS: TrashSettings = {
+  retentionDays: TRASH_RETENTION_DAYS,
+};
+
+const isRetentionOption = (value: unknown): value is TrashRetentionDays =>
+  TRASH_RETENTION_OPTIONS.some((option) => option.value === value);
+
 export const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value));
 
@@ -58,23 +74,34 @@ const normalizeEditorSettings = (
   ...settings,
 });
 
+const normalizeTrashSettings = (
+  settings: Partial<TrashSettings> | undefined,
+): TrashSettings => ({
+  retentionDays: isRetentionOption(settings?.retentionDays)
+    ? settings.retentionDays
+    : DEFAULT_TRASH_SETTINGS.retentionDays,
+});
+
 interface SettingsStore {
   toasts: ToastSettings;
   editor: EditorSettings;
+  trash: TrashSettings;
   setToastSettings: (partial: Partial<ToastSettings>) => void;
   resetToastSettings: () => void;
   setEditorSettings: (partial: Partial<EditorSettings>) => void;
   resetEditorSettings: () => void;
+  setTrashSettings: (partial: Partial<TrashSettings>) => void;
 }
 
 const STORAGE_KEY = "settings";
-const STORAGE_VERSION = 2;
+const STORAGE_VERSION = 3;
 
 export const useSettingsStore = create<SettingsStore>()(
   persist(
     (set) => ({
       toasts: DEFAULT_TOAST_SETTINGS,
       editor: DEFAULT_EDITOR_SETTINGS,
+      trash: DEFAULT_TRASH_SETTINGS,
 
       setToastSettings: (partial) =>
         set((state) => ({
@@ -89,6 +116,11 @@ export const useSettingsStore = create<SettingsStore>()(
         })),
 
       resetEditorSettings: () => set({ editor: DEFAULT_EDITOR_SETTINGS }),
+
+      setTrashSettings: (partial) =>
+        set((state) => ({
+          trash: normalizeTrashSettings({ ...state.trash, ...partial }),
+        })),
     }),
     {
       name: STORAGE_KEY,
@@ -96,17 +128,20 @@ export const useSettingsStore = create<SettingsStore>()(
       partialize: (state) => ({
         toasts: state.toasts,
         editor: state.editor,
+        trash: state.trash,
       }),
       migrate: (persistedState) => {
         const state = persistedState as
           | {
               toasts?: Partial<ToastSettings>;
               editor?: Partial<EditorSettings>;
+              trash?: Partial<TrashSettings>;
             }
           | undefined;
         return {
           toasts: normalizeToastSettings(state?.toasts),
           editor: normalizeEditorSettings(state?.editor),
+          trash: normalizeTrashSettings(state?.trash),
         };
       },
     },
