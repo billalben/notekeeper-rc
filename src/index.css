@@ -1100,6 +1100,44 @@ body {
   color: var(--on-surface-variant);
 }
 
+/* ?=== #STORAGE METER === */
+.storage-meter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  background-color: var(--surface);
+}
+.storage-meter-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+  color: var(--on-surface);
+}
+.storage-meter-warning {
+  color: var(--danger);
+}
+.storage-meter-bar {
+  height: 8px;
+  background-color: var(--surface-container-highest);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+.storage-meter-fill {
+  height: 100%;
+  background-color: var(--primary);
+  border-radius: inherit;
+  transition: width var(--tr-duration-medium) var(--tr-easing-emphasized);
+}
+.storage-meter-fill.warning {
+  background-color: var(--danger);
+}
+.storage-meter-note,
+.storage-meter-unavailable {
+  color: var(--on-surface-variant);
+}
+
 /* ?=== #TOASTS === */
 .toast-region {
   position: fixed;
@@ -1215,8 +1253,10 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .toast,
-  .toast.exiting {
+  .toast.exiting,
+  .storage-meter-fill {
     animation: none;
+    transition: none;
   }
 }
 

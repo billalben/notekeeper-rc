@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNoteStore } from "../../store/useNoteStore";
 import { toast } from "../../store/useToastStore";
 import { ComingSoon, SettingsGroup, SettingsRow } from "./SettingsSection";
+import { StorageMeter } from "./StorageMeter";
 
 type DeleteScope = "notes" | "notebooks" | "all";
 
@@ -98,12 +99,7 @@ export const SettingsData = () => {
       </SettingsGroup>
 
       <SettingsGroup title="Storage">
-        <SettingsRow
-          title="Storage usage"
-          description="See how much of your browser storage is used."
-        >
-          <ComingSoon />
-        </SettingsRow>
+        <StorageMeter />
       </SettingsGroup>
 
       <SettingsGroup title="Danger zone">
