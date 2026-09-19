@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useThemeStore } from "../store/useThemeStore";
+import { useUIStore } from "../store/useUIStore";
 import { getGreetingMsg } from "../utils";
 import { IconButton } from "./IconButton";
 
@@ -8,7 +8,7 @@ interface HeaderProps {
 }
 
 export const Header = ({ onOpenSidebar }: HeaderProps) => {
-  const toggleTheme = useThemeStore((state) => state.toggleTheme);
+  const openSettings = useUIStore((state) => state.openSettings);
 
   const [greeting] = useState(() => getGreetingMsg(new Date().getHours()));
   const [date] = useState(() => new Date().toDateString().replace(" ", ", "));
@@ -25,21 +25,12 @@ export const Header = ({ onOpenSidebar }: HeaderProps) => {
       </div>
 
       <IconButton
-        tooltip="Toggle theme"
-        label="Toggle theme"
-        className="theme-btn"
-        onClick={toggleTheme}
-      >
-        <span className="material-symbols-rounded dark-icon" aria-hidden="true">
-          dark_mode
-        </span>
-        <span
-          className="material-symbols-rounded light-icon"
-          aria-hidden="true"
-        >
-          light_mode
-        </span>
-      </IconButton>
+        icon="settings"
+        tooltip="Open settings"
+        label="Open settings"
+        className="settings-btn"
+        onClick={openSettings}
+      />
 
       <IconButton
         icon="menu"

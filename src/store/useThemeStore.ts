@@ -16,6 +16,7 @@ const getInitialTheme = (): Theme => {
 interface ThemeStore {
   theme: Theme;
   toggleTheme: () => void;
+  setTheme: (theme: Theme) => void;
 }
 
 export const useThemeStore = create<ThemeStore>((set, get) => ({
@@ -25,5 +26,10 @@ export const useThemeStore = create<ThemeStore>((set, get) => ({
     const newTheme: Theme = get().theme === "light" ? "dark" : "light";
     localStorage.setItem("theme", newTheme);
     set({ theme: newTheme });
+  },
+
+  setTheme: (theme) => {
+    localStorage.setItem("theme", theme);
+    set({ theme });
   },
 }));

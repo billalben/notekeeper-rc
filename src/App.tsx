@@ -4,6 +4,7 @@ import { Fab } from "./components/Fab";
 import { Header } from "./components/Header";
 import { NoteList } from "./components/NoteList";
 import { NoteModal } from "./components/NoteModal";
+import { SettingsModal } from "./components/settings/SettingsModal";
 import { Sidebar } from "./components/Sidebar";
 import { useNoteStore } from "./store/useNoteStore";
 import { useThemeStore } from "./store/useThemeStore";
@@ -28,6 +29,8 @@ const App = () => {
   const deleteNotebook = useNoteStore((state) => state.deleteNotebook);
 
   const startAddingNotebook = useUIStore((state) => state.startAddingNotebook);
+  const isSettingsOpen = useUIStore((state) => state.isSettingsOpen);
+  const closeSettings = useUIStore((state) => state.closeSettings);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [noteModal, setNoteModal] = useState<NoteModalState | null>(null);
@@ -176,6 +179,8 @@ const App = () => {
       {confirm && (
         <ConfirmModal title={confirm.title} onConfirm={handleConfirm} />
       )}
+
+      {isSettingsOpen && <SettingsModal onClose={closeSettings} />}
     </>
   );
 };
