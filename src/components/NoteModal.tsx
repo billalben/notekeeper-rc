@@ -64,9 +64,11 @@ export const NoteModal = ({
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const autosave = useSettingsStore((state) => state.editor.autosave);
   const defaultMode = useSettingsStore((state) => state.editor.defaultMode);
+  const presentation = useSettingsStore((state) => state.editor.presentation);
   const showWordCount = useSettingsStore((state) => state.editor.showWordCount);
 
   const [mode, setMode] = useState<"edit" | "preview">(defaultMode);
+  const [isFull, setIsFull] = useState(presentation === "full");
   const [isConfirmingClose, setIsConfirmingClose] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
@@ -241,13 +243,22 @@ export const NoteModal = ({
 
   return (
     <>
-      <div className="modal note-modal">
-        <IconButton
-          type="button"
-          icon="close"
-          label="Close modal"
-          onClick={requestClose}
-        />
+      <div className={`modal note-modal${isFull ? " note-modal-full" : ""}`}>
+        <div className="modal-actions">
+          <IconButton
+            type="button"
+            icon={isFull ? "close_fullscreen" : "open_in_full"}
+            label={isFull ? "Shrink editor" : "Expand editor"}
+            aria-pressed={isFull}
+            onClick={() => setIsFull((current) => !current)}
+          />
+          <IconButton
+            type="button"
+            icon="close"
+            label="Close modal"
+            onClick={requestClose}
+          />
+        </div>
 
         <input
           type="text"

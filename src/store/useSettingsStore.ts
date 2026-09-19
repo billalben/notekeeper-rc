@@ -30,9 +30,12 @@ export const DEFAULT_TOAST_SETTINGS: ToastSettings = {
 
 export type EditorMode = "edit" | "preview";
 
+export type EditorPresentation = "modal" | "full";
+
 export interface EditorSettings {
   autosave: boolean;
   defaultMode: EditorMode;
+  presentation: EditorPresentation;
   showWordCount: boolean;
   closeModalOnBackdropClick: boolean;
 }
@@ -40,6 +43,7 @@ export interface EditorSettings {
 export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
   autosave: true,
   defaultMode: "preview",
+  presentation: "modal",
   showWordCount: true,
   closeModalOnBackdropClick: false,
 };
@@ -126,6 +130,7 @@ const normalizeToastSettings = (
 });
 
 const EDITOR_MODES: EditorMode[] = ["edit", "preview"];
+const EDITOR_PRESENTATIONS: EditorPresentation[] = ["modal", "full"];
 
 const normalizeEditorSettings = (
   settings: Partial<EditorSettings> | undefined,
@@ -134,6 +139,11 @@ const normalizeEditorSettings = (
   defaultMode: EDITOR_MODES.includes(settings?.defaultMode as EditorMode)
     ? (settings?.defaultMode as EditorMode)
     : DEFAULT_EDITOR_SETTINGS.defaultMode,
+  presentation: EDITOR_PRESENTATIONS.includes(
+    settings?.presentation as EditorPresentation,
+  )
+    ? (settings?.presentation as EditorPresentation)
+    : DEFAULT_EDITOR_SETTINGS.presentation,
   showWordCount:
     settings?.showWordCount ?? DEFAULT_EDITOR_SETTINGS.showWordCount,
   closeModalOnBackdropClick:

@@ -1,6 +1,7 @@
 import {
   useSettingsStore,
   type EditorMode,
+  type EditorPresentation,
 } from "../../store/useSettingsStore";
 import {
   ComingSoon,
@@ -13,6 +14,7 @@ import {
 export const SettingsGeneral = () => {
   const autosave = useSettingsStore((state) => state.editor.autosave);
   const defaultMode = useSettingsStore((state) => state.editor.defaultMode);
+  const presentation = useSettingsStore((state) => state.editor.presentation);
   const showWordCount = useSettingsStore((state) => state.editor.showWordCount);
   const closeModalOnBackdropClick = useSettingsStore(
     (state) => state.editor.closeModalOnBackdropClick,
@@ -42,9 +44,21 @@ export const SettingsGeneral = () => {
         </SettingsRow>
         <SettingsRow
           title="Open notes in"
-          description="Choose between a modal or a full page."
+          description="Choose the editor size: a centered window or near-fullscreen."
         >
-          <ComingSoon />
+          <SettingsSelect
+            label="Editor size"
+            value={presentation}
+            options={[
+              { value: "modal", label: "Modal" },
+              { value: "full", label: "Full page" },
+            ]}
+            onChange={(value) =>
+              setEditorSettings({
+                presentation: value as EditorPresentation,
+              })
+            }
+          />
         </SettingsRow>
         <SettingsRow
           title="Default view"

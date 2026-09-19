@@ -950,7 +950,7 @@ button.tag-chip {
     visibility: visible;
   }
 }
-.modal .icon-btn {
+.modal > .icon-btn {
   position: absolute;
   top: var(--spacing-4);
   right: var(--spacing-4);
@@ -961,10 +961,26 @@ button.tag-chip {
 .modal-overlay.modal-stacked {
   z-index: 9;
 }
+.modal-actions {
+  position: absolute;
+  top: var(--spacing-4);
+  right: var(--spacing-4);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  z-index: 1;
+}
 .modal.note-modal {
   display: flex;
   flex-direction: column;
   height: min(80vh, 640px);
+}
+.modal.note-modal.note-modal-full {
+  max-width: 1100px;
+  height: 90vh;
+}
+.note-modal .modal-title {
+  padding-inline-end: calc(var(--spacing-10) + 48px);
 }
 .note-modal .modal-title,
 .note-modal .tag-editor,
