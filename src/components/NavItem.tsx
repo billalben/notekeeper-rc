@@ -60,24 +60,32 @@ export const NavItem = ({
         if (event.key === "Enter") onSelect(notebook.id);
       }}
     >
-      {isEditing ? (
-        <input
-          ref={inputRef}
-          className="text text-label-large"
-          value={draftName}
-          onClick={(event) => event.stopPropagation()}
-          onChange={(event) => setDraftName(event.target.value)}
-          onBlur={commitRename}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") commitRename();
-            if (event.key === "Escape") cancelRename();
-          }}
-        />
-      ) : (
-        <span className="text text-label-large" data-notebook-field>
-          {notebook.name}
-        </span>
-      )}
+      <span
+        className="material-symbols-rounded nav-item-icon"
+        aria-hidden="true"
+      >
+        folder
+      </span>
+      <span className="nav-item-label">
+        {isEditing ? (
+          <input
+            ref={inputRef}
+            className="text text-label-large"
+            value={draftName}
+            onClick={(event) => event.stopPropagation()}
+            onChange={(event) => setDraftName(event.target.value)}
+            onBlur={commitRename}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") commitRename();
+              if (event.key === "Escape") cancelRename();
+            }}
+          />
+        ) : (
+          <span className="text text-label-large" data-notebook-field>
+            {notebook.name}
+          </span>
+        )}
+      </span>
       <IconButton
         icon="edit"
         size="small"

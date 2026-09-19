@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { useSidebarResize } from "../hooks/useSidebarResize";
 import { useNoteStore } from "../store/useNoteStore";
+import { useSettingsStore } from "../store/useSettingsStore";
 import { toast } from "../store/useToastStore";
 import { useUIStore } from "../store/useUIStore";
 import type { Notebook } from "../types";
@@ -16,6 +18,8 @@ interface SidebarProps {
   onRequestDeleteNotebook: (notebook: Notebook) => void;
 }
 
+const DESKTOP_QUERY = "(min-width: 992px)";
+
 export const Sidebar = ({
   open,
   onClose,
@@ -28,12 +32,23 @@ export const Sidebar = ({
   const addNotebook = useNoteStore((state) => state.addNotebook);
   const renameNotebook = useNoteStore((state) => state.renameNotebook);
 
+  const collapsed = useSettingsStore((state) => state.sidebar.collapsed);
+  const setSidebarSettings = useSettingsStore(
+    (state) => state.setSidebarSettings,
+  );
+
   const isAdding = useUIStore((state) => state.isAddingNotebook);
   const startAddingNotebook = useUIStore((state) => state.startAddingNotebook);
   const stopAddingNotebook = useUIStore((state) => state.stopAddingNotebook);
   const view = useUIStore((state) => state.view);
   const openTrash = useUIStore((state) => state.openTrash);
   const showNotes = useUIStore((state) => state.showNotes);
+
+  const { isResizing, startResize } = useSidebarResize(collapsed);
+
+  const isDesktop =
+    typeof window !== "undefined" &&
+    window.matchMedia(DESKTOP_QUERY).matches;
 
   const visibleNotebooks = notebooks.filter(
     (notebook) => notebook.deletedAt === null,
@@ -84,12 +99,25 @@ export const Sidebar = ({
   };
 
   return (
-    <header className={`sidebar${open ? " active" : ""}`} data-sidebar>
+    <header
+      className={`sidebar${open ? " active" : ""}${
+        collapsed && isDesktop ? " collapsed" : ""
+      }`}
+      data-sidebar
+    >
       <div className="wrapper wrapper-1">
         <div>
           <img src={logoLight} alt="NoteKeeper" className="logo-light" />
           <img src={logoDark} alt="NoteKeeper" className="logo-dark" />
         </div>
+
+        <IconButton
+          icon={collapsed ? "menu_open" : "menu"}
+          tooltip={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="collapse-btn"
+          onClick={() => setSidebarSettings({ collapsed: !collapsed })}
+        />
 
         <IconButton
           icon="close"
@@ -172,6 +200,14 @@ export const Sidebar = ({
           <strong>Billal Benz</strong>
         </span>
       </div>
+
+      <div
+        className={`sidebar-resizer${isResizing ? " resizing" : ""}`}
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Resize sidebar"
+        onPointerDown={startResize}
+      />
     </header>
   );
 };
