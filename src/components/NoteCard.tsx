@@ -7,9 +7,11 @@ interface NoteCardProps {
   note: Note;
   canMoveUp: boolean;
   canMoveDown: boolean;
+  canMoveToNotebook: boolean;
   onOpen: (note: Note) => void;
   onTogglePin: (note: Note) => void;
   onMove: (note: Note, direction: MoveDirection) => void;
+  onRequestMove: (note: Note) => void;
   onRequestDelete: (note: Note) => void;
 }
 
@@ -17,9 +19,11 @@ export const NoteCard = ({
   note,
   canMoveUp,
   canMoveDown,
+  canMoveToNotebook,
   onOpen,
   onTogglePin,
   onMove,
+  onRequestMove,
   onRequestDelete,
 }: NoteCardProps) => {
   const isEdited = note.updatedOn !== note.postedOn;
@@ -64,6 +68,14 @@ export const NoteCard = ({
               label: note.pinned ? "Unpin note" : "Pin note",
               icon: "push_pin",
               onSelect: () => onTogglePin(note),
+            },
+            {
+              key: "move",
+              label: "Move to notebook",
+              icon: "drive_file_move",
+              disabled: !canMoveToNotebook,
+              separatorBefore: true,
+              onSelect: () => onRequestMove(note),
             },
             {
               key: "up",

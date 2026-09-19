@@ -17,6 +17,7 @@ export interface ToastOptions {
   description?: string;
   duration?: number;
   action?: ToastAction;
+  actions?: ToastAction[];
 }
 
 export interface ToastInput extends ToastOptions {

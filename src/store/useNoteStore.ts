@@ -51,6 +51,12 @@ interface NoteStore {
     noteId: string,
     direction: MoveDirection,
   ) => void;
+  moveNoteToNotebook: (
+    sourceNotebookId: string,
+    noteId: string,
+    targetNotebookId: string,
+    targetIndex?: number,
+  ) => void;
   deleteNote: (notebookId: string, noteId: string) => void;
   restoreNote: (noteId: string) => void;
   permanentlyDeleteNote: (notebookId: string, noteId: string) => void;
@@ -293,6 +299,48 @@ export const useNoteStore = create<NoteStore>()(
               : notebook,
           ),
         }));
+      },
+
+      moveNoteToNotebook: (sourceNotebookId, noteId, targetNotebookId, targetIndex) => {
+        if (sourceNotebookId === targetNotebookId) return;
+        set((state) => {
+          const source = state.notebooks.find(
+            (notebook) => notebook.id === sourceNotebookId,
+          );
+          const target = state.notebooks.find(
+            (notebook) => notebook.id === targetNotebookId,
+          );
+          if (!source || !target || target.deletedAt !== null) return state;
+
+          const note = source.notes.find((item) => item.id === noteId);
+          if (!note) return state;
+
+          const movedNote: Note = {
+            ...note,
+            notebookId: targetNotebookId,
+          };
+
+          return {
+            notebooks: state.notebooks.map((notebook) => {
+              if (notebook.id === sourceNotebookId) {
+                return {
+                  ...notebook,
+                  notes: notebook.notes.filter((item) => item.id !== noteId),
+                };
+              }
+              if (notebook.id === targetNotebookId) {
+                const notes = [...notebook.notes];
+                const index =
+                  targetIndex === undefined
+                    ? 0
+                    : Math.max(0, Math.min(targetIndex, notes.length));
+                notes.splice(index, 0, movedNote);
+                return { ...notebook, notes };
+              }
+              return notebook;
+            }),
+          };
+        });
       },
 
       deleteNote: (notebookId, noteId) => {

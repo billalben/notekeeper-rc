@@ -4,6 +4,7 @@ import { Fab } from "./components/Fab";
 import { Header } from "./components/Header";
 import { NoteList } from "./components/NoteList";
 import { NoteModal } from "./components/NoteModal";
+import { MoveNoteModal } from "./components/MoveNoteModal";
 import { SettingsModal } from "./components/settings/SettingsModal";
 import { Sidebar } from "./components/Sidebar";
 import { ToastRegion } from "./components/ToastRegion";
@@ -35,6 +36,9 @@ const App = () => {
   const updateNote = useNoteStore((state) => state.updateNote);
   const toggleNotePin = useNoteStore((state) => state.toggleNotePin);
   const moveNote = useNoteStore((state) => state.moveNote);
+  const moveNoteToNotebook = useNoteStore(
+    (state) => state.moveNoteToNotebook,
+  );
   const deleteNote = useNoteStore((state) => state.deleteNote);
   const restoreNote = useNoteStore((state) => state.restoreNote);
   const deleteNotebook = useNoteStore((state) => state.deleteNotebook);
@@ -48,10 +52,12 @@ const App = () => {
   const isSettingsOpen = useUIStore((state) => state.isSettingsOpen);
   const closeSettings = useUIStore((state) => state.closeSettings);
   const view = useUIStore((state) => state.view);
+  const showNotes = useUIStore((state) => state.showNotes);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [noteModal, setNoteModal] = useState<NoteModalState | null>(null);
   const [confirm, setConfirm] = useState<ConfirmState | null>(null);
+  const [moveNoteTarget, setMoveNoteTarget] = useState<Note | null>(null);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -118,6 +124,50 @@ const App = () => {
 
   const handleMoveNote = (note: Note, direction: MoveDirection) => {
     moveNote(note.notebookId, note.id, direction);
+  };
+
+  const handleMoveNoteToNotebook = (targetNotebookId: string) => {
+    if (!moveNoteTarget) return;
+    const note = moveNoteTarget;
+    const sourceNotebookId = note.notebookId;
+    const sourceNotebook = notebooks.find(
+      (notebook) => notebook.id === sourceNotebookId,
+    );
+    const sourceIndex =
+      sourceNotebook?.notes.findIndex((item) => item.id === note.id) ?? 0;
+    const target = notebooks.find(
+      (notebook) => notebook.id === targetNotebookId,
+    );
+
+    moveNoteToNotebook(sourceNotebookId, note.id, targetNotebookId);
+    setMoveNoteTarget(null);
+
+    const targetName = target?.name ?? "notebook";
+    toast.success(`Note moved to "${targetName}"`, {
+      duration: 6000,
+      actions: [
+        {
+          label: "Go to notebook",
+          onClick: () => {
+            setActiveNotebook(targetNotebookId);
+            showNotes();
+            setSidebarOpen(false);
+          },
+        },
+        {
+          label: "Undo",
+          onClick: () => {
+            moveNoteToNotebook(
+              targetNotebookId,
+              note.id,
+              sourceNotebookId,
+              sourceIndex,
+            );
+            toast.success("Move undone");
+          },
+        },
+      ],
+    });
   };
 
   const handleDeleteNote = (note: Note) => {
@@ -214,9 +264,11 @@ const App = () => {
             ) : (
               <NoteList
                 notes={activeNotes}
+                canMoveToNotebook={visibleNotebooks.length > 1}
                 onOpen={openEditNote}
                 onTogglePin={handleToggleNotePin}
                 onMove={handleMoveNote}
+                onRequestMove={setMoveNoteTarget}
                 onRequestDelete={handleDeleteNote}
               />
             )}
@@ -247,6 +299,15 @@ const App = () => {
 
       {confirm && (
         <ConfirmModal title={confirm.title} onConfirm={handleConfirm} />
+      )}
+
+      {moveNoteTarget && (
+        <MoveNoteModal
+          note={moveNoteTarget}
+          notebooks={visibleNotebooks}
+          onMove={handleMoveNoteToNotebook}
+          onClose={() => setMoveNoteTarget(null)}
+        />
       )}
 
       {isSettingsOpen && <SettingsModal onClose={closeSettings} />}

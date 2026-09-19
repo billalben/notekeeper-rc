@@ -9,17 +9,21 @@ interface NoteCardWithFlags extends Note {
 
 interface NoteListProps {
   notes: NoteCardWithFlags[];
+  canMoveToNotebook: boolean;
   onOpen: (note: Note) => void;
   onTogglePin: (note: Note) => void;
   onMove: (note: Note, direction: MoveDirection) => void;
+  onRequestMove: (note: Note) => void;
   onRequestDelete: (note: Note) => void;
 }
 
 export const NoteList = ({
   notes,
+  canMoveToNotebook,
   onOpen,
   onTogglePin,
   onMove,
+  onRequestMove,
   onRequestDelete,
 }: NoteListProps) => {
   return (
@@ -31,9 +35,11 @@ export const NoteList = ({
             note={note}
             canMoveUp={note.canMoveUp}
             canMoveDown={note.canMoveDown}
+            canMoveToNotebook={canMoveToNotebook}
             onOpen={onOpen}
             onTogglePin={onTogglePin}
             onMove={onMove}
+            onRequestMove={onRequestMove}
             onRequestDelete={onRequestDelete}
           />
         ))

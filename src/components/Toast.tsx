@@ -50,8 +50,10 @@ export const Toast = ({ toast, onDismiss }: ToastProps) => {
     };
   }, [paused, exiting, requestDismiss]);
 
-  const handleAction = () => {
-    toast.action?.onClick();
+  const actions = toast.actions ?? (toast.action ? [toast.action] : []);
+
+  const handleAction = (action: NonNullable<typeof toast.action>) => {
+    action.onClick();
     requestDismiss();
   };
 
@@ -68,25 +70,32 @@ export const Toast = ({ toast, onDismiss }: ToastProps) => {
         {TYPE_ICONS[toast.type]}
       </span>
 
-      <div className="toast-body">
-        <p className="toast-message text-body-medium">{toast.message}</p>
-        {toast.description && (
-          <p className="toast-description text-body-small">
-            {toast.description}
-          </p>
+      <div className="toast-content">
+        <div className="toast-body">
+          <p className="toast-message text-body-medium">{toast.message}</p>
+          {toast.description && (
+            <p className="toast-description text-body-small">
+              {toast.description}
+            </p>
+          )}
+        </div>
+
+        {actions.length > 0 && (
+          <div className="toast-actions">
+            {actions.map((action, index) => (
+              <button
+                key={`${action.label}-${index}`}
+                type="button"
+                className="toast-action text-label-large"
+                onClick={() => handleAction(action)}
+              >
+                {action.label}
+                <div className="state-layer" />
+              </button>
+            ))}
+          </div>
         )}
       </div>
-
-      {toast.action && (
-        <button
-          type="button"
-          className="toast-action text-label-large"
-          onClick={handleAction}
-        >
-          {toast.action.label}
-          <div className="state-layer" />
-        </button>
-      )}
 
       {showCloseButton && (
         <IconButton
