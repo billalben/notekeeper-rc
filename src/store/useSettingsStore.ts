@@ -126,7 +126,7 @@ interface SettingsStore {
 }
 
 const STORAGE_KEY = "settings";
-const STORAGE_VERSION = 4;
+const STORAGE_VERSION = 5;
 
 export const useSettingsStore = create<SettingsStore>()(
   persist(

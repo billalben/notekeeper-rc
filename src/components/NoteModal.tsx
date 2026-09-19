@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { countWords, getRelativeTime } from "../utils";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { IconButton } from "./IconButton";
+import { MarkdownContent } from "./MarkdownContent";
 
 interface NoteModalProps {
   title?: string;
@@ -22,6 +23,7 @@ export const NoteModal = ({
 }: NoteModalProps) => {
   const [title, setTitle] = useState(initialTitle);
   const [text, setText] = useState(initialText);
+  const [mode, setMode] = useState<"edit" | "preview">("preview");
   const showWordCount = useSettingsStore((state) => state.editor.showWordCount);
 
   const isSubmitDisabled = !title.trim() && !text.trim();
@@ -75,13 +77,20 @@ export const NoteModal = ({
           onChange={(event) => setTitle(event.target.value)}
         />
 
-        <textarea
-          placeholder="Take a note..."
-          value={text}
-          className="modal-text text-body-large custom-scrollbar"
-          data-note-field
-          onChange={(event) => setText(event.target.value)}
-        />
+        {mode === "preview" ? (
+          <MarkdownContent
+            text={text}
+            className="modal-text markdown-body text-body-large custom-scrollbar"
+          />
+        ) : (
+          <textarea
+            placeholder="Take a note..."
+            value={text}
+            className="modal-text text-body-large custom-scrollbar"
+            data-note-field
+            onChange={(event) => setText(event.target.value)}
+          />
+        )}
 
         <div className="modal-footer">
           <span className="time text-label-large">{timeLabel}</span>
@@ -90,6 +99,26 @@ export const NoteModal = ({
               {wordCountLabel}
             </span>
           )}
+          <div className="mode-toggle" role="group" aria-label="Editor mode">
+            <button
+              type="button"
+              className={`btn text mode-toggle-btn${mode === "edit" ? " active" : ""}`}
+              aria-pressed={mode === "edit"}
+              onClick={() => setMode("edit")}
+            >
+              <span className="text-label-large">Edit</span>
+              <div className="state-layer" />
+            </button>
+            <button
+              type="button"
+              className={`btn text mode-toggle-btn${mode === "preview" ? " active" : ""}`}
+              aria-pressed={mode === "preview"}
+              onClick={() => setMode("preview")}
+            >
+              <span className="text-label-large">Preview</span>
+              <div className="state-layer" />
+            </button>
+          </div>
           <button
             className="btn text"
             type="submit"
