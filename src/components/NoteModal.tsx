@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { getRelativeTime } from "../utils";
+import { countWords, getRelativeTime } from "../utils";
+import { useSettingsStore } from "../store/useSettingsStore";
 import { IconButton } from "./IconButton";
 
 interface NoteModalProps {
@@ -21,8 +22,15 @@ export const NoteModal = ({
 }: NoteModalProps) => {
   const [title, setTitle] = useState(initialTitle);
   const [text, setText] = useState(initialText);
+  const showWordCount = useSettingsStore((state) => state.editor.showWordCount);
 
   const isSubmitDisabled = !title.trim() && !text.trim();
+
+  const words = countWords(`${title} ${text}`);
+  const characters = title.length + text.length;
+  const wordCountLabel = `${words} ${words === 1 ? "word" : "words"} · ${characters} ${
+    characters === 1 ? "character" : "characters"
+  }`;
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -77,6 +85,11 @@ export const NoteModal = ({
 
         <div className="modal-footer">
           <span className="time text-label-large">{timeLabel}</span>
+          {showWordCount && (
+            <span className="counts text-label-large" data-word-count>
+              {wordCountLabel}
+            </span>
+          )}
           <button
             className="btn text"
             type="submit"

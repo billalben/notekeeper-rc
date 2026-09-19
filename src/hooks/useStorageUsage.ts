@@ -26,6 +26,7 @@ export const useStorageUsage = (): StorageUsage => {
   const notebooks = useNoteStore((state) => state.notebooks);
   const activeNotebookId = useNoteStore((state) => state.activeNotebookId);
   const toasts = useSettingsStore((state) => state.toasts);
+  const editor = useSettingsStore((state) => state.editor);
   const theme = useThemeStore((state) => state.theme);
 
   return useMemo(() => {
@@ -34,7 +35,7 @@ export const useStorageUsage = (): StorageUsage => {
     const bytes =
       estimateBytes(JSON.stringify({ notebooks, activeNotebookId })) +
       estimateBytes(theme) +
-      estimateBytes(JSON.stringify({ toasts }));
+      estimateBytes(JSON.stringify({ toasts, editor }));
 
     return {
       supported: true,
@@ -42,5 +43,5 @@ export const useStorageUsage = (): StorageUsage => {
       quota: STORAGE_QUOTA_BYTES,
       percent: (bytes / STORAGE_QUOTA_BYTES) * 100,
     };
-  }, [notebooks, activeNotebookId, toasts, theme]);
+  }, [notebooks, activeNotebookId, toasts, editor, theme]);
 };

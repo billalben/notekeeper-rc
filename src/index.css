@@ -588,6 +588,7 @@ body {
 }
 .modal-footer {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   align-items: center;
   gap: var(--spacing-2);
@@ -595,7 +596,12 @@ body {
 }
 .modal-footer .time {
   flex-grow: 1;
+  min-width: 0;
   color: var(--on-surface-variant);
+}
+.modal-footer .counts {
+  color: var(--on-surface-variant);
+  white-space: nowrap;
 }
 
 /* * Button */

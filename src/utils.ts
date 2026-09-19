@@ -22,6 +22,11 @@ export const getGreetingMsg = (currentHour: number): string => {
   return `Good ${greeting}`;
 };
 
+export const countWords = (text: string): number => {
+  const matches = text.trim().match(/\S+/g);
+  return matches ? matches.length : 0;
+};
+
 export const getRelativeTime = (milliSeconds: number): string => {
   const currentTime = new Date().getTime();
 

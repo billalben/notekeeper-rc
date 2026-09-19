@@ -23,6 +23,14 @@ export const DEFAULT_TOAST_SETTINGS: ToastSettings = {
   showCloseButton: true,
 };
 
+export interface EditorSettings {
+  showWordCount: boolean;
+}
+
+export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
+  showWordCount: true,
+};
+
 export const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value));
 
@@ -43,19 +51,30 @@ const normalizeToastSettings = (
   ),
 });
 
+const normalizeEditorSettings = (
+  settings: Partial<EditorSettings> | undefined,
+): EditorSettings => ({
+  ...DEFAULT_EDITOR_SETTINGS,
+  ...settings,
+});
+
 interface SettingsStore {
   toasts: ToastSettings;
+  editor: EditorSettings;
   setToastSettings: (partial: Partial<ToastSettings>) => void;
   resetToastSettings: () => void;
+  setEditorSettings: (partial: Partial<EditorSettings>) => void;
+  resetEditorSettings: () => void;
 }
 
 const STORAGE_KEY = "settings";
-const STORAGE_VERSION = 1;
+const STORAGE_VERSION = 2;
 
 export const useSettingsStore = create<SettingsStore>()(
   persist(
     (set) => ({
       toasts: DEFAULT_TOAST_SETTINGS,
+      editor: DEFAULT_EDITOR_SETTINGS,
 
       setToastSettings: (partial) =>
         set((state) => ({
@@ -63,16 +82,32 @@ export const useSettingsStore = create<SettingsStore>()(
         })),
 
       resetToastSettings: () => set({ toasts: DEFAULT_TOAST_SETTINGS }),
+
+      setEditorSettings: (partial) =>
+        set((state) => ({
+          editor: normalizeEditorSettings({ ...state.editor, ...partial }),
+        })),
+
+      resetEditorSettings: () => set({ editor: DEFAULT_EDITOR_SETTINGS }),
     }),
     {
       name: STORAGE_KEY,
       version: STORAGE_VERSION,
-      partialize: (state) => ({ toasts: state.toasts }),
+      partialize: (state) => ({
+        toasts: state.toasts,
+        editor: state.editor,
+      }),
       migrate: (persistedState) => {
         const state = persistedState as
-          | { toasts?: Partial<ToastSettings> }
+          | {
+              toasts?: Partial<ToastSettings>;
+              editor?: Partial<EditorSettings>;
+            }
           | undefined;
-        return { toasts: normalizeToastSettings(state?.toasts) };
+        return {
+          toasts: normalizeToastSettings(state?.toasts),
+          editor: normalizeEditorSettings(state?.editor),
+        };
       },
     },
   ),
