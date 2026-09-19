@@ -63,23 +63,23 @@
   --fs-label-medium: 1.2rem;
   --fs-label-small: 1.1rem;
 
-  /* Line height */
-  --lh-base: 20px;
-  --lh-display-large: 64px;
-  --lh-display-medium: 52px;
-  --lh-display-small: 44px;
-  --lh-headline-large: 40px;
-  --lh-headline-medium: 36px;
-  --lh-headline-small: 32px;
-  --lh-title-large: 28px;
-  --lh-title-medium: 24px;
-  --lh-title-small: 20px;
-  --lh-body-large: 24px;
-  --lh-body-medium: 20px;
-  --lh-body-small: 16px;
-  --lh-label-large: 20px;
-  --lh-label-medium: 16px;
-  --lh-label-small: 16px;
+  /* Line height (rem so it scales with --fs-base) */
+  --lh-base: 2rem;
+  --lh-display-large: 6.4rem;
+  --lh-display-medium: 5.2rem;
+  --lh-display-small: 4.4rem;
+  --lh-headline-large: 4rem;
+  --lh-headline-medium: 3.6rem;
+  --lh-headline-small: 3.2rem;
+  --lh-title-large: 2.8rem;
+  --lh-title-medium: 2.4rem;
+  --lh-title-small: 2rem;
+  --lh-body-large: 2.4rem;
+  --lh-body-medium: 2rem;
+  --lh-body-small: 1.6rem;
+  --lh-label-large: 2rem;
+  --lh-label-medium: 1.6rem;
+  --lh-label-small: 1.6rem;
 
   /* Font weight */
   --fw-regular: 400;
@@ -213,6 +213,142 @@
   --code-function: #ce93d8;
   --code-attr: #80cbc4;
   --code-variable: #ede0db;
+}
+
+/* ?=== #APPEARANCE PREFERENCES === */
+/* Accent presets override the primary/secondary-container base tokens. The
+   [data-theme] blocks above resolve --primary etc. from these variables, so
+   switching data-accent recolors the UI in both themes. "orange" is the
+   default and needs no block. */
+:root {
+  --swatch-orange: #9d4300;
+  --swatch-blue: #1565c0;
+  --swatch-green: #2e6c3f;
+  --swatch-teal: #00696e;
+  --swatch-violet: #6a4fa3;
+  --swatch-rose: #b3265a;
+}
+
+[data-accent="blue"] {
+  --primary-light: #1565c0;
+  --on-primary-light: #ffffff;
+  --primary-container-light: #d6e3ff;
+  --on-primary-container-light: #001b3f;
+  --secondary-container-light: #d6e3ff;
+  --on-secondary-container-light: #001b3f;
+  --primary-dark: #a9c7ff;
+  --on-primary-dark: #003062;
+  --primary-container-dark: #00458f;
+  --on-primary-container-dark: #d6e3ff;
+  --secondary-container-dark: #00458f;
+  --on-secondary-container-dark: #d6e3ff;
+}
+
+[data-accent="green"] {
+  --primary-light: #2e6c3f;
+  --on-primary-light: #ffffff;
+  --primary-container-light: #b4f0bf;
+  --on-primary-container-light: #00210c;
+  --secondary-container-light: #b4f0bf;
+  --on-secondary-container-light: #00210c;
+  --primary-dark: #98d6a4;
+  --on-primary-dark: #00391a;
+  --primary-container-dark: #15522a;
+  --on-primary-container-dark: #b4f0bf;
+  --secondary-container-dark: #15522a;
+  --on-secondary-container-dark: #b4f0bf;
+}
+
+[data-accent="teal"] {
+  --primary-light: #00696e;
+  --on-primary-light: #ffffff;
+  --primary-container-light: #9df0f6;
+  --on-primary-container-light: #002022;
+  --secondary-container-light: #9df0f6;
+  --on-secondary-container-light: #002022;
+  --primary-dark: #83d3d9;
+  --on-primary-dark: #003739;
+  --primary-container-dark: #004f53;
+  --on-primary-container-dark: #9df0f6;
+  --secondary-container-dark: #004f53;
+  --on-secondary-container-dark: #9df0f6;
+}
+
+[data-accent="violet"] {
+  --primary-light: #6a4fa3;
+  --on-primary-light: #ffffff;
+  --primary-container-light: #e9ddff;
+  --on-primary-container-light: #22005d;
+  --secondary-container-light: #e9ddff;
+  --on-secondary-container-light: #22005d;
+  --primary-dark: #cfbcff;
+  --on-primary-dark: #381e72;
+  --primary-container-dark: #4f378a;
+  --on-primary-container-dark: #e9ddff;
+  --secondary-container-dark: #4f378a;
+  --on-secondary-container-dark: #e9ddff;
+}
+
+[data-accent="rose"] {
+  --primary-light: #b3265a;
+  --on-primary-light: #ffffff;
+  --primary-container-light: #ffd9e1;
+  --on-primary-container-light: #3f001d;
+  --secondary-container-light: #ffd9e1;
+  --on-secondary-container-light: #3f001d;
+  --primary-dark: #ffb1c6;
+  --on-primary-dark: #65002f;
+  --primary-container-dark: #8c1d4b;
+  --on-primary-container-dark: #ffd9e1;
+  --secondary-container-dark: #8c1d4b;
+  --on-secondary-container-dark: #ffd9e1;
+}
+
+/* Font scale: --fs-base drives the root font size; line-heights are in rem so
+   the whole type ramp scales together. */
+html[data-font="small"] {
+  --fs-base: 56.25%;
+}
+html[data-font="large"] {
+  --fs-base: 68.75%;
+}
+
+/* Density: spacing is derived from --spacing-base via calc(), so overriding it
+   here changes padding/gaps app-wide. */
+html[data-density="compact"] {
+  --spacing-base: 3px;
+}
+html[data-density="comfortable"] {
+  --spacing-base: 5px;
+}
+
+/* Corner style: overrides the radius scale. "default" uses :root values. */
+html[data-radius="square"] {
+  --radius-extra-small: 0;
+  --radius-small: 0;
+  --radius-medium: 0;
+  --radius-large: 0;
+  --radius-extra-large: 0;
+  --radius-full: 0;
+}
+html[data-radius="rounded"] {
+  --radius-extra-small: 8px;
+  --radius-small: 12px;
+  --radius-medium: 16px;
+  --radius-large: 20px;
+  --radius-extra-large: 32px;
+}
+
+/* High contrast: strengthen borders and secondary text in both themes. */
+html[data-contrast="high"] {
+  --outline-light: #4a3b34;
+  --outline-variant-light: #8a776e;
+  --on-surface-variant-light: #332924;
+  --on-surface-light: #000000;
+  --outline-dark: #ece4df;
+  --outline-variant-dark: #b6a49b;
+  --on-surface-variant-dark: #f4ece7;
+  --on-surface-dark: #ffffff;
 }
 
 /* ?=== #RESET === */
@@ -414,19 +550,11 @@ body {
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background-color: var(--surface-container-low);
-  border-radius: 4px;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  -ms-border-radius: 4px;
-  -o-border-radius: 4px;
+  border-radius: var(--radius-extra-small);
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background-color: var(--outline-variant);
-  border-radius: 4px;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  -ms-border-radius: 4px;
-  -o-border-radius: 4px;
+  border-radius: var(--radius-extra-small);
 }
 .overlay {
   position: fixed;
@@ -552,14 +680,14 @@ body {
 .pin-badge {
   flex-shrink: 0;
   color: var(--primary);
-  font-size: 18px;
+  font-size: 1.8rem;
   cursor: default;
   transform: rotate(45deg);
 }
 .card-favorite-badge {
   flex-shrink: 0;
   color: var(--primary);
-  font-size: 18px;
+  font-size: 1.8rem;
   cursor: default;
 }
 .card .card-text {
@@ -626,7 +754,7 @@ body {
   color: var(--on-surface-variant);
 }
 .card-notebook .material-symbols-rounded {
-  font-size: 16px;
+  font-size: 1.6rem;
 }
 .tag-chip {
   --state-layer-bg: var(--primary);
@@ -664,7 +792,7 @@ button.tag-chip {
 .tag-filter-icon {
   flex-shrink: 0;
   color: var(--on-surface-variant);
-  font-size: 20px;
+  font-size: 2rem;
 }
 .tag-filter-list {
   display: flex;
@@ -688,7 +816,7 @@ button.tag-chip {
   opacity: 1;
 }
 .tag-chip-remove .material-symbols-rounded {
-  font-size: 16px;
+  font-size: 1.6rem;
 }
 .tag-input-row {
   display: flex;
@@ -716,7 +844,7 @@ button.tag-chip {
 .tag-input-icon {
   flex-shrink: 0;
   color: var(--on-surface-variant);
-  font-size: 20px;
+  font-size: 2rem;
 }
 .tag-input {
   flex: 1 1 60px;
@@ -764,7 +892,7 @@ button.tag-chip {
 }
 .tag-suggestion .material-symbols-rounded {
   color: inherit;
-  font-size: 18px;
+  font-size: 1.8rem;
 }
 .tag-suggestion-count {
   margin-inline-start: auto;
@@ -791,7 +919,7 @@ button.tag-chip {
   opacity: 1;
 }
 .tag-suggestion-delete .material-symbols-rounded {
-  font-size: 18px;
+  font-size: 1.8rem;
 }
 
 /* * Modal */
@@ -1216,7 +1344,7 @@ button.tag-chip {
 }
 .item-menu-action .material-symbols-rounded {
   flex-shrink: 0;
-  font-size: 20px;
+  font-size: 2rem;
   color: var(--on-surface-variant);
 }
 .item-menu-action.separated {
@@ -1263,7 +1391,7 @@ button.tag-chip {
 }
 .move-note-item .material-symbols-rounded {
   flex-shrink: 0;
-  font-size: 20px;
+  font-size: 2rem;
   color: var(--on-surface-variant);
 }
 .move-note-item .text-label-large {
@@ -1352,7 +1480,7 @@ button.tag-chip {
 }
 .nav-item-icon {
   flex-shrink: 0;
-  font-size: 22px;
+  font-size: 2.2rem;
 }
 .nav-item-label {
   flex-grow: 1;
@@ -1362,7 +1490,7 @@ button.tag-chip {
   min-width: 0;
 }
 .nav-item-label .pin-badge {
-  font-size: 16px;
+  font-size: 1.6rem;
   transform: rotate(45deg);
 }
 .nav-item .text {
@@ -1736,6 +1864,7 @@ button.tag-chip {
 .settings-select {
   height: 40px;
   padding-inline: var(--spacing-3);
+  font: inherit;
   background-color: var(--surface-container-highest);
   color: var(--on-surface);
   border: 1px solid var(--outline-variant);
@@ -1745,6 +1874,52 @@ button.tag-chip {
 .settings-select:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+.settings-select-wrap {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  height: 40px;
+}
+.settings-select-wrap::after {
+  content: attr(data-value);
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 calc(var(--spacing-3) + 20px) 0 var(--spacing-3);
+  visibility: hidden;
+  white-space: pre;
+}
+.settings-select-wrap .settings-select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.accent-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+}
+.accent-swatch {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--outline-variant);
+  cursor: pointer;
+  transition: box-shadow var(--tr-duration-short) var(--tr-easing-linear);
+}
+.accent-swatch:hover {
+  box-shadow: 0 0 0 3px var(--surface-container-highest);
+}
+.accent-swatch[aria-pressed="true"] {
+  border-color: var(--on-surface);
+}
+.accent-swatch .material-symbols-rounded {
+  color: #ffffff;
+  font-size: 1.6rem;
 }
 .settings-range-control {
   display: flex;
@@ -2002,12 +2177,18 @@ button.tag-chip {
   --state-layer-bg: var(--inverse-on-surface);
 }
 @media (prefers-reduced-motion: reduce) {
-  .toast,
-  .toast.exiting,
-  .storage-meter-fill {
-    animation: none;
-    transition: none;
+  html:not([data-motion="full"]) {
+    --tr-duration-short: 0.01ms;
+    --tr-duration-medium: 0.01ms;
+    --tr-duration-long: 0.01ms;
+    scroll-behavior: auto;
   }
+}
+html[data-motion="reduce"] {
+  --tr-duration-short: 0.01ms;
+  --tr-duration-medium: 0.01ms;
+  --tr-duration-long: 0.01ms;
+  scroll-behavior: auto;
 }
 
 /* ?=== #MEDIA QUERIES === */
@@ -2145,7 +2326,7 @@ button.tag-chip {
     inset-inline-end: 14px;
     min-width: 16px;
     height: 16px;
-    font-size: 10px;
+    font-size: 1rem;
   }
   .sidebar.collapsed .trash-nav-item,
   .sidebar.collapsed .favorite-nav-item {

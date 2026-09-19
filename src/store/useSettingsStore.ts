@@ -53,6 +53,40 @@ export const SIDEBAR_WIDTH_MIN = 280;
 export const SIDEBAR_WIDTH_MAX = 480;
 export const SIDEBAR_WIDTH_DEFAULT = 360;
 
+export type MotionPreference = "system" | "reduce" | "full";
+
+export const DEFAULT_MOTION: MotionPreference = "system";
+
+export type AccentColor =
+  | "orange"
+  | "blue"
+  | "green"
+  | "teal"
+  | "violet"
+  | "rose";
+
+export type FontScale = "small" | "default" | "large";
+
+export type Density = "compact" | "default" | "comfortable";
+
+export type RadiusStyle = "default" | "square" | "rounded";
+
+export interface AppearanceSettings {
+  accent: AccentColor;
+  fontScale: FontScale;
+  density: Density;
+  radius: RadiusStyle;
+  highContrast: boolean;
+}
+
+export const DEFAULT_APPEARANCE_SETTINGS: AppearanceSettings = {
+  accent: "orange",
+  fontScale: "default",
+  density: "default",
+  radius: "default",
+  highContrast: false,
+};
+
 export interface SidebarSettings {
   collapsed: boolean;
   width: number;
@@ -103,6 +137,46 @@ const normalizeTrashSettings = (
     : DEFAULT_TRASH_SETTINGS.retentionDays,
 });
 
+const isMotionPreference = (value: unknown): value is MotionPreference =>
+  value === "system" || value === "reduce" || value === "full";
+
+const normalizeMotion = (value: unknown): MotionPreference =>
+  isMotionPreference(value) ? value : DEFAULT_MOTION;
+
+const ACCENT_COLORS: AccentColor[] = [
+  "orange",
+  "blue",
+  "green",
+  "teal",
+  "violet",
+  "rose",
+];
+
+const FONT_SCALES: FontScale[] = ["small", "default", "large"];
+const DENSITIES: Density[] = ["compact", "default", "comfortable"];
+const RADIUS_STYLES: RadiusStyle[] = ["default", "square", "rounded"];
+
+const normalizeAppearance = (
+  settings: Partial<AppearanceSettings> | undefined,
+): AppearanceSettings => ({
+  accent: ACCENT_COLORS.includes(settings?.accent as AccentColor)
+    ? (settings?.accent as AccentColor)
+    : DEFAULT_APPEARANCE_SETTINGS.accent,
+  fontScale: FONT_SCALES.includes(settings?.fontScale as FontScale)
+    ? (settings?.fontScale as FontScale)
+    : DEFAULT_APPEARANCE_SETTINGS.fontScale,
+  density: DENSITIES.includes(settings?.density as Density)
+    ? (settings?.density as Density)
+    : DEFAULT_APPEARANCE_SETTINGS.density,
+  radius: RADIUS_STYLES.includes(settings?.radius as RadiusStyle)
+    ? (settings?.radius as RadiusStyle)
+    : DEFAULT_APPEARANCE_SETTINGS.radius,
+  highContrast:
+    typeof settings?.highContrast === "boolean"
+      ? settings.highContrast
+      : DEFAULT_APPEARANCE_SETTINGS.highContrast,
+});
+
 const normalizeSidebarSettings = (
   settings: Partial<SidebarSettings> | undefined,
 ): SidebarSettings => ({
@@ -120,6 +194,11 @@ interface SettingsStore {
   editor: EditorSettings;
   trash: TrashSettings;
   sidebar: SidebarSettings;
+  motion: MotionPreference;
+  appearance: AppearanceSettings;
+  setMotion: (motion: MotionPreference) => void;
+  setAppearanceSettings: (partial: Partial<AppearanceSettings>) => void;
+  resetAppearanceSettings: () => void;
   setToastSettings: (partial: Partial<ToastSettings>) => void;
   resetToastSettings: () => void;
   setEditorSettings: (partial: Partial<EditorSettings>) => void;
@@ -129,7 +208,7 @@ interface SettingsStore {
 }
 
 const STORAGE_KEY = "settings";
-const STORAGE_VERSION = 6;
+const STORAGE_VERSION = 10;
 
 export const useSettingsStore = create<SettingsStore>()(
   persist(
@@ -138,6 +217,18 @@ export const useSettingsStore = create<SettingsStore>()(
       editor: DEFAULT_EDITOR_SETTINGS,
       trash: DEFAULT_TRASH_SETTINGS,
       sidebar: DEFAULT_SIDEBAR_SETTINGS,
+      motion: DEFAULT_MOTION,
+      appearance: DEFAULT_APPEARANCE_SETTINGS,
+
+      setMotion: (motion) => set({ motion: normalizeMotion(motion) }),
+
+      setAppearanceSettings: (partial) =>
+        set((state) => ({
+          appearance: normalizeAppearance({ ...state.appearance, ...partial }),
+        })),
+
+      resetAppearanceSettings: () =>
+        set({ appearance: DEFAULT_APPEARANCE_SETTINGS }),
 
       setToastSettings: (partial) =>
         set((state) => ({
@@ -171,6 +262,8 @@ export const useSettingsStore = create<SettingsStore>()(
         editor: state.editor,
         trash: state.trash,
         sidebar: state.sidebar,
+        motion: state.motion,
+        appearance: state.appearance,
       }),
       migrate: (persistedState) => {
         const state = persistedState as
@@ -179,6 +272,8 @@ export const useSettingsStore = create<SettingsStore>()(
               editor?: Partial<EditorSettings>;
               trash?: Partial<TrashSettings>;
               sidebar?: Partial<SidebarSettings>;
+              motion?: unknown;
+              appearance?: Partial<AppearanceSettings>;
             }
           | undefined;
         return {
@@ -186,6 +281,8 @@ export const useSettingsStore = create<SettingsStore>()(
           editor: normalizeEditorSettings(state?.editor),
           trash: normalizeTrashSettings(state?.trash),
           sidebar: normalizeSidebarSettings(state?.sidebar),
+          motion: normalizeMotion(state?.motion),
+          appearance: normalizeAppearance(state?.appearance),
         };
       },
       merge: (persistedState, currentState) => {
@@ -195,6 +292,8 @@ export const useSettingsStore = create<SettingsStore>()(
               editor?: Partial<EditorSettings>;
               trash?: Partial<TrashSettings>;
               sidebar?: Partial<SidebarSettings>;
+              motion?: unknown;
+              appearance?: Partial<AppearanceSettings>;
             }
           | undefined;
         return {
@@ -203,6 +302,8 @@ export const useSettingsStore = create<SettingsStore>()(
           editor: normalizeEditorSettings(state?.editor),
           trash: normalizeTrashSettings(state?.trash),
           sidebar: normalizeSidebarSettings(state?.sidebar),
+          motion: normalizeMotion(state?.motion),
+          appearance: normalizeAppearance(state?.appearance),
         };
       },
     },

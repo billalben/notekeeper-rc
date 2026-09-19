@@ -26,6 +26,45 @@
           var initialTheme =
             storedTheme || (systemThemeIsDark ? "dark" : "light");
           document.documentElement.setAttribute("data-theme", initialTheme);
+
+          var storedSettings = localStorage.getItem("settings");
+          var settings = storedSettings ? JSON.parse(storedSettings) : null;
+          var state = settings && settings.state ? settings.state : null;
+          var motion = state ? state.motion : null;
+          if (motion === "reduce" || motion === "full") {
+            document.documentElement.setAttribute("data-motion", motion);
+          }
+
+          var appearance = state ? state.appearance : null;
+          if (appearance) {
+            if (appearance.accent) {
+              document.documentElement.setAttribute(
+                "data-accent",
+                appearance.accent
+              );
+            }
+            if (appearance.fontScale) {
+              document.documentElement.setAttribute(
+                "data-font",
+                appearance.fontScale
+              );
+            }
+            if (appearance.density) {
+              document.documentElement.setAttribute(
+                "data-density",
+                appearance.density
+              );
+            }
+            if (appearance.radius) {
+              document.documentElement.setAttribute(
+                "data-radius",
+                appearance.radius
+              );
+            }
+            if (appearance.highContrast) {
+              document.documentElement.setAttribute("data-contrast", "high");
+            }
+          }
         } catch (e) {
           /* ignore */
         }

@@ -10,6 +10,7 @@ import {
 import {
   SettingsGroup,
   SettingsRow,
+  SettingsSelect,
   SettingsSwitch,
 } from "./SettingsSection";
 
@@ -97,23 +98,18 @@ export const SettingsNotifications = () => {
           title="Position"
           description="Where notifications appear on screen."
         >
-          <select
-            className="settings-select"
-            aria-label="Toast position"
+          <SettingsSelect
+            label="Toast position"
             value={toasts.position}
             disabled={!toasts.enabled}
-            onChange={(event) =>
-              setToastSettings({
-                position: event.target.value as ToastPosition,
-              })
+            options={POSITIONS.map((position) => ({
+              value: position.value,
+              label: position.label,
+            }))}
+            onChange={(value) =>
+              setToastSettings({ position: value as ToastPosition })
             }
-          >
-            {POSITIONS.map((position) => (
-              <option key={position.value} value={position.value}>
-                {position.label}
-              </option>
-            ))}
-          </select>
+          />
         </SettingsRow>
 
         <SettingsRow

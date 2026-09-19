@@ -57,6 +57,8 @@ const App = () => {
   const purgeExpiredTrash = useNoteStore((state) => state.purgeExpiredTrash);
 
   const retentionDays = useSettingsStore((state) => state.trash.retentionDays);
+  const motion = useSettingsStore((state) => state.motion);
+  const appearance = useSettingsStore((state) => state.appearance);
 
   const startAddingNotebook = useUIStore((state) => state.startAddingNotebook);
   const isSettingsOpen = useUIStore((state) => state.isSettingsOpen);
@@ -75,6 +77,24 @@ const App = () => {
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (motion === "system") root.removeAttribute("data-motion");
+    else root.setAttribute("data-motion", motion);
+  }, [motion]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.setAttribute("data-accent", appearance.accent);
+    root.setAttribute("data-font", appearance.fontScale);
+    root.setAttribute("data-density", appearance.density);
+    root.setAttribute("data-radius", appearance.radius);
+    root.setAttribute(
+      "data-contrast",
+      appearance.highContrast ? "high" : "default",
+    );
+  }, [appearance]);
 
   useEffect(() => {
     purgeExpiredTrash(trashRetentionMs(retentionDays));

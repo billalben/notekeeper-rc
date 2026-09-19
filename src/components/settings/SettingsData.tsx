@@ -3,7 +3,12 @@ import { useNoteStore } from "../../store/useNoteStore";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { toast } from "../../store/useToastStore";
 import { TRASH_RETENTION_OPTIONS } from "../../utils";
-import { ComingSoon, SettingsGroup, SettingsRow } from "./SettingsSection";
+import {
+  ComingSoon,
+  SettingsGroup,
+  SettingsRow,
+  SettingsSelect,
+} from "./SettingsSection";
 import { StorageMeter } from "./StorageMeter";
 
 type DeleteScope = "notes" | "notebooks" | "all";
@@ -127,28 +132,19 @@ export const SettingsData = () => {
               : "Deleted notes and notebooks move to Trash before being removed."
           }
         >
-          <select
-            className="settings-select"
-            aria-label="Trash retention"
+          <SettingsSelect
+            label="Trash retention"
             value={retentionDays === null ? "forever" : String(retentionDays)}
-            onChange={(event) =>
+            options={TRASH_RETENTION_OPTIONS.map((option) => ({
+              value: option.value === null ? "forever" : String(option.value),
+              label: option.label,
+            }))}
+            onChange={(value) =>
               setTrashSettings({
-                retentionDays:
-                  event.target.value === "forever"
-                    ? null
-                    : Number(event.target.value),
+                retentionDays: value === "forever" ? null : Number(value),
               })
             }
-          >
-            {TRASH_RETENTION_OPTIONS.map((option) => (
-              <option
-                key={option.label}
-                value={option.value === null ? "forever" : String(option.value)}
-              >
-                {option.label}
-              </option>
-            ))}
-          </select>
+          />
         </SettingsRow>
       </SettingsGroup>
 
