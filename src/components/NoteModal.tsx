@@ -100,7 +100,17 @@ export const NoteModal = ({
           </button>
         </div>
       </form>
-      <div className="overlay modal-overlay" />
+      <div
+        className="overlay modal-overlay"
+        onClick={(event) => {
+          if (
+            useSettingsStore.getState().editor.closeModalOnBackdropClick &&
+            event.target === event.currentTarget
+          ) {
+            onClose();
+          }
+        }}
+      />
     </>
   );
 };

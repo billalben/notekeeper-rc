@@ -8,6 +8,9 @@ import {
 
 export const SettingsGeneral = () => {
   const showWordCount = useSettingsStore((state) => state.editor.showWordCount);
+  const closeModalOnBackdropClick = useSettingsStore(
+    (state) => state.editor.closeModalOnBackdropClick,
+  );
   const setEditorSettings = useSettingsStore(
     (state) => state.setEditorSettings,
   );
@@ -35,6 +38,21 @@ export const SettingsGeneral = () => {
             checked={showWordCount}
             label="Word count"
             onChange={(checked) => setEditorSettings({ showWordCount: checked })}
+          />
+        </SettingsRow>
+      </SettingsGroup>
+
+      <SettingsGroup title="Modals">
+        <SettingsRow
+          title="Close on outside click"
+          description="Clicking the backdrop dismisses a modal. Off by default."
+        >
+          <SettingsSwitch
+            checked={closeModalOnBackdropClick}
+            label="Close modals when clicking outside"
+            onChange={(checked) =>
+              setEditorSettings({ closeModalOnBackdropClick: checked })
+            }
           />
         </SettingsRow>
       </SettingsGroup>

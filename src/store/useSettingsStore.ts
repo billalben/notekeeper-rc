@@ -30,10 +30,12 @@ export const DEFAULT_TOAST_SETTINGS: ToastSettings = {
 
 export interface EditorSettings {
   showWordCount: boolean;
+  closeModalOnBackdropClick: boolean;
 }
 
 export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
   showWordCount: true,
+  closeModalOnBackdropClick: false,
 };
 
 export interface TrashSettings {
@@ -84,8 +86,11 @@ const normalizeToastSettings = (
 const normalizeEditorSettings = (
   settings: Partial<EditorSettings> | undefined,
 ): EditorSettings => ({
-  ...DEFAULT_EDITOR_SETTINGS,
-  ...settings,
+  showWordCount:
+    settings?.showWordCount ?? DEFAULT_EDITOR_SETTINGS.showWordCount,
+  closeModalOnBackdropClick:
+    settings?.closeModalOnBackdropClick ??
+    DEFAULT_EDITOR_SETTINGS.closeModalOnBackdropClick,
 });
 
 const normalizeTrashSettings = (
@@ -174,6 +179,23 @@ export const useSettingsStore = create<SettingsStore>()(
             }
           | undefined;
         return {
+          toasts: normalizeToastSettings(state?.toasts),
+          editor: normalizeEditorSettings(state?.editor),
+          trash: normalizeTrashSettings(state?.trash),
+          sidebar: normalizeSidebarSettings(state?.sidebar),
+        };
+      },
+      merge: (persistedState, currentState) => {
+        const state = persistedState as
+          | {
+              toasts?: Partial<ToastSettings>;
+              editor?: Partial<EditorSettings>;
+              trash?: Partial<TrashSettings>;
+              sidebar?: Partial<SidebarSettings>;
+            }
+          | undefined;
+        return {
+          ...currentState,
           toasts: normalizeToastSettings(state?.toasts),
           editor: normalizeEditorSettings(state?.editor),
           trash: normalizeTrashSettings(state?.trash),

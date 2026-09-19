@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ComponentType } from "react";
+import { useSettingsStore } from "../../store/useSettingsStore";
 import { IconButton } from "../IconButton";
 import { SettingsAbout } from "./SettingsAbout";
 import { SettingsAppearance } from "./SettingsAppearance";
@@ -46,6 +47,9 @@ export const SettingsModal = ({ onClose }: SettingsModalProps) => {
   const [activeSection, setActiveSection] = useState<SectionId>("general");
   const [mobilePane, setMobilePane] = useState<"list" | "content">("list");
   const dialogRef = useRef<HTMLDivElement>(null);
+  const closeOnBackdropClick = useSettingsStore(
+    (state) => state.editor.closeModalOnBackdropClick,
+  );
 
   useEffect(() => {
     const previouslyFocused = document.activeElement as HTMLElement | null;
@@ -146,7 +150,12 @@ export const SettingsModal = ({ onClose }: SettingsModalProps) => {
       <div
         className="overlay modal-overlay"
         onClick={(event) => {
-          if (event.target === event.currentTarget) onClose();
+          if (
+            closeOnBackdropClick &&
+            event.target === event.currentTarget
+          ) {
+            onClose();
+          }
         }}
       />
     </>

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useSettingsStore } from "../store/useSettingsStore";
 
 interface ConfirmModalProps {
   title: string;
@@ -40,7 +41,17 @@ export const ConfirmModal = ({ title, onConfirm }: ConfirmModalProps) => {
           </button>
         </div>
       </div>
-      <div className="overlay modal-overlay" />
+      <div
+        className="overlay modal-overlay"
+        onClick={(event) => {
+          if (
+            useSettingsStore.getState().editor.closeModalOnBackdropClick &&
+            event.target === event.currentTarget
+          ) {
+            onConfirm(false);
+          }
+        }}
+      />
     </>
   );
 };
