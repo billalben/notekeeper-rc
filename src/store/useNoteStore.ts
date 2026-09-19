@@ -42,6 +42,9 @@ interface NoteStore {
   ) => Note | undefined;
   updateNote: (noteId: string, data: Pick<Note, "title" | "text">) => void;
   deleteNote: (notebookId: string, noteId: string) => void;
+  deleteAllNotes: () => void;
+  deleteAllNotebooks: () => void;
+  deleteAllData: () => void;
 }
 
 /**
@@ -185,6 +188,18 @@ export const useNoteStore = create<NoteStore>()(
           ),
         }));
       },
+
+      deleteAllNotes: () => {
+        set((state) => ({
+          notebooks: state.notebooks.map((notebook) => ({
+            ...notebook,
+            notes: [],
+          })),
+        }));
+      },
+
+      deleteAllNotebooks: () => set({ notebooks: [], activeNotebookId: null }),
+      deleteAllData: () => set({ notebooks: [], activeNotebookId: null }),
     }),
     {
       name: STORAGE_KEY,
