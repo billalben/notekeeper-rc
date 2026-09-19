@@ -39,7 +39,10 @@ const handleStorageError = (error: unknown) => {
   });
 };
 
-type NoteInput = Pick<Note, "title" | "text"> & { tags?: string[] };
+type NoteInput = Pick<Note, "title" | "text"> & {
+  tags?: string[];
+  favorite?: boolean;
+};
 
 interface NoteStore {
   notebooks: Notebook[];
@@ -59,6 +62,7 @@ interface NoteStore {
   updateNote: (noteId: string, data: NoteInput) => void;
   toggleNotePin: (notebookId: string, noteId: string) => void;
   toggleNoteFavorite: (notebookId: string, noteId: string) => void;
+  setNoteFavorite: (noteId: string, favorite: boolean) => void;
   moveNote: (
     notebookId: string,
     noteId: string,
@@ -292,7 +296,7 @@ export const useNoteStore = create<NoteStore>()(
           updatedOn: now,
           deletedAt: null,
           pinned: false,
-          favorite: false,
+          favorite: data.favorite ?? false,
         };
 
         set((state) => ({
@@ -354,6 +358,17 @@ export const useNoteStore = create<NoteStore>()(
                 }
               : notebook,
           ),
+        }));
+      },
+
+      setNoteFavorite: (noteId, favorite) => {
+        set((state) => ({
+          notebooks: state.notebooks.map((notebook) => ({
+            ...notebook,
+            notes: notebook.notes.map((note) =>
+              note.id === noteId ? { ...note, favorite } : note,
+            ),
+          })),
         }));
       },
 

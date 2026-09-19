@@ -9,6 +9,9 @@ const sanitizeSchema = {
   ...defaultSchema,
   attributes: {
     ...defaultSchema.attributes,
+    // GFM task lists need the checkbox state; the default schema only keeps
+    // `type` and `disabled`, which would drop completed items.
+    input: [...(defaultSchema.attributes?.input ?? []), "checked"],
     code: [
       ...(defaultSchema.attributes?.code ?? []),
       ["className", /^language-./],

@@ -3,7 +3,7 @@ import { ConfirmModal } from "./components/ConfirmModal";
 import { Fab } from "./components/Fab";
 import { Header } from "./components/Header";
 import { NoteList } from "./components/NoteList";
-import { NoteModal } from "./components/NoteModal";
+import { NoteModal, type NoteSaveInput } from "./components/NoteModal";
 import { MoveNoteModal } from "./components/MoveNoteModal";
 import { SettingsModal } from "./components/settings/SettingsModal";
 import { Sidebar } from "./components/Sidebar";
@@ -45,6 +45,7 @@ const App = () => {
   const toggleNoteFavorite = useNoteStore(
     (state) => state.toggleNoteFavorite,
   );
+  const setNoteFavorite = useNoteStore((state) => state.setNoteFavorite);
   const moveNote = useNoteStore((state) => state.moveNote);
   const moveNoteToNotebook = useNoteStore(
     (state) => state.moveNoteToNotebook,
@@ -154,21 +155,40 @@ const App = () => {
     setNoteModal({ type: "edit", note });
   };
 
-  const handleNoteAutosave = (noteData: {
-    title: string;
-    text: string;
-    tags: string[];
-  }) => {
+  const handleNoteSave = (noteData: NoteSaveInput): Note | undefined => {
     if (!noteModal) return;
 
     if (noteModal.type === "create") {
-      if (!activeNotebookId) return;
-      const note = addNote(activeNotebookId, noteData);
+      const note = addNote(noteData.notebookId, {
+        title: noteData.title,
+        text: noteData.text,
+        tags: noteData.tags,
+        favorite: noteData.favorite,
+      });
       if (note) setNoteModal({ type: "edit", note });
-      return;
+      return note;
     }
 
-    updateNote(noteModal.note.id, noteData);
+    const noteId = noteModal.note.id;
+    const current = useNoteStore
+      .getState()
+      .notebooks.flatMap((notebook) => notebook.notes)
+      .find((note) => note.id === noteId);
+    const sourceNotebookId = current?.notebookId ?? noteData.notebookId;
+
+    updateNote(noteId, {
+      title: noteData.title,
+      text: noteData.text,
+      tags: noteData.tags,
+    });
+    if (noteData.notebookId !== sourceNotebookId) {
+      moveNoteToNotebook(sourceNotebookId, noteId, noteData.notebookId);
+    }
+    if (current && current.favorite !== noteData.favorite) {
+      setNoteFavorite(noteId, noteData.favorite);
+    }
+
+    return current ?? noteModal.note;
   };
 
   const handleToggleNotePin = (note: Note) => {
@@ -253,6 +273,14 @@ const App = () => {
     toggleNotebookPin(notebook.id);
   };
 
+  const handleDeleteTag = (tag: string) => {
+    deleteTag(tag);
+    removeTagFilter(tag);
+    toast.success(`Tag #${tag} deleted`);
+  };
+
+  const tagUsage = countTagUsageMap(notebooks);
+
   const handleConfirm = (isConfirm: boolean) => {
     if (confirm && isConfirm) {
       const { notebookId } = confirm;
@@ -271,14 +299,6 @@ const App = () => {
     }
     setConfirm(null);
   };
-
-  const handleDeleteTag = (tag: string) => {
-    deleteTag(tag);
-    removeTagFilter(tag);
-    toast.success(`Tag #${tag} deleted`);
-  };
-
-  const tagUsage = countTagUsageMap(notebooks);
 
   return (
     <>
@@ -384,26 +404,31 @@ const App = () => {
 
       {noteModal && (
         <NoteModal
+          noteId={noteModal.type === "edit" ? noteModal.note.id : undefined}
           title={noteModal.type === "edit" ? noteModal.note.title : undefined}
           text={noteModal.type === "edit" ? noteModal.note.text : undefined}
           tags={noteModal.type === "edit" ? noteModal.note.tags : undefined}
+          favorite={
+            noteModal.type === "edit" ? noteModal.note.favorite : undefined
+          }
+          notebookId={
+            noteModal.type === "edit"
+              ? noteModal.note.notebookId
+              : (activeNotebookId ?? "")
+          }
+          notebooks={visibleNotebooks}
           tagSuggestions={allTags}
           tagUsage={tagUsage}
-          notebookName={
-            noteModal.type === "edit"
-              ? notebookNames[noteModal.note.notebookId]
-              : activeNotebook?.name
-          }
           isNew={noteModal.type === "create"}
-          onCreateTag={createTag}
-          onDeleteTag={handleDeleteTag}
           postedOn={
             noteModal.type === "edit" ? noteModal.note.postedOn : undefined
           }
           updatedOn={
             noteModal.type === "edit" ? noteModal.note.updatedOn : undefined
           }
-          onSave={handleNoteAutosave}
+          onSave={handleNoteSave}
+          onCreateTag={createTag}
+          onDeleteTag={handleDeleteTag}
           onClose={() => setNoteModal(null)}
         />
       )}

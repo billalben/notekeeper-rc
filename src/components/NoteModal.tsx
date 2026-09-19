@@ -1,502 +1,554 @@
 import {
-  useCallback,
   useEffect,
+  useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
-import { addTag, countWords, getRelativeTime, hasTag, removeTag } from "../utils";
-import { downloadNoteFile } from "../utils/export";
-import { useSettingsStore } from "../store/useSettingsStore";
+import { countWords, getRelativeTime } from "../utils";
+import { downloadFile, MIME_MARKDOWN, slugify } from "../utils/export";
 import { toast } from "../store/useToastStore";
+import { useSettingsStore } from "../store/useSettingsStore";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 import { useAutoSave } from "../hooks/useAutoSave";
+import {
+  toggleLinePrefix,
+  wrapSelection,
+  type EditResult,
+} from "../utils/markdownFormat";
 import { ConfirmModal } from "./ConfirmModal";
-import { IconButton } from "./IconButton";
 import { MarkdownContent } from "./MarkdownContent";
+import { NoteTags } from "./NoteTags";
+import { NoteToolbar, type EditorMode, type FormatKind } from "./NoteToolbar";
+import type { Note, Notebook } from "../types";
 
-interface NoteData {
+interface NoteDraft {
   title: string;
   text: string;
   tags: string[];
+  notebookId: string;
+  favorite: boolean;
 }
 
-const isSameNote = (a: NoteData, b: NoteData): boolean =>
+export type NoteSaveInput = NoteDraft;
+
+const isSameDraft = (a: NoteDraft, b: NoteDraft): boolean =>
   a.title === b.title &&
   a.text === b.text &&
+  a.notebookId === b.notebookId &&
+  a.favorite === b.favorite &&
   a.tags.length === b.tags.length &&
   a.tags.every((tag, index) => tag === b.tags[index]);
 
+const IS_MAC =
+  typeof navigator !== "undefined" &&
+  /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
+
 interface NoteModalProps {
+  noteId?: string;
   title?: string;
   text?: string;
   tags?: string[];
+  favorite?: boolean;
+  notebookId: string;
+  notebooks: Notebook[];
   tagSuggestions: string[];
   tagUsage: Record<string, number>;
-  notebookName?: string | null;
   isNew: boolean;
-  onCreateTag: (tag: string) => void;
-  onDeleteTag: (tag: string) => void;
   postedOn?: number;
   updatedOn?: number;
-  onSave: (noteData: NoteData) => void;
+  onSave: (data: NoteSaveInput) => Note | undefined;
+  onCreateTag: (tag: string) => void;
+  onDeleteTag: (tag: string) => void;
   onClose: () => void;
 }
 
-const MAX_SUGGESTIONS = 8;
-
 export const NoteModal = ({
+  noteId: initialNoteId,
   title: initialTitle = "",
   text: initialText = "",
   tags: initialTags = [],
+  favorite: initialFavorite = false,
+  notebookId,
+  notebooks,
   tagSuggestions,
   tagUsage,
-  notebookName,
   isNew,
-  onCreateTag,
-  onDeleteTag,
   postedOn,
   updatedOn,
   onSave,
+  onCreateTag,
+  onDeleteTag,
   onClose,
 }: NoteModalProps) => {
   const [title, setTitle] = useState(initialTitle);
   const [text, setText] = useState(initialText);
   const [tags, setTags] = useState(initialTags);
-  const [tagInput, setTagInput] = useState("");
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [highlightedIndex, setHighlightedIndex] = useState(0);
-  const autosave = useSettingsStore((state) => state.editor.autosave);
-  const defaultMode = useSettingsStore((state) => state.editor.defaultMode);
-  const presentation = useSettingsStore((state) => state.editor.presentation);
-  const showWordCount = useSettingsStore((state) => state.editor.showWordCount);
-  const exportFormat = useSettingsStore((state) => state.export.defaultFormat);
-
-  const [mode, setMode] = useState<"edit" | "preview">(defaultMode);
-  const [isFull, setIsFull] = useState(presentation === "full");
+  const [favorite, setFavorite] = useState(initialFavorite);
+  const [noteId, setNoteId] = useState(initialNoteId);
+  const [selectedNotebookId, setSelectedNotebookId] = useState(notebookId);
+  const [mode, setMode] = useState<EditorMode>("edit");
+  const [isFull, setIsFull] = useState(
+    () => useSettingsStore.getState().editor.presentation === "full",
+  );
   const [isConfirmingClose, setIsConfirmingClose] = useState(false);
-  const [isDirty, setIsDirty] = useState(false);
-
-  const suggestionsOpenRef = useRef(false);
-  const lastSavedRef = useRef<NoteData>({
+  const [savedAt, setSavedAt] = useState<number | null>(updatedOn ?? null);
+  const [savedSnapshot, setSavedSnapshot] = useState<NoteDraft>({
     title: initialTitle,
     text: initialText,
     tags: initialTags,
+    notebookId,
+    favorite: initialFavorite,
   });
 
-  const shouldSave = useCallback(
-    (note: NoteData) =>
-      !(
-        isNew &&
-        !note.title.trim() &&
-        !note.text.trim() &&
-        note.tags.length === 0
-      ),
-    [isNew],
+  const autosave = useSettingsStore((state) => state.editor.autosave);
+  const showWordCount = useSettingsStore((state) => state.editor.showWordCount);
+
+  const titleId = useId();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLInputElement>(null);
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const pendingSelectionRef = useRef<{ start: number; end: number } | null>(
+    null,
+  );
+  const initialIsNewRef = useRef(isNew);
+
+  const hasNote = Boolean(noteId);
+  const hasNoteRef = useRef(hasNote);
+  useEffect(() => {
+    hasNoteRef.current = hasNote;
+  }, [hasNote]);
+
+  useFocusTrap(dialogRef, !isConfirmingClose);
+
+  useEffect(() => {
+    if (initialIsNewRef.current) titleRef.current?.focus();
+    else bodyRef.current?.focus();
+  }, []);
+
+  const draft = useMemo<NoteDraft>(
+    () => ({
+      title,
+      text,
+      tags,
+      notebookId: selectedNotebookId,
+      favorite,
+    }),
+    [title, text, tags, selectedNotebookId, favorite],
   );
 
-  const handleSave = useCallback(
-    (note: NoteData) => {
-      lastSavedRef.current = note;
-      setIsDirty(false);
-      onSave(note);
-    },
-    [onSave],
-  );
+  const dirty = !isSameDraft(draft, savedSnapshot);
+  const isSavable =
+    hasNote || Boolean(title.trim() || text.trim() || tags.length);
 
-  const { status, savedAt, schedule, flush } = useAutoSave({
-    onSave: handleSave,
+  const notebookValue = notebooks.some((nb) => nb.id === selectedNotebookId)
+    ? selectedNotebookId
+    : (notebooks[0]?.id ?? "");
+
+  const words = useMemo(() => countWords(text), [text]);
+  const wordCountLabel = `${words} ${words === 1 ? "word" : "words"}`;
+
+  const showEdited =
+    postedOn !== undefined &&
+    savedAt !== null &&
+    savedAt - postedOn > 1000;
+
+  const persist = (data: NoteDraft) => {
+    const result = onSave(data);
+    if (!hasNoteRef.current) {
+      if (!result) return;
+      setNoteId(result.id);
+      setSelectedNotebookId(result.notebookId);
+      setFavorite(result.favorite);
+    }
+    setSavedAt(Date.now());
+    setSavedSnapshot(data);
+  };
+
+  const shouldSave = (data: NoteDraft) =>
+    hasNoteRef.current ||
+    Boolean(data.title.trim() || data.text.trim() || data.tags.length);
+
+  const { status, schedule, flush } = useAutoSave<NoteDraft>({
+    onSave: persist,
     shouldSave,
   });
 
   useEffect(() => {
-    const current = { title, text, tags };
-    const dirty = !isSameNote(current, lastSavedRef.current);
-    setIsDirty(dirty);
     if (!autosave || !dirty) return;
-    schedule(current);
-  }, [title, text, tags, autosave, schedule]);
+    schedule(draft);
+  }, [autosave, dirty, draft, schedule]);
 
-  const requestClose = useCallback(() => {
+  useLayoutEffect(() => {
+    const pending = pendingSelectionRef.current;
+    if (!pending || !bodyRef.current) return;
+    bodyRef.current.focus();
+    bodyRef.current.setSelectionRange(pending.start, pending.end);
+    pendingSelectionRef.current = null;
+  }, [text]);
+
+  const applyEdit = (result: EditResult) => {
+    pendingSelectionRef.current = {
+      start: result.selectionStart,
+      end: result.selectionEnd,
+    };
+    setText(result.value);
+  };
+
+  const handleFormat = (kind: FormatKind) => {
+    const element = bodyRef.current;
+    if (!element) return;
+
+    const { selectionStart, selectionEnd, value } = element;
+    let result: EditResult;
+
+    switch (kind) {
+      case "h":
+        result = toggleLinePrefix(value, selectionStart, selectionEnd, "## ");
+        break;
+      case "ul":
+        result = toggleLinePrefix(value, selectionStart, selectionEnd, "- ");
+        break;
+      case "task":
+        result = toggleLinePrefix(value, selectionStart, selectionEnd, "- [ ] ");
+        break;
+      case "b":
+        result = wrapSelection(
+          value,
+          selectionStart,
+          selectionEnd,
+          "**",
+          "**",
+          "bold",
+        );
+        break;
+      case "i":
+        result = wrapSelection(
+          value,
+          selectionStart,
+          selectionEnd,
+          "*",
+          "*",
+          "italic",
+        );
+        break;
+      case "code":
+        result = wrapSelection(
+          value,
+          selectionStart,
+          selectionEnd,
+          "`",
+          "`",
+          "code",
+        );
+        break;
+    }
+
+    applyEdit(result);
+  };
+
+  const handleModeChange = (next: EditorMode) => {
+    setMode(next);
+    if (next === "edit") {
+      requestAnimationFrame(() => bodyRef.current?.focus());
+    }
+  };
+
+  const handleSave = () => {
+    if (!dirty || !isSavable) return;
+    persist(draft);
+  };
+
+  const handleDiscard = () => {
+    setTitle(savedSnapshot.title);
+    setText(savedSnapshot.text);
+    setTags(savedSnapshot.tags);
+    setSelectedNotebookId(savedSnapshot.notebookId);
+    setFavorite(savedSnapshot.favorite);
+  };
+
+  const requestClose = () => {
     if (autosave) {
       flush();
       onClose();
       return;
     }
-    if (isDirty) {
+    if (dirty) {
       setIsConfirmingClose(true);
       return;
     }
     onClose();
-  }, [autosave, isDirty, flush, onClose]);
-
-  const words = countWords(`${title} ${text}`);
-  const characters = title.length + text.length;
-  const wordCountLabel = `${words} ${words === 1 ? "word" : "words"} · ${characters} ${
-    characters === 1 ? "character" : "characters"
-  }`;
-
-  const suggestions = useMemo(() => {
-    const query = tagInput.trim().toLowerCase();
-    return tagSuggestions
-      .filter((tag) => {
-        if (hasTag(tags, tag)) return false;
-        return query ? tag.toLowerCase().includes(query) : true;
-      })
-      .slice(0, MAX_SUGGESTIONS);
-  }, [tagSuggestions, tags, tagInput]);
-
-  useEffect(() => {
-    suggestionsOpenRef.current = showSuggestions;
-  }, [showSuggestions]);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        event.key === "Escape" &&
-        !suggestionsOpenRef.current &&
-        !isConfirmingClose
-      ) {
-        requestClose();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [requestClose, isConfirmingClose]);
-
-  const commitTag = (raw: string) => {
-    onCreateTag(raw);
-    setTags((current) => addTag(current, raw));
-    setTagInput("");
-    setShowSuggestions(false);
-    setHighlightedIndex(0);
   };
 
-  const handleDeleteTag = (tag: string) => {
-    onDeleteTag(tag);
-    setTags((current) => removeTag(current, tag));
-  };
-
-  const download = (format: "md" | "json") => {
-    const now = Date.now();
+  const handleDownload = () => {
     try {
-      downloadNoteFile(
-        {
-          title,
-          text,
-          tags,
-          postedOn: postedOn ?? now,
-          updatedOn: updatedOn ?? now,
-        },
-        notebookName ?? null,
-        format,
+      const filename = `${slugify(title) || "note"}.md`;
+      downloadFile(
+        filename,
+        `# ${title || "Untitled note"}\n\n${text}`,
+        MIME_MARKDOWN,
       );
     } catch {
       toast.error("Couldn't export the note");
     }
   };
 
-  const handleTagInputKeyDown = (
-    event: ReactKeyboardEvent<HTMLInputElement>,
-  ) => {
+  const handleTitleKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       event.preventDefault();
-      if (!tagInput.trim()) return;
-      const suggestion =
-        showSuggestions && suggestions[highlightedIndex]
-          ? suggestions[highlightedIndex]
-          : tagInput;
-      commitTag(suggestion);
-      return;
-    }
-
-    if (event.key === ",") {
-      event.preventDefault();
-      if (tagInput.trim()) commitTag(tagInput);
-      return;
-    }
-
-    if (event.key === "Backspace" && tagInput === "" && tags.length > 0) {
-      event.preventDefault();
-      setTags((current) => current.slice(0, -1));
-      return;
-    }
-
-    if (event.key === "ArrowDown") {
-      event.preventDefault();
-      setShowSuggestions(true);
-      setHighlightedIndex((index) =>
-        Math.min(index + 1, suggestions.length - 1),
-      );
-      return;
-    }
-
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-      setHighlightedIndex((index) => Math.max(index - 1, 0));
-      return;
-    }
-
-    if (event.key === "Escape" && showSuggestions) {
-      event.stopPropagation();
-      setShowSuggestions(false);
+      bodyRef.current?.focus();
     }
   };
 
-  const editedAt = savedAt ?? updatedOn;
-  const timeLabel = postedOn
-    ? `Created ${getRelativeTime(postedOn)}${
-        editedAt && editedAt !== postedOn
-          ? ` · Edited ${getRelativeTime(editedAt)}`
-          : ""
-      }`
-    : "";
-  const saveStatusLabel =
-    status === "saving" ? "Saving…" : status === "saved" ? "Saved" : "";
+  const actionsRef = useRef({
+    save: handleSave,
+    flush,
+    format: handleFormat,
+    close: requestClose,
+    confirming: isConfirmingClose,
+  });
+  useEffect(() => {
+    actionsRef.current = {
+      save: handleSave,
+      flush,
+      format: handleFormat,
+      close: requestClose,
+      confirming: isConfirmingClose,
+    };
+  });
 
-  const isEmpty = !title.trim() && !text.trim() && tags.length === 0;
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const { save, flush: flushSave, format, close, confirming } =
+        actionsRef.current;
+      const mod = event.ctrlKey || event.metaKey;
 
-  const handleManualSubmit = () => {
-    if (isEmpty) return;
-    if (tagInput.trim()) onCreateTag(tagInput);
-    const finalTags = tagInput.trim() ? addTag(tags, tagInput) : tags;
-    handleSave({ title, text, tags: finalTags });
-    onClose();
-  };
+      if (event.key === "Escape" && !confirming) {
+        close();
+        return;
+      }
+      if (!mod) return;
+
+      const key = event.key.toLowerCase();
+      if (key === "s") {
+        event.preventDefault();
+        if (autosave) flushSave();
+        else save();
+        return;
+      }
+      if (event.target === bodyRef.current && (key === "b" || key === "i")) {
+        event.preventDefault();
+        format(key === "b" ? "b" : "i");
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [autosave]);
+
+  const statusLabel = dirty
+    ? autosave && status === "saving"
+      ? "Saving…"
+      : "Unsaved changes"
+    : "All changes saved";
 
   return (
     <>
-      <div className={`modal note-modal${isFull ? " note-modal-full" : ""}`}>
-        <div className="modal-actions">
-          <IconButton
-            type="button"
-            icon={isFull ? "close_fullscreen" : "open_in_full"}
-            label={isFull ? "Shrink editor" : "Expand editor"}
-            aria-pressed={isFull}
-            onClick={() => setIsFull((current) => !current)}
-          />
-          <IconButton
-            type="button"
-            icon="download"
-            label={`Download as ${
-              exportFormat === "md" ? "Markdown" : "JSON"
-            }`}
-            onClick={() => download(exportFormat)}
-          />
-          <IconButton
-            type="button"
-            icon="close"
-            label="Close modal"
-            onClick={requestClose}
-          />
-        </div>
-
-        <input
-          type="text"
-          placeholder="Untitled"
-          value={title}
-          className="modal-title text-title-medium"
-          data-note-field
-          autoFocus
-          onChange={(event) => setTitle(event.target.value)}
-          onBlur={flush}
-        />
-
-        <div className="tag-editor">
-          <div className="tag-input-row">
-            <span
-              className="material-symbols-rounded tag-input-icon"
-              aria-hidden="true"
-            >
-              label
-            </span>
-            {tags.map((tag) => (
-              <span key={tag} className="tag-chip">
-                <span className="text-label-large">#{tag}</span>
-                <button
-                  type="button"
-                  className="tag-chip-remove"
-                  aria-label={`Remove tag ${tag}`}
-                  onClick={() => setTags((current) => removeTag(current, tag))}
-                >
-                  <span className="material-symbols-rounded" aria-hidden="true">
-                    close
-                  </span>
-                </button>
+      <div
+        className="note-overlay"
+        onMouseDown={(event) => {
+          if (event.target === event.currentTarget) requestClose();
+        }}
+      >
+        <div
+          ref={dialogRef}
+          className={`note-dialog${isFull ? " is-expanded" : ""}`}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={titleId}
+        >
+          <div className="note-top">
+            <label className="note-notebook" title="Move to notebook">
+              <span className="material-symbols-rounded" aria-hidden="true">
+                folder
               </span>
-            ))}
+              <select
+                aria-label="Notebook"
+                value={notebookValue}
+                onChange={(event) =>
+                  setSelectedNotebookId(event.target.value)
+                }
+              >
+                {notebooks.map((notebook) => (
+                  <option key={notebook.id} value={notebook.id}>
+                    {notebook.name}
+                  </option>
+                ))}
+              </select>
+              <span
+                className="material-symbols-rounded note-chevron"
+                aria-hidden="true"
+              >
+                expand_more
+              </span>
+            </label>
+
+            <div className="note-actions">
+              <button
+                type="button"
+                className="note-icon-btn"
+                aria-pressed={favorite}
+                aria-label={
+                  favorite ? "Remove from favorites" : "Add to favorites"
+                }
+                title={favorite ? "Remove from favorites" : "Add to favorites"}
+                onClick={() => setFavorite((current) => !current)}
+              >
+                <svg
+                  className="note-fav"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                className="note-icon-btn note-expand"
+                aria-label={isFull ? "Collapse editor" : "Expand editor"}
+                title={isFull ? "Collapse" : "Expand"}
+                onClick={() => setIsFull((current) => !current)}
+              >
+                <span className="material-symbols-rounded" aria-hidden="true">
+                  {isFull ? "close_fullscreen" : "open_in_full"}
+                </span>
+              </button>
+              <button
+                type="button"
+                className="note-icon-btn"
+                aria-label="Download as Markdown"
+                title="Download as Markdown"
+                onClick={handleDownload}
+              >
+                <span className="material-symbols-rounded" aria-hidden="true">
+                  download
+                </span>
+              </button>
+              <span className="note-sep" aria-hidden="true" />
+              <button
+                type="button"
+                className="note-icon-btn"
+                aria-label="Close"
+                title="Close (Esc)"
+                onClick={requestClose}
+              >
+                <span className="material-symbols-rounded" aria-hidden="true">
+                  close
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div className="note-head">
             <input
+              id={titleId}
+              ref={titleRef}
               type="text"
-              className="tag-input"
-              placeholder={tags.length === 0 ? "Add a tag..." : undefined}
-              aria-label="Add a tag"
-              value={tagInput}
-              role="combobox"
-              aria-expanded={showSuggestions && suggestions.length > 0}
-              aria-controls="tag-suggestions"
-              aria-autocomplete="list"
-              onChange={(event) => {
-                setTagInput(event.target.value);
-                setHighlightedIndex(0);
-                setShowSuggestions(true);
-              }}
-              onFocus={() => {
-                setHighlightedIndex(0);
-                setShowSuggestions(true);
-              }}
-              onBlur={() => setShowSuggestions(false)}
-              onKeyDown={handleTagInputKeyDown}
+              className="note-title-input"
+              placeholder="Untitled note"
+              autoComplete="off"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              onKeyDown={handleTitleKeyDown}
+            />
+            <NoteTags
+              tags={tags}
+              suggestions={tagSuggestions}
+              tagUsage={tagUsage}
+              onChange={setTags}
+              onCreateTag={onCreateTag}
+              onDeleteTag={onDeleteTag}
             />
           </div>
 
-          {showSuggestions && suggestions.length > 0 && (
-            <ul
-              id="tag-suggestions"
-              className="tag-suggestions custom-scrollbar"
-              role="listbox"
-              aria-label="Tag suggestions"
-            >
-              {suggestions.map((tag, index) => {
-                const usage = tagUsage[tag.toLowerCase()] ?? 0;
-
-                return (
-                  <li
-                    key={tag}
-                    role="option"
-                    aria-selected={index === highlightedIndex}
-                  >
-                    <div
-                      className={`tag-suggestion-row${
-                        index === highlightedIndex ? " active" : ""
-                      }`}
-                      onMouseEnter={() => setHighlightedIndex(index)}
-                    >
-                      <button
-                        type="button"
-                        className="tag-suggestion"
-                        onMouseDown={(event) => event.preventDefault()}
-                        onClick={() => commitTag(tag)}
-                      >
-                        <span
-                          className="material-symbols-rounded"
-                          aria-hidden="true"
-                        >
-                          label
-                        </span>
-                        <span className="text-label-large">{tag}</span>
-                        <span className="tag-suggestion-count text-label-small">
-                          {usage} {usage === 1 ? "note" : "notes"}
-                        </span>
-                      </button>
-                      <button
-                        type="button"
-                        className="tag-suggestion-delete"
-                        aria-label={`Delete tag ${tag}`}
-                        title={`Delete tag ${tag}`}
-                        onMouseDown={(event) => event.preventDefault()}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          handleDeleteTag(tag);
-                        }}
-                      >
-                        <span
-                          className="material-symbols-rounded"
-                          aria-hidden="true"
-                        >
-                          delete
-                        </span>
-                        <div className="state-layer" />
-                      </button>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
-
-        {mode === "preview" ? (
-          <MarkdownContent
-            text={text}
-            className="modal-text markdown-body text-body-large custom-scrollbar"
+          <NoteToolbar
+            mode={mode}
+            onModeChange={handleModeChange}
+            onFormat={handleFormat}
           />
-        ) : (
-          <textarea
-            placeholder="Take a note..."
-            value={text}
-            className="modal-text text-body-large custom-scrollbar"
-            data-note-field
-            onChange={(event) => setText(event.target.value)}
-            onBlur={flush}
-          />
-        )}
 
-        <div className="modal-footer">
-          <span className="time text-label-large">{timeLabel}</span>
-          {showWordCount && (
-            <span className="counts text-label-large" data-word-count>
-              {wordCountLabel}
-            </span>
-          )}
-          <div className="mode-toggle" role="group" aria-label="Editor mode">
-            <button
-              type="button"
-              className={`btn text mode-toggle-btn${mode === "edit" ? " active" : ""}`}
-              aria-pressed={mode === "edit"}
-              onClick={() => setMode("edit")}
-            >
-              <span className="text-label-large">Edit</span>
-              <div className="state-layer" />
-            </button>
-            <button
-              type="button"
-              className={`btn text mode-toggle-btn${mode === "preview" ? " active" : ""}`}
-              aria-pressed={mode === "preview"}
-              onClick={() => setMode("preview")}
-            >
-              <span className="text-label-large">Preview</span>
-              <div className="state-layer" />
-            </button>
+          <div className="note-editor">
+            <textarea
+              ref={bodyRef}
+              className="note-textarea custom-scrollbar"
+              placeholder="Start writing…"
+              spellCheck
+              value={text}
+              disabled={mode === "preview"}
+              style={{ visibility: mode === "edit" ? "visible" : "hidden" }}
+              onChange={(event) => setText(event.target.value)}
+            />
+            {mode === "preview" && (
+              <div className="note-preview custom-scrollbar">
+                {text.trim() ? (
+                  <MarkdownContent text={text} className="markdown-body" />
+                ) : (
+                  <p className="note-preview-empty">Nothing to preview yet.</p>
+                )}
+              </div>
+            )}
           </div>
-          {autosave ? (
-            <span
-              className={`save-status${status === "idle" ? "" : ` ${status}`}`}
-              role="status"
-              aria-live="polite"
-              aria-label={saveStatusLabel}
-              title={saveStatusLabel}
-            >
-              {status !== "idle" && (
-                <span className="material-symbols-rounded" aria-hidden="true">
-                  {status === "saving" ? "sync" : "cloud_done"}
+
+          <div className="note-foot">
+            <div className="note-meta">
+              <span
+                className={`note-status${dirty ? " is-dirty" : ""}`}
+                role="status"
+                aria-live="polite"
+              >
+                {statusLabel}
+              </span>
+              {postedOn !== undefined && (
+                <span className="note-created">
+                  Created {getRelativeTime(postedOn)}
                 </span>
               )}
-            </span>
-          ) : (
-            <button
-              className="btn text"
-              type="button"
-              disabled={isEmpty}
-              onClick={handleManualSubmit}
-            >
-              <span className="text-label-large">Save</span>
-              <div className="state-layer" />
-            </button>
-          )}
+              {showEdited && savedAt !== null && (
+                <span className="note-updated">
+                  Edited {getRelativeTime(savedAt)}
+                </span>
+              )}
+              {showWordCount && <span>{wordCountLabel}</span>}
+            </div>
+
+            <div className="note-foot-actions">
+              {!autosave && dirty && (
+                <button
+                  type="button"
+                  className="note-btn is-ghost"
+                  onClick={handleDiscard}
+                >
+                  Discard
+                </button>
+              )}
+              {!autosave && (
+                <button
+                  type="button"
+                  className="note-btn is-primary"
+                  disabled={!dirty || !isSavable}
+                  onClick={handleSave}
+                >
+                  Save
+                  <kbd>{IS_MAC ? "⌘" : "Ctrl"} S</kbd>
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
-      <div
-        className="overlay modal-overlay"
-        onClick={(event) => {
-          if (
-            useSettingsStore.getState().editor.closeModalOnBackdropClick &&
-            event.target === event.currentTarget
-          ) {
-            requestClose();
-          }
-        }}
-      />
+
       {isConfirmingClose && (
         <ConfirmModal
           heading="You have unsaved changes"
