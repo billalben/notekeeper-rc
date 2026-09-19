@@ -4,8 +4,14 @@ import { SettingsAbout } from "./SettingsAbout";
 import { SettingsAppearance } from "./SettingsAppearance";
 import { SettingsData } from "./SettingsData";
 import { SettingsGeneral } from "./SettingsGeneral";
+import { SettingsNotifications } from "./SettingsNotifications";
 
-type SectionId = "general" | "appearance" | "data" | "about";
+type SectionId =
+  | "general"
+  | "appearance"
+  | "notifications"
+  | "data"
+  | "about";
 
 interface Section {
   id: SectionId;
@@ -21,6 +27,12 @@ const SECTIONS: Section[] = [
     label: "Appearance",
     icon: "palette",
     Component: SettingsAppearance,
+  },
+  {
+    id: "notifications",
+    label: "Notifications",
+    icon: "notifications",
+    Component: SettingsNotifications,
   },
   { id: "data", label: "Data", icon: "database", Component: SettingsData },
   { id: "about", label: "About", icon: "info", Component: SettingsAbout },

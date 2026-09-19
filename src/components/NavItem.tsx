@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { toast } from "../store/useToastStore";
 import type { Notebook } from "../types";
 import { IconButton } from "./IconButton";
 
@@ -34,7 +35,10 @@ export const NavItem = ({
   const commitRename = () => {
     const nextName = draftName.trim() || notebook.name;
     setIsEditing(false);
-    if (nextName !== notebook.name) onRename(notebook.id, nextName);
+    if (nextName !== notebook.name) {
+      onRename(notebook.id, nextName);
+      toast.success("Notebook renamed");
+    }
   };
 
   const cancelRename = () => {

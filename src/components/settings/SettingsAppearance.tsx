@@ -1,9 +1,14 @@
 import { useThemeStore } from "../../store/useThemeStore";
-import { ComingSoon, SettingsGroup, SettingsRow } from "./SettingsSection";
+import {
+  ComingSoon,
+  SettingsGroup,
+  SettingsRow,
+  SettingsSwitch,
+} from "./SettingsSection";
 
 export const SettingsAppearance = () => {
   const theme = useThemeStore((state) => state.theme);
-  const toggleTheme = useThemeStore((state) => state.toggleTheme);
+  const setTheme = useThemeStore((state) => state.setTheme);
 
   const isDark = theme === "dark";
 
@@ -14,16 +19,11 @@ export const SettingsAppearance = () => {
           title="Dark mode"
           description="Use a dark color scheme across the app."
         >
-          <button
-            type="button"
-            role="switch"
-            aria-checked={isDark}
-            aria-label="Dark mode"
-            className={`settings-switch${isDark ? " active" : ""}`}
-            onClick={toggleTheme}
-          >
-            <span className="settings-switch-thumb" />
-          </button>
+          <SettingsSwitch
+            checked={isDark}
+            label="Dark mode"
+            onChange={(checked) => setTheme(checked ? "dark" : "light")}
+          />
         </SettingsRow>
       </SettingsGroup>
 

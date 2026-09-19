@@ -1,10 +1,33 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 import type { Note, Notebook } from "../types";
 import { generateID } from "../utils";
+import { createLocalStorage, isQuotaExceededError } from "./persistStorage";
+import { toast } from "./useToastStore";
 
 const STORAGE_KEY = "noteKeeperDB";
 const STORAGE_VERSION = 2;
+
+const STORAGE_ERROR_COOLDOWN = 10_000;
+let lastStorageErrorAt = 0;
+
+const handleStorageError = (error: unknown) => {
+  const now = Date.now();
+  if (now - lastStorageErrorAt < STORAGE_ERROR_COOLDOWN) return;
+  lastStorageErrorAt = now;
+
+  if (isQuotaExceededError(error)) {
+    toast.error("Browser storage is full", {
+      description:
+        "Free up space or export a backup. Recent changes may not be saved.",
+    });
+    return;
+  }
+
+  toast.error("Couldn't save your changes", {
+    description: "This browser blocked local storage. Check your settings.",
+  });
+};
 
 interface NoteStore {
   notebooks: Notebook[];
@@ -166,6 +189,7 @@ export const useNoteStore = create<NoteStore>()(
     {
       name: STORAGE_KEY,
       version: STORAGE_VERSION,
+      storage: createJSONStorage(() => createLocalStorage(handleStorageError)),
       migrate: (persistedState) => {
         const state = persistedState as {
           notebooks?: Notebook[];

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNoteStore } from "../store/useNoteStore";
+import { toast } from "../store/useToastStore";
 import { useUIStore } from "../store/useUIStore";
 import type { Notebook } from "../types";
 import { Fab } from "./Fab";
@@ -51,7 +52,10 @@ export const Sidebar = ({
 
     const name = newName.trim();
     stopAddingNotebook();
-    if (name) addNotebook(name);
+    if (name) {
+      addNotebook(name);
+      toast.success("Notebook created");
+    }
   };
 
   const cancelAdd = () => {

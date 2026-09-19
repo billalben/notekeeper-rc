@@ -39,3 +39,26 @@ export const SettingsRow = ({
 export const ComingSoon = () => (
   <span className="settings-badge text-label-small">Coming soon</span>
 );
+
+interface SettingsSwitchProps {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  label: string;
+}
+
+export const SettingsSwitch = ({
+  checked,
+  onChange,
+  label,
+}: SettingsSwitchProps) => (
+  <button
+    type="button"
+    role="switch"
+    aria-checked={checked}
+    aria-label={label}
+    className={`settings-switch${checked ? " active" : ""}`}
+    onClick={() => onChange(!checked)}
+  >
+    <span className="settings-switch-thumb" />
+  </button>
+);

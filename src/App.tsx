@@ -6,9 +6,11 @@ import { NoteList } from "./components/NoteList";
 import { NoteModal } from "./components/NoteModal";
 import { SettingsModal } from "./components/settings/SettingsModal";
 import { Sidebar } from "./components/Sidebar";
+import { ToastRegion } from "./components/ToastRegion";
 import { useNoteStore } from "./store/useNoteStore";
 import { useThemeStore } from "./store/useThemeStore";
 import { useUIStore } from "./store/useUIStore";
+import { toast } from "./store/useToastStore";
 import type { Note, Notebook } from "./types";
 
 type NoteModalState = { type: "create" } | { type: "edit"; note: Note };
@@ -69,9 +71,13 @@ const App = () => {
     if (!noteModal) return;
 
     if (noteModal.type === "create") {
-      if (activeNotebookId) addNote(activeNotebookId, noteData);
+      if (activeNotebookId) {
+        addNote(activeNotebookId, noteData);
+        toast.success("Note created");
+      }
     } else {
       updateNote(noteModal.note.id, noteData);
+      toast.success("Note saved");
     }
 
     setNoteModal(null);
@@ -98,8 +104,10 @@ const App = () => {
     if (confirm && isConfirm) {
       if (confirm.kind === "note") {
         deleteNote(confirm.notebookId, confirm.noteId);
+        toast.success("Note deleted");
       } else {
         deleteNotebook(confirm.notebookId);
+        toast.success("Notebook deleted");
       }
     }
     setConfirm(null);
@@ -181,6 +189,8 @@ const App = () => {
       )}
 
       {isSettingsOpen && <SettingsModal onClose={closeSettings} />}
+
+      <ToastRegion />
     </>
   );
 };

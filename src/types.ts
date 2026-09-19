@@ -12,3 +12,13 @@ export interface Notebook {
   name: string;
   notes: Note[];
 }
+
+export type ToastType = "success" | "error" | "info";
+
+export type ToastPosition =
+  | "top-left"
+  | "top-center"
+  | "top-right"
+  | "bottom-left"
+  | "bottom-center"
+  | "bottom-right";
