@@ -1,15 +1,29 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type FormEvent,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import { addTag, countWords, getRelativeTime, hasTag, removeTag } from "../utils";
 import { useSettingsStore } from "../store/useSettingsStore";
+import { useAutoSave } from "../hooks/useAutoSave";
+import { ConfirmModal } from "./ConfirmModal";
 import { IconButton } from "./IconButton";
 import { MarkdownContent } from "./MarkdownContent";
+
+interface NoteData {
+  title: string;
+  text: string;
+  tags: string[];
+}
+
+const isSameNote = (a: NoteData, b: NoteData): boolean =>
+  a.title === b.title &&
+  a.text === b.text &&
+  a.tags.length === b.tags.length &&
+  a.tags.every((tag, index) => tag === b.tags[index]);
 
 interface NoteModalProps {
   title?: string;
@@ -17,15 +31,12 @@ interface NoteModalProps {
   tags?: string[];
   tagSuggestions: string[];
   tagUsage: Record<string, number>;
+  isNew: boolean;
   onCreateTag: (tag: string) => void;
   onDeleteTag: (tag: string) => void;
   postedOn?: number;
   updatedOn?: number;
-  onSubmit: (noteData: {
-    title: string;
-    text: string;
-    tags: string[];
-  }) => void;
+  onSave: (noteData: NoteData) => void;
   onClose: () => void;
 }
 
@@ -37,11 +48,12 @@ export const NoteModal = ({
   tags: initialTags = [],
   tagSuggestions,
   tagUsage,
+  isNew,
   onCreateTag,
   onDeleteTag,
   postedOn,
   updatedOn,
-  onSubmit,
+  onSave,
   onClose,
 }: NoteModalProps) => {
   const [title, setTitle] = useState(initialTitle);
@@ -50,12 +62,66 @@ export const NoteModal = ({
   const [tagInput, setTagInput] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
-  const [mode, setMode] = useState<"edit" | "preview">("preview");
+  const autosave = useSettingsStore((state) => state.editor.autosave);
+  const defaultMode = useSettingsStore((state) => state.editor.defaultMode);
   const showWordCount = useSettingsStore((state) => state.editor.showWordCount);
 
-  const suggestionsOpenRef = useRef(false);
+  const [mode, setMode] = useState<"edit" | "preview">(defaultMode);
+  const [isConfirmingClose, setIsConfirmingClose] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
 
-  const isSubmitDisabled = !title.trim() && !text.trim() && tags.length === 0;
+  const suggestionsOpenRef = useRef(false);
+  const lastSavedRef = useRef<NoteData>({
+    title: initialTitle,
+    text: initialText,
+    tags: initialTags,
+  });
+
+  const shouldSave = useCallback(
+    (note: NoteData) =>
+      !(
+        isNew &&
+        !note.title.trim() &&
+        !note.text.trim() &&
+        note.tags.length === 0
+      ),
+    [isNew],
+  );
+
+  const handleSave = useCallback(
+    (note: NoteData) => {
+      lastSavedRef.current = note;
+      setIsDirty(false);
+      onSave(note);
+    },
+    [onSave],
+  );
+
+  const { status, savedAt, schedule, flush } = useAutoSave({
+    onSave: handleSave,
+    shouldSave,
+  });
+
+  useEffect(() => {
+    const current = { title, text, tags };
+    const dirty = !isSameNote(current, lastSavedRef.current);
+    setIsDirty(dirty);
+    if (!autosave || !dirty) return;
+    schedule(current);
+  }, [title, text, tags, autosave, schedule]);
+
+  const requestClose = useCallback(() => {
+    if (autosave) {
+      flush();
+      onClose();
+      return;
+    }
+    if (isDirty) {
+      setIsConfirmingClose(true);
+      return;
+    }
+    onClose();
+  }, [autosave, isDirty, flush, onClose]);
 
   const words = countWords(`${title} ${text}`);
   const characters = title.length + text.length;
@@ -79,12 +145,18 @@ export const NoteModal = ({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !suggestionsOpenRef.current) onClose();
+      if (
+        event.key === "Escape" &&
+        !suggestionsOpenRef.current &&
+        !isConfirmingClose
+      ) {
+        requestClose();
+      }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
+  }, [requestClose, isConfirmingClose]);
 
   const commitTag = (raw: string) => {
     onCreateTag(raw);
@@ -146,30 +218,35 @@ export const NoteModal = ({
     }
   };
 
+  const editedAt = savedAt ?? updatedOn;
   const timeLabel = postedOn
     ? `Created ${getRelativeTime(postedOn)}${
-        updatedOn && updatedOn !== postedOn
-          ? ` · Edited ${getRelativeTime(updatedOn)}`
+        editedAt && editedAt !== postedOn
+          ? ` · Edited ${getRelativeTime(editedAt)}`
           : ""
       }`
     : "";
+  const saveStatusLabel =
+    status === "saving" ? "Saving…" : status === "saved" ? "Saved" : "";
 
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    if (isSubmitDisabled) return;
+  const isEmpty = !title.trim() && !text.trim() && tags.length === 0;
+
+  const handleManualSubmit = () => {
+    if (isEmpty) return;
     if (tagInput.trim()) onCreateTag(tagInput);
     const finalTags = tagInput.trim() ? addTag(tags, tagInput) : tags;
-    onSubmit({ title, text, tags: finalTags });
+    handleSave({ title, text, tags: finalTags });
+    onClose();
   };
 
   return (
     <>
-      <form className="modal note-modal" onSubmit={handleSubmit}>
+      <div className="modal note-modal">
         <IconButton
           type="button"
           icon="close"
           label="Close modal"
-          onClick={onClose}
+          onClick={requestClose}
         />
 
         <input
@@ -180,6 +257,7 @@ export const NoteModal = ({
           data-note-field
           autoFocus
           onChange={(event) => setTitle(event.target.value)}
+          onBlur={flush}
         />
 
         <div className="tag-editor">
@@ -307,6 +385,7 @@ export const NoteModal = ({
             className="modal-text text-body-large custom-scrollbar"
             data-note-field
             onChange={(event) => setText(event.target.value)}
+            onBlur={flush}
           />
         )}
 
@@ -337,16 +416,33 @@ export const NoteModal = ({
               <div className="state-layer" />
             </button>
           </div>
-          <button
-            className="btn text"
-            type="submit"
-            disabled={isSubmitDisabled}
-          >
-            <span className="text-label-large">Save</span>
-            <div className="state-layer" />
-          </button>
+          {autosave ? (
+            <span
+              className={`save-status${status === "idle" ? "" : ` ${status}`}`}
+              role="status"
+              aria-live="polite"
+              aria-label={saveStatusLabel}
+              title={saveStatusLabel}
+            >
+              {status !== "idle" && (
+                <span className="material-symbols-rounded" aria-hidden="true">
+                  {status === "saving" ? "sync" : "cloud_done"}
+                </span>
+              )}
+            </span>
+          ) : (
+            <button
+              className="btn text"
+              type="button"
+              disabled={isEmpty}
+              onClick={handleManualSubmit}
+            >
+              <span className="text-label-large">Save</span>
+              <div className="state-layer" />
+            </button>
+          )}
         </div>
-      </form>
+      </div>
       <div
         className="overlay modal-overlay"
         onClick={(event) => {
@@ -354,10 +450,22 @@ export const NoteModal = ({
             useSettingsStore.getState().editor.closeModalOnBackdropClick &&
             event.target === event.currentTarget
           ) {
-            onClose();
+            requestClose();
           }
         }}
       />
+      {isConfirmingClose && (
+        <ConfirmModal
+          heading="You have unsaved changes"
+          description="Close the editor without saving?"
+          confirmLabel="Discard"
+          stacked
+          onConfirm={(confirm) => {
+            setIsConfirmingClose(false);
+            if (confirm) onClose();
+          }}
+        />
+      )}
     </>
   );
 };

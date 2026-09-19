@@ -28,12 +28,18 @@ export const DEFAULT_TOAST_SETTINGS: ToastSettings = {
   showCloseButton: true,
 };
 
+export type EditorMode = "edit" | "preview";
+
 export interface EditorSettings {
+  autosave: boolean;
+  defaultMode: EditorMode;
   showWordCount: boolean;
   closeModalOnBackdropClick: boolean;
 }
 
 export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
+  autosave: true,
+  defaultMode: "preview",
   showWordCount: true,
   closeModalOnBackdropClick: false,
 };
@@ -119,9 +125,15 @@ const normalizeToastSettings = (
   ),
 });
 
+const EDITOR_MODES: EditorMode[] = ["edit", "preview"];
+
 const normalizeEditorSettings = (
   settings: Partial<EditorSettings> | undefined,
 ): EditorSettings => ({
+  autosave: settings?.autosave ?? DEFAULT_EDITOR_SETTINGS.autosave,
+  defaultMode: EDITOR_MODES.includes(settings?.defaultMode as EditorMode)
+    ? (settings?.defaultMode as EditorMode)
+    : DEFAULT_EDITOR_SETTINGS.defaultMode,
   showWordCount:
     settings?.showWordCount ?? DEFAULT_EDITOR_SETTINGS.showWordCount,
   closeModalOnBackdropClick:
@@ -208,7 +220,7 @@ interface SettingsStore {
 }
 
 const STORAGE_KEY = "settings";
-const STORAGE_VERSION = 10;
+const STORAGE_VERSION = 11;
 
 export const useSettingsStore = create<SettingsStore>()(
   persist(

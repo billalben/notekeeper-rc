@@ -154,7 +154,7 @@ const App = () => {
     setNoteModal({ type: "edit", note });
   };
 
-  const handleNoteSubmit = (noteData: {
+  const handleNoteAutosave = (noteData: {
     title: string;
     text: string;
     tags: string[];
@@ -162,16 +162,13 @@ const App = () => {
     if (!noteModal) return;
 
     if (noteModal.type === "create") {
-      if (activeNotebookId) {
-        addNote(activeNotebookId, noteData);
-        toast.success("Note created");
-      }
-    } else {
-      updateNote(noteModal.note.id, noteData);
-      toast.success("Note saved");
+      if (!activeNotebookId) return;
+      const note = addNote(activeNotebookId, noteData);
+      if (note) setNoteModal({ type: "edit", note });
+      return;
     }
 
-    setNoteModal(null);
+    updateNote(noteModal.note.id, noteData);
   };
 
   const handleToggleNotePin = (note: Note) => {
@@ -392,6 +389,7 @@ const App = () => {
           tags={noteModal.type === "edit" ? noteModal.note.tags : undefined}
           tagSuggestions={allTags}
           tagUsage={tagUsage}
+          isNew={noteModal.type === "create"}
           onCreateTag={createTag}
           onDeleteTag={handleDeleteTag}
           postedOn={
@@ -400,7 +398,7 @@ const App = () => {
           updatedOn={
             noteModal.type === "edit" ? noteModal.note.updatedOn : undefined
           }
-          onSubmit={handleNoteSubmit}
+          onSave={handleNoteAutosave}
           onClose={() => setNoteModal(null)}
         />
       )}

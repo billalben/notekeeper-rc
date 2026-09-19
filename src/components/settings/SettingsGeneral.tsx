@@ -1,12 +1,18 @@
-import { useSettingsStore } from "../../store/useSettingsStore";
+import {
+  useSettingsStore,
+  type EditorMode,
+} from "../../store/useSettingsStore";
 import {
   ComingSoon,
   SettingsGroup,
   SettingsRow,
+  SettingsSelect,
   SettingsSwitch,
 } from "./SettingsSection";
 
 export const SettingsGeneral = () => {
+  const autosave = useSettingsStore((state) => state.editor.autosave);
+  const defaultMode = useSettingsStore((state) => state.editor.defaultMode);
   const showWordCount = useSettingsStore((state) => state.editor.showWordCount);
   const closeModalOnBackdropClick = useSettingsStore(
     (state) => state.editor.closeModalOnBackdropClick,
@@ -28,13 +34,33 @@ export const SettingsGeneral = () => {
           title="Autosave"
           description="Edits save automatically as you type."
         >
-          <ComingSoon />
+          <SettingsSwitch
+            checked={autosave}
+            label="Autosave"
+            onChange={(checked) => setEditorSettings({ autosave: checked })}
+          />
         </SettingsRow>
         <SettingsRow
           title="Open notes in"
           description="Choose between a modal or a full page."
         >
           <ComingSoon />
+        </SettingsRow>
+        <SettingsRow
+          title="Default view"
+          description="Choose how notes open in the editor."
+        >
+          <SettingsSelect
+            label="Default editor view"
+            value={defaultMode}
+            options={[
+              { value: "preview", label: "Preview" },
+              { value: "edit", label: "Edit" },
+            ]}
+            onChange={(value) =>
+              setEditorSettings({ defaultMode: value as EditorMode })
+            }
+          />
         </SettingsRow>
         <SettingsRow
           title="Word count"

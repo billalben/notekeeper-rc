@@ -1,15 +1,21 @@
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useSettingsStore } from "../store/useSettingsStore";
 
 interface ConfirmModalProps {
-  title: string;
+  title?: string;
+  heading?: ReactNode;
   description?: string;
+  confirmLabel?: string;
+  stacked?: boolean;
   onConfirm: (isConfirm: boolean) => void;
 }
 
 export const ConfirmModal = ({
   title,
+  heading,
   description,
+  confirmLabel = "Delete",
+  stacked = false,
   onConfirm,
 }: ConfirmModalProps) => {
   useEffect(() => {
@@ -23,9 +29,13 @@ export const ConfirmModal = ({
 
   return (
     <>
-      <div className="modal">
+      <div className={`modal${stacked ? " modal-stacked" : ""}`}>
         <h3 className="modal-title text-title-medium">
-          Are you sure you want to delete <strong>"{title}"</strong> ?
+          {heading ?? (
+            <>
+              Are you sure you want to delete <strong>"{title}"</strong> ?
+            </>
+          )}
         </h3>
         {description && (
           <p className="modal-description text-body-medium">{description}</p>
@@ -44,13 +54,13 @@ export const ConfirmModal = ({
             type="button"
             onClick={() => onConfirm(true)}
           >
-            <span className="text-label-large">Delete</span>
+            <span className="text-label-large">{confirmLabel}</span>
             <div className="state-layer" />
           </button>
         </div>
       </div>
       <div
-        className="overlay modal-overlay"
+        className={`overlay modal-overlay${stacked ? " modal-stacked" : ""}`}
         onClick={(event) => {
           if (
             useSettingsStore.getState().editor.closeModalOnBackdropClick &&

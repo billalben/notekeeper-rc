@@ -955,6 +955,12 @@ button.tag-chip {
   top: var(--spacing-4);
   right: var(--spacing-4);
 }
+.modal.modal-stacked {
+  z-index: 10;
+}
+.modal-overlay.modal-stacked {
+  z-index: 9;
+}
 .modal.note-modal {
   display: flex;
   flex-direction: column;
@@ -1007,6 +1013,25 @@ button.tag-chip {
 .modal-footer .counts {
   color: var(--on-surface-variant);
   white-space: nowrap;
+}
+.modal-footer .save-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: var(--on-surface-variant);
+}
+.modal-footer .save-status.saved {
+  color: var(--primary);
+}
+.modal-footer .save-status.saving .material-symbols-rounded {
+  animation: save-spin 1s linear infinite;
+}
+@keyframes save-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 .mode-toggle {
   display: flex;
@@ -2189,6 +2214,14 @@ html[data-motion="reduce"] {
   --tr-duration-medium: 0.01ms;
   --tr-duration-long: 0.01ms;
   scroll-behavior: auto;
+}
+html[data-motion="reduce"] .modal-footer .save-status.saving .material-symbols-rounded {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="full"]) .modal-footer .save-status.saving .material-symbols-rounded {
+    animation: none;
+  }
 }
 
 /* ?=== #MEDIA QUERIES === */
