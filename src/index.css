@@ -689,6 +689,11 @@ body {
   color: var(--primary);
   font-size: 1.8rem;
   cursor: default;
+  font-variation-settings:
+    "FILL" 1,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
 }
 .card .card-text {
   color: var(--on-surface-variant);
@@ -1770,7 +1775,9 @@ button.tag-chip {
   position: fixed;
   z-index: 30;
   min-width: 180px;
-  max-width: 260px;
+  max-width: min(260px, calc(100vw - 16px));
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   padding: var(--spacing-1);
@@ -1796,6 +1803,13 @@ button.tag-chip {
   flex-shrink: 0;
   font-size: 2rem;
   color: var(--on-surface-variant);
+}
+.item-menu-action.is-filled .material-symbols-rounded {
+  font-variation-settings:
+    "FILL" 1,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
 }
 .item-menu-action.separated {
   margin-block-start: var(--spacing-1);
@@ -1862,7 +1876,7 @@ button.tag-chip {
   right: 100%;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: repeat(2, max-content) 1fr max-content;
+  grid-template-rows: repeat(2, max-content) minmax(0, 1fr) max-content;
   background-color: var(--surface-container-low);
   max-width: var(--sidebar-width);
   width: 100%;
@@ -1904,6 +1918,8 @@ button.tag-chip {
 }
 .sidebar .nav {
   overflow-y: auto;
+  min-height: 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2);
@@ -1912,6 +1928,8 @@ button.tag-chip {
   color: var(--on-surface-variant);
   --state-layer-bg: var(--on-surface-variant);
   height: 56px;
+  flex-shrink: 0;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: var(--spacing-3);
@@ -1934,22 +1952,27 @@ button.tag-chip {
 }
 .nav-item-label {
   flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
   display: flex;
   align-items: center;
   gap: var(--spacing-1);
-  min-width: 0;
 }
 .nav-item-label .pin-badge {
+  flex-shrink: 0;
   font-size: 1.6rem;
   transform: rotate(45deg);
 }
 .nav-item .text {
-  flex-grow: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 .nav-item .icon-btn {
+  flex-shrink: 0;
   opacity: 0;
   visibility: hidden;
   transition: opacity var(--tr-duration-short) var(--tr-easing-linear);
@@ -2852,7 +2875,7 @@ html[data-motion="reduce"] .search-palette {
     height: 100vh;
     width: var(--sidebar-current);
     max-width: none;
-    grid-template-rows: repeat(3, max-content) 1fr max-content;
+    grid-template-rows: repeat(3, max-content) minmax(0, 1fr) max-content;
     box-shadow: none;
     border-radius: 0;
     transition: width var(--tr-duration-medium) var(--tr-easing-emphasized);

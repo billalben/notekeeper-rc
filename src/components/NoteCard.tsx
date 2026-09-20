@@ -119,6 +119,7 @@ export const NoteCard = ({
               key: "favorite",
               label: note.favorite ? "Unfavorite note" : "Favorite note",
               icon: note.favorite ? "star" : "star_border",
+              filled: note.favorite,
               onSelect: () => onToggleFavorite(note),
             },
             {

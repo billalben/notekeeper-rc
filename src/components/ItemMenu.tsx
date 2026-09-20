@@ -1,10 +1,17 @@
 import {
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
+
+const MENU_GAP = 4;
+const VIEWPORT_MARGIN = 8;
+
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(Math.max(value, min), max);
 
 export interface ItemMenuItem {
   key: string;
@@ -13,6 +20,7 @@ export interface ItemMenuItem {
   onSelect: () => void;
   disabled?: boolean;
   danger?: boolean;
+  filled?: boolean;
   separatorBefore?: boolean;
 }
 
@@ -35,8 +43,40 @@ export const ItemMenu = ({ label, items, children }: ItemMenuProps) => {
     const trigger = triggerRef.current;
     if (!trigger) return;
     const rect = trigger.getBoundingClientRect();
-    setPosition({ top: rect.bottom + 4, left: rect.right });
+    setPosition({ top: rect.bottom + MENU_GAP, left: rect.right });
   };
+
+  useLayoutEffect(() => {
+    if (!position) return;
+    const menu = menuRef.current;
+    const trigger = triggerRef.current;
+    if (!menu || !trigger) return;
+
+    const menuRect = menu.getBoundingClientRect();
+    const triggerRect = trigger.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    let top = triggerRect.bottom + MENU_GAP;
+    if (top + menuRect.height > viewportHeight - VIEWPORT_MARGIN) {
+      top = triggerRect.top - menuRect.height - MENU_GAP;
+    }
+    top = clamp(
+      top,
+      VIEWPORT_MARGIN,
+      Math.max(VIEWPORT_MARGIN, viewportHeight - menuRect.height - VIEWPORT_MARGIN),
+    );
+
+    const left = clamp(
+      triggerRect.right,
+      menuRect.width + VIEWPORT_MARGIN,
+      viewportWidth - VIEWPORT_MARGIN,
+    );
+
+    if (top !== position.top || left !== position.left) {
+      setPosition({ top, left });
+    }
+  }, [position]);
 
   useEffect(() => {
     if (!position) return;
@@ -114,8 +154,8 @@ export const ItemMenu = ({ label, items, children }: ItemMenuProps) => {
                 type="button"
                 role="menuitem"
                 className={`item-menu-action${item.danger ? " danger" : ""}${
-                  item.separatorBefore ? " separated" : ""
-                }`}
+                  item.filled ? " is-filled" : ""
+                }${item.separatorBefore ? " separated" : ""}`}
                 disabled={item.disabled}
                 onClick={(event) => {
                   event.stopPropagation();
