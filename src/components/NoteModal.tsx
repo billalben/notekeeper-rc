@@ -8,9 +8,12 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import { countWords, getRelativeTime } from "../utils";
+import { formatChord } from "../utils/shortcuts";
 import { downloadFile, MIME_MARKDOWN, slugify } from "../utils/export";
 import { toast } from "../store/useToastStore";
 import { useSettingsStore } from "../store/useSettingsStore";
+import { useUIStore } from "../store/useUIStore";
+import { useActionHotkey } from "../hooks/useActionHotkey";
 import { useFocusTrap } from "../hooks/useFocusTrap";
 import { useAutoSave } from "../hooks/useAutoSave";
 import {
@@ -42,10 +45,6 @@ const isSameDraft = (a: NoteDraft, b: NoteDraft): boolean =>
   a.tags.length === b.tags.length &&
   a.tags.every((tag, index) => tag === b.tags[index]);
 
-const IS_MAC =
-  typeof navigator !== "undefined" &&
-  /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
-
 interface NoteModalProps {
   noteId?: string;
   title?: string;
@@ -62,6 +61,7 @@ interface NoteModalProps {
   onSave: (data: NoteSaveInput) => Note | undefined;
   onCreateTag: (tag: string) => void;
   onDeleteTag: (tag: string) => void;
+  onDelete?: (noteId: string) => void;
   onClose: () => void;
 }
 
@@ -81,6 +81,7 @@ export const NoteModal = ({
   onSave,
   onCreateTag,
   onDeleteTag,
+  onDelete,
   onClose,
 }: NoteModalProps) => {
   const [title, setTitle] = useState(initialTitle);
@@ -105,6 +106,9 @@ export const NoteModal = ({
 
   const autosave = useSettingsStore((state) => state.editor.autosave);
   const showWordCount = useSettingsStore((state) => state.editor.showWordCount);
+  const saveChord = useSettingsStore((state) => state.shortcuts.saveNote);
+  const isSettingsOpen = useUIStore((state) => state.isSettingsOpen);
+  const isSearchOpen = useUIStore((state) => state.isSearchOpen);
 
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -302,51 +306,52 @@ export const NoteModal = ({
     }
   };
 
-  const actionsRef = useRef({
-    save: handleSave,
-    flush,
-    format: handleFormat,
-    close: requestClose,
-    confirming: isConfirmingClose,
-  });
+  const formatRef = useRef(handleFormat);
   useEffect(() => {
-    actionsRef.current = {
-      save: handleSave,
-      flush,
-      format: handleFormat,
-      close: requestClose,
-      confirming: isConfirmingClose,
-    };
+    formatRef.current = handleFormat;
   });
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      const { save, flush: flushSave, format, close, confirming } =
-        actionsRef.current;
       const mod = event.ctrlKey || event.metaKey;
-
-      if (event.key === "Escape" && !confirming) {
-        close();
-        return;
-      }
-      if (!mod) return;
+      if (!mod || event.target !== bodyRef.current) return;
 
       const key = event.key.toLowerCase();
-      if (key === "s") {
+      if (key === "b" || key === "i") {
         event.preventDefault();
-        if (autosave) flushSave();
-        else save();
-        return;
-      }
-      if (event.target === bodyRef.current && (key === "b" || key === "i")) {
-        event.preventDefault();
-        format(key === "b" ? "b" : "i");
+        formatRef.current(key === "b" ? "b" : "i");
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [autosave]);
+  }, []);
+
+  useActionHotkey("closeModal", requestClose, {
+    enabled: !isConfirmingClose && !isSettingsOpen && !isSearchOpen,
+    enableOnFormTags: true,
+  });
+  useActionHotkey(
+    "saveNote",
+    () => {
+      if (autosave) flush();
+      else handleSave();
+    },
+    { enableOnFormTags: true },
+  );
+  useActionHotkey(
+    "togglePreview",
+    () => handleModeChange(mode === "edit" ? "preview" : "edit"),
+    { enableOnFormTags: true },
+  );
+  useActionHotkey("downloadNote", handleDownload, { enableOnFormTags: true });
+  useActionHotkey(
+    "deleteNote",
+    () => {
+      if (noteId) onDelete?.(noteId);
+    },
+    { enabled: Boolean(noteId) && Boolean(onDelete), enableOnFormTags: true },
+  );
 
   const statusLabel = dirty
     ? autosave && status === "saving"
@@ -541,7 +546,7 @@ export const NoteModal = ({
                   onClick={handleSave}
                 >
                   Save
-                  <kbd>{IS_MAC ? "⌘" : "Ctrl"} S</kbd>
+                  <kbd>{formatChord(saveChord)}</kbd>
                 </button>
               )}
             </div>

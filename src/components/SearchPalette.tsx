@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import type { RangeTuple } from "fuse.js";
+import { useActionHotkey } from "../hooks/useActionHotkey";
 import { useNoteStore } from "../store/useNoteStore";
 import type { Note } from "../types";
 import {
@@ -87,18 +88,6 @@ export const SearchPalette = ({ onOpenNote, onClose }: SearchPaletteProps) => {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      const mod = event.ctrlKey || event.metaKey;
-
-      if (event.key === "Escape") {
-        event.preventDefault();
-        onClose();
-        return;
-      }
-      if (mod && event.key.toLowerCase() === "k") {
-        event.preventDefault();
-        onClose();
-        return;
-      }
       if (event.key === "ArrowDown") {
         event.preventDefault();
         setActiveIndex((index) =>
@@ -126,7 +115,10 @@ export const SearchPalette = ({ onOpenNote, onClose }: SearchPaletteProps) => {
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [results, activeIndex, onOpenNote, onClose]);
+  }, [results, activeIndex, onOpenNote]);
+
+  useActionHotkey("closeModal", onClose, { enableOnFormTags: true });
+  useActionHotkey("openSearch", onClose, { enableOnFormTags: true });
 
   return (
     <>

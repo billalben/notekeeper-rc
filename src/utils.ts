@@ -49,6 +49,9 @@ export const getRelativeTime = (milliSeconds: number): string => {
 
 export const DAY_MS = 24 * 60 * 60 * 1000;
 
+/** Media query shared by the sidebar (drawer vs icon rail) and shortcuts. */
+export const DESKTOP_QUERY = "(min-width: 992px)";
+
 export const TRASH_RETENTION_DAYS = 30;
 
 export type TrashRetentionDays = number | null;

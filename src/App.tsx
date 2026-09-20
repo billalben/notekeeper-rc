@@ -6,11 +6,13 @@ import { NoteList } from "./components/NoteList";
 import { NoteModal, type NoteSaveInput } from "./components/NoteModal";
 import { MoveNoteModal } from "./components/MoveNoteModal";
 import { SearchPalette } from "./components/SearchPalette";
+import { ShortcutHelpOverlay } from "./components/ShortcutHelpOverlay";
 import { SettingsModal } from "./components/settings/SettingsModal";
 import { Sidebar } from "./components/Sidebar";
 import { TagFilterBar } from "./components/TagFilterBar";
 import { ToastRegion } from "./components/ToastRegion";
 import { TrashView } from "./components/TrashView";
+import { useActionHotkey } from "./hooks/useActionHotkey";
 import { useNoteStore } from "./store/useNoteStore";
 import { useSettingsStore } from "./store/useSettingsStore";
 import { useThemeStore } from "./store/useThemeStore";
@@ -33,6 +35,7 @@ type ConfirmState = { notebookId: string; title: string };
 
 const App = () => {
   const theme = useThemeStore((state) => state.theme);
+  const toggleTheme = useThemeStore((state) => state.toggleTheme);
 
   const notebooks = useNoteStore((state) => state.notebooks);
   const allTags = useNoteStore((state) => state.tags);
@@ -74,6 +77,9 @@ const App = () => {
   const toggleTag = useUIStore((state) => state.toggleTag);
   const removeTagFilter = useUIStore((state) => state.removeTagFilter);
   const clearTagFilter = useUIStore((state) => state.clearTagFilter);
+  const isShortcutHelpOpen = useUIStore((state) => state.isShortcutHelpOpen);
+  const openShortcutHelp = useUIStore((state) => state.openShortcutHelp);
+  const closeShortcutHelp = useUIStore((state) => state.closeShortcutHelp);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [noteModal, setNoteModal] = useState<NoteModalState | null>(null);
@@ -105,34 +111,6 @@ const App = () => {
   useEffect(() => {
     purgeExpiredTrash(trashRetentionMs(retentionDays));
   }, [retentionDays, purgeExpiredTrash]);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const mod = event.ctrlKey || event.metaKey;
-      if (!mod || event.key.toLowerCase() !== "k") return;
-      if (
-        isSettingsOpen ||
-        isSearchOpen ||
-        noteModal ||
-        confirm ||
-        moveNoteTarget
-      ) {
-        return;
-      }
-      event.preventDefault();
-      openSearch();
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [
-    isSettingsOpen,
-    isSearchOpen,
-    noteModal,
-    confirm,
-    moveNoteTarget,
-    openSearch,
-  ]);
 
   useEffect(() => {
     const visible = notebooks.filter((notebook) => notebook.deletedAt === null);
@@ -320,6 +298,43 @@ const App = () => {
     toast.success(`Tag #${tag} deleted`);
   };
 
+  const handleDeleteNoteById = (noteId: string) => {
+    const note = useNoteStore
+      .getState()
+      .notebooks.flatMap((notebook) => notebook.notes)
+      .find((item) => item.id === noteId);
+    if (note) handleDeleteNote(note);
+    setNoteModal(null);
+  };
+
+  const anyModalOpen =
+    isSettingsOpen ||
+    isSearchOpen ||
+    Boolean(noteModal) ||
+    Boolean(confirm) ||
+    Boolean(moveNoteTarget) ||
+    isShortcutHelpOpen;
+
+  useActionHotkey("newNote", openCreateNote, { enabled: !anyModalOpen });
+  useActionHotkey(
+    "openSearch",
+    () => {
+      if (isSearchOpen) closeSearch();
+      else openSearch();
+    },
+    {
+      enabled:
+        !isSearchOpen &&
+        !isSettingsOpen &&
+        !noteModal &&
+        !confirm &&
+        !moveNoteTarget &&
+        !isShortcutHelpOpen,
+    },
+  );
+  useActionHotkey("toggleTheme", toggleTheme, { enabled: !anyModalOpen });
+  useActionHotkey("shortcutHelp", openShortcutHelp, { enabled: !anyModalOpen });
+
   const tagUsage = countTagUsageMap(notebooks);
 
   const handleConfirm = (isConfirm: boolean) => {
@@ -470,6 +485,7 @@ const App = () => {
           onSave={handleNoteSave}
           onCreateTag={createTag}
           onDeleteTag={handleDeleteTag}
+          onDelete={handleDeleteNoteById}
           onClose={() => setNoteModal(null)}
         />
       )}
@@ -491,6 +507,10 @@ const App = () => {
 
       {isSearchOpen && (
         <SearchPalette onOpenNote={openSearchNote} onClose={closeSearch} />
+      )}
+
+      {isShortcutHelpOpen && (
+        <ShortcutHelpOverlay onClose={closeShortcutHelp} />
       )}
 
       <ToastRegion />

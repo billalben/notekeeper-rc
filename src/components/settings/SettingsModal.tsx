@@ -1,15 +1,19 @@
 import { useEffect, useRef, useState, type ComponentType } from "react";
+import { useActionHotkey } from "../../hooks/useActionHotkey";
 import { useSettingsStore } from "../../store/useSettingsStore";
+import { useUIStore } from "../../store/useUIStore";
 import { IconButton } from "../IconButton";
 import { SettingsAbout } from "./SettingsAbout";
 import { SettingsAppearance } from "./SettingsAppearance";
 import { SettingsData } from "./SettingsData";
 import { SettingsGeneral } from "./SettingsGeneral";
 import { SettingsNotifications } from "./SettingsNotifications";
+import { SettingsShortcuts } from "./SettingsShortcuts";
 
 type SectionId =
   | "general"
   | "appearance"
+  | "shortcuts"
   | "notifications"
   | "data"
   | "about";
@@ -28,6 +32,12 @@ const SECTIONS: Section[] = [
     label: "Appearance",
     icon: "palette",
     Component: SettingsAppearance,
+  },
+  {
+    id: "shortcuts",
+    label: "Shortcuts",
+    icon: "keyboard",
+    Component: SettingsShortcuts,
   },
   {
     id: "notifications",
@@ -50,6 +60,12 @@ export const SettingsModal = ({ onClose }: SettingsModalProps) => {
   const closeOnBackdropClick = useSettingsStore(
     (state) => state.editor.closeModalOnBackdropClick,
   );
+  const isShortcutHelpOpen = useUIStore((state) => state.isShortcutHelpOpen);
+
+  useActionHotkey("closeModal", onClose, {
+    enabled: !isShortcutHelpOpen,
+    enableOnFormTags: true,
+  });
 
   useEffect(() => {
     const previouslyFocused = document.activeElement as HTMLElement | null;
@@ -58,13 +74,7 @@ export const SettingsModal = ({ onClose }: SettingsModalProps) => {
     const { overflow } = document.body.style;
     document.body.style.overflow = "hidden";
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handleKeyDown);
-
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = overflow;
       previouslyFocused?.focus?.();
     };

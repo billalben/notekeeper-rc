@@ -4,7 +4,6 @@ import {
   type EditorPresentation,
 } from "../../store/useSettingsStore";
 import {
-  ComingSoon,
   SettingsGroup,
   SettingsRow,
   SettingsSelect,
@@ -27,6 +26,10 @@ export const SettingsGeneral = () => {
   );
   const setSidebarSettings = useSettingsStore(
     (state) => state.setSidebarSettings,
+  );
+  const header = useSettingsStore((state) => state.header);
+  const setHeaderSettings = useSettingsStore(
+    (state) => state.setHeaderSettings,
   );
 
   return (
@@ -118,12 +121,42 @@ export const SettingsGeneral = () => {
         </SettingsRow>
       </SettingsGroup>
 
-      <SettingsGroup title="Shortcuts">
+      <SettingsGroup title="Header">
         <SettingsRow
-          title="Keyboard shortcuts"
-          description="View and rebind keyboard shortcuts."
+          title="Search"
+          description="Show the search button in the header."
         >
-          <ComingSoon />
+          <SettingsSwitch
+            checked={header.showSearch}
+            label="Show search button"
+            onChange={(checked) =>
+              setHeaderSettings({ showSearch: checked })
+            }
+          />
+        </SettingsRow>
+        <SettingsRow
+          title="Shortcuts"
+          description="Show the keyboard shortcut button in the header."
+        >
+          <SettingsSwitch
+            checked={header.showShortcuts}
+            label="Show shortcuts button"
+            onChange={(checked) =>
+              setHeaderSettings({ showShortcuts: checked })
+            }
+          />
+        </SettingsRow>
+        <SettingsRow
+          title="Theme toggle"
+          description="Show the light/dark mode button in the header."
+        >
+          <SettingsSwitch
+            checked={header.showTheme}
+            label="Show theme toggle"
+            onChange={(checked) =>
+              setHeaderSettings({ showTheme: checked })
+            }
+          />
         </SettingsRow>
       </SettingsGroup>
     </>

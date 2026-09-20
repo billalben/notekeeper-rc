@@ -142,7 +142,6 @@
   /* ? Others */
   --sidebar-width: 360px;
   --sidebar-current: var(--sidebar-width);
-  --sidebar-collapsed-width: 84px;
 }
 [data-theme="light"] {
   color-scheme: light;
@@ -2045,11 +2044,15 @@ button.tag-chip {
 .main .header .text {
   color: var(--on-surface-variant);
 }
-.settings-btn {
+.settings-btn,
+.theme-btn {
   transition: transform var(--tr-duration-medium) var(--tr-easing-emphasized);
 }
-.settings-btn:where(:hover, :focus-visible) {
+.settings-btn.is-rotated {
   transform: rotate(90deg);
+}
+.theme-btn.is-rotated {
+  transform: rotate(180deg);
 }
 .main > .title {
   margin-block: var(--spacing-3);
@@ -2915,64 +2918,6 @@ html[data-motion="reduce"] .search-palette {
     transition: none;
   }
 
-  /* ?=== #SIDEBAR COLLAPSED === */
-  .sidebar.collapsed {
-    transition: none;
-  }
-  .sidebar.collapsed .wrapper-1 {
-    justify-content: center;
-    padding-inline: 0;
-  }
-  .sidebar.collapsed .wrapper-1 > div,
-  .sidebar.collapsed .wrapper-2 h2,
-  .sidebar.collapsed .cp-info,
-  .sidebar.collapsed .nav-item .text,
-  .sidebar.collapsed .nav-item .nav-item-label,
-  .sidebar.collapsed .nav-item .icon-btn,
-  .sidebar.collapsed .notebook-count {
-    display: none;
-  }
-  .sidebar.collapsed .wrapper-2 {
-    justify-content: center;
-    padding-inline: 0;
-  }
-  .sidebar.collapsed .nav-item {
-    justify-content: center;
-    padding-inline: 0;
-  }
-  .sidebar.collapsed .nav-item-icon,
-  .sidebar.collapsed .trash-nav-item > .material-symbols-rounded,
-  .sidebar.collapsed .favorite-nav-item > .material-symbols-rounded {
-    margin-inline: auto;
-  }
-  .sidebar.collapsed .trash-nav-item,
-  .sidebar.collapsed .favorite-nav-item {
-    justify-content: center;
-    padding-inline: 0;
-  }
-  .sidebar.collapsed .trash-badge,
-  .sidebar.collapsed .favorite-badge {
-    position: absolute;
-    top: 6px;
-    inset-inline-end: 14px;
-    min-width: 16px;
-    height: 16px;
-    font-size: 1rem;
-  }
-  .sidebar.collapsed .trash-nav-item,
-  .sidebar.collapsed .favorite-nav-item {
-    position: relative;
-  }
-  .sidebar.collapsed .fab {
-    width: 48px;
-    padding-inline: 0;
-    margin-inline: auto;
-    border-radius: var(--radius-full);
-  }
-  .sidebar.collapsed .fab .text {
-    display: none;
-  }
-
   /* ?=== #MAIN === */
   .main {
     --main-padding-inline: var(--spacing-10);
@@ -2981,12 +2926,6 @@ html[data-motion="reduce"] .search-palette {
   .main .fab {
     display: none;
   }
-  .collapse-btn {
-    display: grid;
-  }
-}
-.collapse-btn {
-  display: none;
 }
 
 /* Responsive for larger than 1400px screen */
@@ -2997,4 +2936,117 @@ html[data-motion="reduce"] .search-palette {
     width: 100%;
     margin-inline: auto;
   }
+}
+
+/* * Keyboard shortcuts */
+.shortcut-control {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+.shortcut-key-btn {
+  min-width: 84px;
+  padding: var(--spacing-2) var(--spacing-4);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-small);
+  background-color: var(--surface-container);
+  color: var(--on-surface);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background-color var(--tr-duration-short) var(--tr-easing-standard),
+    border-color var(--tr-duration-short) var(--tr-easing-standard);
+}
+.shortcut-key-btn:hover {
+  background-color: var(--surface-container-high);
+}
+.shortcut-key-btn.is-recording {
+  border-color: var(--primary);
+  color: var(--primary);
+  background-color: var(--secondary-container);
+  animation: shortcut-recording-pulse 1.2s ease-in-out infinite;
+}
+@keyframes shortcut-recording-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+.shortcut-reset-btn {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--on-surface-variant);
+  cursor: pointer;
+  transition: background-color var(--tr-duration-short) var(--tr-easing-standard);
+}
+.shortcut-reset-btn:hover {
+  background-color: var(--surface-container-high);
+  color: var(--on-surface);
+}
+.shortcut-reset-btn .material-symbols-rounded {
+  font-size: 18px;
+}
+
+/* * Shortcut help overlay */
+.shortcut-help-modal {
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  max-height: min(80vh, 720px);
+  padding: 0;
+}
+.shortcut-help-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  padding: var(--spacing-5) var(--spacing-6);
+  border-block-end: 1px solid var(--outline-variant);
+}
+.shortcut-help-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--spacing-6);
+  padding: var(--spacing-6);
+  overflow-y: auto;
+}
+.shortcut-help-group-title {
+  color: var(--on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-p-050);
+  margin-block-end: var(--spacing-2);
+}
+.shortcut-help-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.shortcut-help-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  padding-block: var(--spacing-1);
+}
+.shortcut-key {
+  flex-shrink: 0;
+  min-width: 28px;
+  padding: var(--spacing-05) var(--spacing-2);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-small);
+  background-color: var(--surface-container);
+  color: var(--on-surface-variant);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }

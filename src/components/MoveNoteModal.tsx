@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useActionHotkey } from "../hooks/useActionHotkey";
 import { useSettingsStore } from "../store/useSettingsStore";
 import type { Note, Notebook } from "../types";
 import { IconButton } from "./IconButton";
@@ -16,14 +16,7 @@ export const MoveNoteModal = ({
   onMove,
   onClose,
 }: MoveNoteModalProps) => {
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
+  useActionHotkey("closeModal", onClose, { enableOnFormTags: true });
 
   const destinations = notebooks.filter(
     (notebook) =>

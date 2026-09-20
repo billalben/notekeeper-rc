@@ -1,4 +1,5 @@
-import { useEffect, type ReactNode } from "react";
+import type { ReactNode } from "react";
+import { useActionHotkey } from "../hooks/useActionHotkey";
 import { useSettingsStore } from "../store/useSettingsStore";
 
 interface ConfirmModalProps {
@@ -18,14 +19,9 @@ export const ConfirmModal = ({
   stacked = false,
   onConfirm,
 }: ConfirmModalProps) => {
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onConfirm(false);
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [onConfirm]);
+  useActionHotkey("closeModal", () => onConfirm(false), {
+    enableOnFormTags: true,
+  });
 
   return (
     <>

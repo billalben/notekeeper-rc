@@ -4,19 +4,15 @@ import {
   SIDEBAR_WIDTH_MIN,
   useSettingsStore,
 } from "../store/useSettingsStore";
-
-export const SIDEBAR_COLLAPSED_WIDTH = 84;
+import { DESKTOP_QUERY } from "../utils";
 
 const clampWidth = (value: number): number =>
   Math.min(SIDEBAR_WIDTH_MAX, Math.max(SIDEBAR_WIDTH_MIN, value));
 
-export const applySidebarWidth = (
-  collapsed: boolean,
-  width: number,
-): void => {
+export const applySidebarWidth = (width: number): void => {
   document.documentElement.style.setProperty(
     "--sidebar-current",
-    collapsed ? `${SIDEBAR_COLLAPSED_WIDTH}px` : `${width}px`,
+    `${width}px`,
   );
 };
 
@@ -26,7 +22,7 @@ export const applySidebarWidth = (
  * `--sidebar-current` custom property, and committed on release. `Escape`
  * cancels the drag and restores the previous width.
  */
-export const useSidebarResize = (collapsed: boolean) => {
+export const useSidebarResize = () => {
   const width = useSettingsStore((state) => state.sidebar.width);
   const setSidebarSettings = useSettingsStore(
     (state) => state.setSidebarSettings,
@@ -37,8 +33,8 @@ export const useSidebarResize = (collapsed: boolean) => {
   const startRef = useRef({ pointerX: 0, width });
 
   useEffect(() => {
-    applySidebarWidth(collapsed, isResizing ? dragWidth : width);
-  }, [collapsed, isResizing, dragWidth, width]);
+    applySidebarWidth(isResizing ? dragWidth : width);
+  }, [isResizing, dragWidth, width]);
 
   useEffect(() => {
     if (!isResizing) return;
@@ -81,7 +77,7 @@ export const useSidebarResize = (collapsed: boolean) => {
   }, [isResizing, setSidebarSettings]);
 
   const startResize = (event: PointerEvent<HTMLDivElement>) => {
-    if (!window.matchMedia("(min-width: 992px)").matches) return;
+    if (!window.matchMedia(DESKTOP_QUERY).matches) return;
     event.preventDefault();
     startRef.current = { pointerX: event.clientX, width };
     setDragWidth(width);

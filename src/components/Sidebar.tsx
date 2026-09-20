@@ -20,8 +20,6 @@ interface SidebarProps {
   onRequestDeleteNotebook: (notebook: Notebook) => void;
 }
 
-const DESKTOP_QUERY = "(min-width: 992px)";
-
 export const Sidebar = ({
   open,
   onClose,
@@ -36,11 +34,7 @@ export const Sidebar = ({
   const renameNotebook = useNoteStore((state) => state.renameNotebook);
   const moveNotebook = useNoteStore((state) => state.moveNotebook);
 
-  const collapsed = useSettingsStore((state) => state.sidebar.collapsed);
   const showCounts = useSettingsStore((state) => state.sidebar.showCounts);
-  const setSidebarSettings = useSettingsStore(
-    (state) => state.setSidebarSettings,
-  );
 
   const isAdding = useUIStore((state) => state.isAddingNotebook);
   const startAddingNotebook = useUIStore((state) => state.startAddingNotebook);
@@ -51,10 +45,7 @@ export const Sidebar = ({
   const showNotes = useUIStore((state) => state.showNotes);
   const clearTagFilter = useUIStore((state) => state.clearTagFilter);
 
-  const { isResizing, startResize } = useSidebarResize(collapsed);
-
-  const isDesktop =
-    typeof window !== "undefined" && window.matchMedia(DESKTOP_QUERY).matches;
+  const { isResizing, startResize } = useSidebarResize();
 
   const visibleNotebooks = withMoveFlags(
     sortByPinned(notebooks.filter((notebook) => notebook.deletedAt === null)),
@@ -113,9 +104,7 @@ export const Sidebar = ({
 
   return (
     <header
-      className={`sidebar${open ? " active" : ""}${
-        collapsed && isDesktop ? " collapsed" : ""
-      }`}
+      className={`sidebar${open ? " active" : ""}`}
       data-sidebar
     >
       <div className="wrapper wrapper-1">
@@ -123,14 +112,6 @@ export const Sidebar = ({
           <img src={logoLight} alt="NoteKeeper" className="logo-light" />
           <img src={logoDark} alt="NoteKeeper" className="logo-dark" />
         </div>
-
-        <IconButton
-          icon={collapsed ? "menu_open" : "menu"}
-          tooltip={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="collapse-btn"
-          onClick={() => setSidebarSettings({ collapsed: !collapsed })}
-        />
 
         <IconButton
           icon="close"

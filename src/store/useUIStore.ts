@@ -20,6 +20,11 @@ interface UIStore {
   toggleTag: (tag: string) => void;
   removeTagFilter: (tag: string) => void;
   clearTagFilter: () => void;
+  isShortcutHelpOpen: boolean;
+  openShortcutHelp: () => void;
+  closeShortcutHelp: () => void;
+  isRecordingShortcut: boolean;
+  setRecordingShortcut: (recording: boolean) => void;
 }
 
 export const useUIStore = create<UIStore>((set) => ({
@@ -54,4 +59,10 @@ export const useUIStore = create<UIStore>((set) => ({
       ),
     })),
   clearTagFilter: () => set({ activeTags: [] }),
+  isShortcutHelpOpen: false,
+  openShortcutHelp: () => set({ isShortcutHelpOpen: true }),
+  closeShortcutHelp: () => set({ isShortcutHelpOpen: false }),
+  isRecordingShortcut: false,
+  setRecordingShortcut: (recording) =>
+    set({ isRecordingShortcut: recording }),
 }));

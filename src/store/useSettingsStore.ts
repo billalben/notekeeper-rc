@@ -6,6 +6,13 @@ import {
   TRASH_RETENTION_OPTIONS,
   type TrashRetentionDays,
 } from "../utils";
+import {
+  DEFAULT_SHORTCUTS,
+  normalizeChord,
+  normalizeShortcuts,
+  type ActionId,
+  type ShortcutBindings,
+} from "../utils/shortcuts";
 
 export const TOAST_DURATION_MIN = 1000;
 export const TOAST_DURATION_MAX = 6000;
@@ -118,16 +125,35 @@ export const DEFAULT_APPEARANCE_SETTINGS: AppearanceSettings = {
 };
 
 export interface SidebarSettings {
-  collapsed: boolean;
   width: number;
   showCounts: boolean;
 }
 
 export const DEFAULT_SIDEBAR_SETTINGS: SidebarSettings = {
-  collapsed: false,
   width: SIDEBAR_WIDTH_DEFAULT,
   showCounts: true,
 };
+
+export interface HeaderSettings {
+  showSearch: boolean;
+  showShortcuts: boolean;
+  showTheme: boolean;
+}
+
+export const DEFAULT_HEADER_SETTINGS: HeaderSettings = {
+  showSearch: true,
+  showShortcuts: true,
+  showTheme: true,
+};
+
+const normalizeHeaderSettings = (
+  settings: Partial<HeaderSettings> | undefined,
+): HeaderSettings => ({
+  showSearch: settings?.showSearch ?? DEFAULT_HEADER_SETTINGS.showSearch,
+  showShortcuts:
+    settings?.showShortcuts ?? DEFAULT_HEADER_SETTINGS.showShortcuts,
+  showTheme: settings?.showTheme ?? DEFAULT_HEADER_SETTINGS.showTheme,
+});
 
 export const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value));
@@ -222,7 +248,6 @@ const normalizeAppearance = (
 const normalizeSidebarSettings = (
   settings: Partial<SidebarSettings> | undefined,
 ): SidebarSettings => ({
-  collapsed: settings?.collapsed ?? DEFAULT_SIDEBAR_SETTINGS.collapsed,
   width: clamp(
     settings?.width ?? DEFAULT_SIDEBAR_SETTINGS.width,
     SIDEBAR_WIDTH_MIN,
@@ -236,9 +261,11 @@ interface SettingsStore {
   editor: EditorSettings;
   trash: TrashSettings;
   sidebar: SidebarSettings;
+  header: HeaderSettings;
   motion: MotionPreference;
   appearance: AppearanceSettings;
   export: ExportSettings;
+  shortcuts: ShortcutBindings;
   setMotion: (motion: MotionPreference) => void;
   setAppearanceSettings: (partial: Partial<AppearanceSettings>) => void;
   resetAppearanceSettings: () => void;
@@ -248,11 +275,15 @@ interface SettingsStore {
   resetEditorSettings: () => void;
   setTrashSettings: (partial: Partial<TrashSettings>) => void;
   setSidebarSettings: (partial: Partial<SidebarSettings>) => void;
+  setHeaderSettings: (partial: Partial<HeaderSettings>) => void;
   setExportSettings: (partial: Partial<ExportSettings>) => void;
+  setShortcut: (actionId: ActionId, chord: string) => void;
+  resetShortcut: (actionId: ActionId) => void;
+  resetAllShortcuts: () => void;
 }
 
 const STORAGE_KEY = "settings";
-const STORAGE_VERSION = 12;
+const STORAGE_VERSION = 14;
 
 export const useSettingsStore = create<SettingsStore>()(
   persist(
@@ -261,9 +292,11 @@ export const useSettingsStore = create<SettingsStore>()(
       editor: DEFAULT_EDITOR_SETTINGS,
       trash: DEFAULT_TRASH_SETTINGS,
       sidebar: DEFAULT_SIDEBAR_SETTINGS,
+      header: DEFAULT_HEADER_SETTINGS,
       motion: DEFAULT_MOTION,
       appearance: DEFAULT_APPEARANCE_SETTINGS,
       export: DEFAULT_EXPORT_SETTINGS,
+      shortcuts: DEFAULT_SHORTCUTS,
 
       setMotion: (motion) => set({ motion: normalizeMotion(motion) }),
 
@@ -299,10 +332,33 @@ export const useSettingsStore = create<SettingsStore>()(
           sidebar: normalizeSidebarSettings({ ...state.sidebar, ...partial }),
         })),
 
+      setHeaderSettings: (partial) =>
+        set((state) => ({
+          header: normalizeHeaderSettings({ ...state.header, ...partial }),
+        })),
+
       setExportSettings: (partial) =>
         set((state) => ({
           export: normalizeExportSettings({ ...state.export, ...partial }),
         })),
+
+      setShortcut: (actionId, chord) =>
+        set((state) => ({
+          shortcuts: {
+            ...state.shortcuts,
+            [actionId]: normalizeChord(chord) || DEFAULT_SHORTCUTS[actionId],
+          },
+        })),
+
+      resetShortcut: (actionId) =>
+        set((state) => ({
+          shortcuts: {
+            ...state.shortcuts,
+            [actionId]: DEFAULT_SHORTCUTS[actionId],
+          },
+        })),
+
+      resetAllShortcuts: () => set({ shortcuts: DEFAULT_SHORTCUTS }),
     }),
     {
       name: STORAGE_KEY,
@@ -312,9 +368,11 @@ export const useSettingsStore = create<SettingsStore>()(
         editor: state.editor,
         trash: state.trash,
         sidebar: state.sidebar,
+        header: state.header,
         motion: state.motion,
         appearance: state.appearance,
         export: state.export,
+        shortcuts: state.shortcuts,
       }),
       migrate: (persistedState) => {
         const state = persistedState as
@@ -323,9 +381,11 @@ export const useSettingsStore = create<SettingsStore>()(
               editor?: Partial<EditorSettings>;
               trash?: Partial<TrashSettings>;
               sidebar?: Partial<SidebarSettings>;
+              header?: Partial<HeaderSettings>;
               motion?: unknown;
               appearance?: Partial<AppearanceSettings>;
               export?: Partial<ExportSettings>;
+              shortcuts?: unknown;
             }
           | undefined;
         return {
@@ -333,9 +393,11 @@ export const useSettingsStore = create<SettingsStore>()(
           editor: normalizeEditorSettings(state?.editor),
           trash: normalizeTrashSettings(state?.trash),
           sidebar: normalizeSidebarSettings(state?.sidebar),
+          header: normalizeHeaderSettings(state?.header),
           motion: normalizeMotion(state?.motion),
           appearance: normalizeAppearance(state?.appearance),
           export: normalizeExportSettings(state?.export),
+          shortcuts: normalizeShortcuts(state?.shortcuts),
         };
       },
       merge: (persistedState, currentState) => {
@@ -345,9 +407,11 @@ export const useSettingsStore = create<SettingsStore>()(
               editor?: Partial<EditorSettings>;
               trash?: Partial<TrashSettings>;
               sidebar?: Partial<SidebarSettings>;
+              header?: Partial<HeaderSettings>;
               motion?: unknown;
               appearance?: Partial<AppearanceSettings>;
               export?: Partial<ExportSettings>;
+              shortcuts?: unknown;
             }
           | undefined;
         return {
@@ -356,9 +420,11 @@ export const useSettingsStore = create<SettingsStore>()(
           editor: normalizeEditorSettings(state?.editor),
           trash: normalizeTrashSettings(state?.trash),
           sidebar: normalizeSidebarSettings(state?.sidebar),
+          header: normalizeHeaderSettings(state?.header),
           motion: normalizeMotion(state?.motion),
           appearance: normalizeAppearance(state?.appearance),
           export: normalizeExportSettings(state?.export),
+          shortcuts: normalizeShortcuts(state?.shortcuts),
         };
       },
     },
