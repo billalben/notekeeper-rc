@@ -10,7 +10,6 @@ interface NavItemProps {
   notebook: Notebook & MoveFlags;
   isActive: boolean;
   noteCount: number;
-  showCounts: boolean;
   onSelect: (notebookId: string) => void;
   onRename: (notebookId: string, name: string) => void;
   onTogglePin: (notebook: Notebook) => void;
@@ -22,7 +21,6 @@ export const NavItem = ({
   notebook,
   isActive,
   noteCount,
-  showCounts,
   onSelect,
   onRename,
   onTogglePin,
@@ -65,61 +63,80 @@ export const NavItem = ({
     }
   };
 
+  const isEmpty = noteCount === 0;
+
   return (
     <div
-      className={`nav-item${isActive ? " active" : ""}`}
-      role="button"
-      tabIndex={0}
-      onClick={() => onSelect(notebook.id)}
-      onKeyDown={(event) => {
-        if (event.key === "Enter") onSelect(notebook.id);
-      }}
+      className={`nav-item${isActive ? " is-selected" : ""}${
+        isEmpty ? " is-empty" : ""
+      }`}
       data-pinned={notebook.pinned ? "true" : undefined}
     >
-      <span
-        className="material-symbols-rounded nav-item-icon"
-        aria-hidden="true"
-      >
-        folder
-      </span>
-      <span className="nav-item-label">
-        {isEditing ? (
-          <input
-            ref={inputRef}
-            className="text text-label-large"
-            value={draftName}
-            onClick={(event) => event.stopPropagation()}
-            onChange={(event) => setDraftName(event.target.value)}
-            onBlur={commitRename}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") commitRename();
-              if (event.key === "Escape") cancelRename();
-            }}
-          />
-        ) : (
-          <span className="text text-label-large" data-notebook-field>
-            {notebook.name}
-          </span>
-        )}
-        {notebook.pinned && (
+      {isEditing ? (
+        <div className="nav-item-main">
           <span
-            className="material-symbols-rounded pin-badge"
-            aria-label="Pinned"
-            title="Pinned"
+            className="material-symbols-rounded nav-item-icon"
+            aria-hidden="true"
           >
-            push_pin
+            folder
           </span>
-        )}
-      </span>
-      {showCounts && noteCount > 0 && (
-        <span
-          className="notebook-count text-label-small"
-          aria-label={`${noteCount} notes`}
-          title={`${noteCount} notes`}
+          <span className="nav-item-label">
+            <input
+              ref={inputRef}
+              className="text text-label-large"
+              value={draftName}
+              onChange={(event) => setDraftName(event.target.value)}
+              onBlur={commitRename}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") commitRename();
+                if (event.key === "Escape") cancelRename();
+              }}
+            />
+          </span>
+          <div className="state-layer" />
+        </div>
+      ) : (
+        <button
+          type="button"
+          className="nav-item-main"
+          aria-current={isActive ? "page" : undefined}
+          title={notebook.name}
+          onClick={() => onSelect(notebook.id)}
+          data-sidebar-nav-item
         >
-          {noteCount}
-        </span>
+          <span
+            className="material-symbols-rounded nav-item-icon"
+            aria-hidden="true"
+          >
+            folder
+          </span>
+          <span className="nav-item-label">
+            <span className="text text-label-large" data-notebook-field>
+              {notebook.name}
+            </span>
+            {notebook.pinned && (
+              <span
+                className="material-symbols-rounded pin-badge"
+                aria-label="Pinned"
+                title="Pinned"
+              >
+                push_pin
+              </span>
+            )}
+          </span>
+          {noteCount > 0 && (
+            <span
+              className="notebook-count text-label-small"
+              aria-label={`${noteCount} notes`}
+              title={`${noteCount} notes`}
+            >
+              {noteCount}
+            </span>
+          )}
+          <div className="state-layer" />
+        </button>
       )}
+
       <ItemMenu
         label="Notebook actions"
         items={[
@@ -166,7 +183,6 @@ export const NavItem = ({
           },
         ]}
       />
-      <div className="state-layer" />
     </div>
   );
 };

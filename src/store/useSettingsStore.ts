@@ -126,12 +126,14 @@ export const DEFAULT_APPEARANCE_SETTINGS: AppearanceSettings = {
 
 export interface SidebarSettings {
   width: number;
-  showCounts: boolean;
+  notebooksCollapsed: boolean;
+  moreCollapsed: boolean;
 }
 
 export const DEFAULT_SIDEBAR_SETTINGS: SidebarSettings = {
   width: SIDEBAR_WIDTH_DEFAULT,
-  showCounts: true,
+  notebooksCollapsed: false,
+  moreCollapsed: false,
 };
 
 export interface HeaderSettings {
@@ -253,7 +255,14 @@ const normalizeSidebarSettings = (
     SIDEBAR_WIDTH_MIN,
     SIDEBAR_WIDTH_MAX,
   ),
-  showCounts: settings?.showCounts ?? DEFAULT_SIDEBAR_SETTINGS.showCounts,
+  notebooksCollapsed:
+    typeof settings?.notebooksCollapsed === "boolean"
+      ? settings.notebooksCollapsed
+      : DEFAULT_SIDEBAR_SETTINGS.notebooksCollapsed,
+  moreCollapsed:
+    typeof settings?.moreCollapsed === "boolean"
+      ? settings.moreCollapsed
+      : DEFAULT_SIDEBAR_SETTINGS.moreCollapsed,
 });
 
 interface SettingsStore {
@@ -283,7 +292,7 @@ interface SettingsStore {
 }
 
 const STORAGE_KEY = "settings";
-const STORAGE_VERSION = 14;
+const STORAGE_VERSION = 15;
 
 export const useSettingsStore = create<SettingsStore>()(
   persist(

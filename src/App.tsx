@@ -21,6 +21,7 @@ import { useUIStore } from "./store/useUIStore";
 import { toast } from "./store/useToastStore";
 import type { Note, Notebook } from "./types";
 import {
+  collectAllNotes,
   collectFavoriteNotes,
   collectPinnedNotes,
   countTagUsageMap,
@@ -160,6 +161,12 @@ const App = () => {
   }));
 
   const pinnedNotes = collectPinnedNotes(notebooks).map((note) => ({
+    ...note,
+    canMoveUp: false,
+    canMoveDown: false,
+  }));
+
+  const allNotes = collectAllNotes(notebooks).map((note) => ({
     ...note,
     canMoveUp: false,
     canMoveDown: false,
@@ -393,6 +400,26 @@ const App = () => {
           <StatisticsView onOpenNote={openStatsNote} onNewNote={openCreateNote} />
         ) : view === "trash" ? (
           <TrashView />
+        ) : view === "all" ? (
+          <>
+            <h2 className="title text-title-medium" data-note-panel-title>
+              All notes
+            </h2>
+
+            <NoteList
+              notes={allNotes}
+              canMoveToNotebook={visibleNotebooks.length > 1}
+              notebookNames={notebookNames}
+              emptyMessage="No notes yet"
+              emptyIcon="note_stack"
+              onOpen={openEditNote}
+              onTogglePin={handleToggleNotePin}
+              onToggleFavorite={handleToggleNoteFavorite}
+              onMove={handleMoveNote}
+              onRequestMove={setMoveNoteTarget}
+              onRequestDelete={handleDeleteNote}
+            />
+          </>
         ) : view === "pinned" ? (
           <>
             <h2 className="title text-title-medium" data-note-panel-title>

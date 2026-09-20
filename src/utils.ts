@@ -208,6 +208,20 @@ export const collectPinnedNotes = (notebooks: Notebook[]): Note[] =>
     )
     .sort((a, b) => b.updatedOn - a.updatedOn);
 
+/**
+ * Every visible (non-trashed) note across visible notebooks, pinned first, then
+ * most recently updated first.
+ */
+export const collectAllNotes = (notebooks: Notebook[]): Note[] =>
+  notebooks
+    .filter((notebook) => notebook.deletedAt === null)
+    .flatMap((notebook) =>
+      notebook.notes.filter((note) => note.deletedAt === null),
+    )
+    .sort(
+      (a, b) => Number(b.pinned) - Number(a.pinned) || b.updatedOn - a.updatedOn,
+    );
+
 export type MoveDirection = "up" | "down";
 
 interface Movable {
