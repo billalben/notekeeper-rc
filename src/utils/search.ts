@@ -44,7 +44,7 @@ export const createNoteSearchIndex = (
   entries: SearchEntry[],
 ): Fuse<SearchEntry> => new Fuse(entries, FUSE_OPTIONS);
 
-const stripMarkdown = (text: string): string =>
+export const stripMarkdown = (text: string): string =>
   text
     .replace(/```[\s\S]*?```/g, " ")
     .replace(/`([^`]*)`/g, "$1")

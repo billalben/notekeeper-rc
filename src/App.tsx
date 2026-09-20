@@ -9,6 +9,7 @@ import { SearchPalette } from "./components/SearchPalette";
 import { ShortcutHelpOverlay } from "./components/ShortcutHelpOverlay";
 import { SettingsModal } from "./components/settings/SettingsModal";
 import { Sidebar } from "./components/Sidebar";
+import { StatisticsView } from "./components/StatisticsView";
 import { TagFilterBar } from "./components/TagFilterBar";
 import { ToastRegion } from "./components/ToastRegion";
 import { TrashView } from "./components/TrashView";
@@ -21,6 +22,7 @@ import { toast } from "./store/useToastStore";
 import type { Note, Notebook } from "./types";
 import {
   collectFavoriteNotes,
+  collectPinnedNotes,
   countTagUsageMap,
   filterNotesByTags,
   sortByPinned,
@@ -157,6 +159,12 @@ const App = () => {
     canMoveDown: false,
   }));
 
+  const pinnedNotes = collectPinnedNotes(notebooks).map((note) => ({
+    ...note,
+    canMoveUp: false,
+    canMoveDown: false,
+  }));
+
   const openCreateNote = () => {
     if (visibleNotebooks.length === 0) return;
     setNoteModal({ type: "create" });
@@ -172,6 +180,13 @@ const App = () => {
     clearTagFilter();
     setNoteModal({ type: "edit", note });
     closeSearch();
+  };
+
+  const openStatsNote = (note: Note) => {
+    setActiveNotebook(note.notebookId);
+    showNotes();
+    clearTagFilter();
+    setNoteModal({ type: "edit", note });
   };
 
   const handleNoteSave = (noteData: NoteSaveInput): Note | undefined => {
@@ -374,8 +389,30 @@ const App = () => {
       <main className="main">
         <Header onOpenSidebar={() => setSidebarOpen(true)} />
 
-        {view === "trash" ? (
+        {view === "stats" ? (
+          <StatisticsView onOpenNote={openStatsNote} onNewNote={openCreateNote} />
+        ) : view === "trash" ? (
           <TrashView />
+        ) : view === "pinned" ? (
+          <>
+            <h2 className="title text-title-medium" data-note-panel-title>
+              Pinned
+            </h2>
+
+            <NoteList
+              notes={pinnedNotes}
+              canMoveToNotebook={visibleNotebooks.length > 1}
+              notebookNames={notebookNames}
+              emptyMessage="No pinned notes yet"
+              emptyIcon="push_pin"
+              onOpen={openEditNote}
+              onTogglePin={handleToggleNotePin}
+              onToggleFavorite={handleToggleNoteFavorite}
+              onMove={handleMoveNote}
+              onRequestMove={setMoveNoteTarget}
+              onRequestDelete={handleDeleteNote}
+            />
+          </>
         ) : view === "favorites" ? (
           <>
             <h2 className="title text-title-medium" data-note-panel-title>

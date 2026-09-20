@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type MainView = "notes" | "favorites" | "trash";
+export type MainView = "notes" | "pinned" | "favorites" | "trash" | "stats";
 
 interface UIStore {
   isAddingNotebook: boolean;
@@ -15,6 +15,8 @@ interface UIStore {
   view: MainView;
   openTrash: () => void;
   openFavorites: () => void;
+  openPinned: () => void;
+  openStats: () => void;
   showNotes: () => void;
   activeTags: string[];
   toggleTag: (tag: string) => void;
@@ -40,6 +42,8 @@ export const useUIStore = create<UIStore>((set) => ({
   view: "notes",
   openTrash: () => set({ view: "trash", activeTags: [] }),
   openFavorites: () => set({ view: "favorites", activeTags: [] }),
+  openPinned: () => set({ view: "pinned", activeTags: [] }),
+  openStats: () => set({ view: "stats", activeTags: [] }),
   showNotes: () => set({ view: "notes" }),
   activeTags: [],
   toggleTag: (tag) =>

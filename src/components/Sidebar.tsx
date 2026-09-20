@@ -42,6 +42,8 @@ export const Sidebar = ({
   const view = useUIStore((state) => state.view);
   const openTrash = useUIStore((state) => state.openTrash);
   const openFavorites = useUIStore((state) => state.openFavorites);
+  const openPinned = useUIStore((state) => state.openPinned);
+  const openStats = useUIStore((state) => state.openStats);
   const showNotes = useUIStore((state) => state.showNotes);
   const clearTagFilter = useUIStore((state) => state.clearTagFilter);
 
@@ -61,6 +63,13 @@ export const Sidebar = ({
     (total, notebook) =>
       total +
       notebook.notes.filter((note) => note.deletedAt === null && note.favorite)
+        .length,
+    0,
+  );
+  const pinnedCount = visibleNotebooks.reduce(
+    (total, notebook) =>
+      total +
+      notebook.notes.filter((note) => note.deletedAt === null && note.pinned)
         .length,
     0,
   );
@@ -176,6 +185,43 @@ export const Sidebar = ({
           </div>
         )}
       </nav>
+
+      <button
+        type="button"
+        className={`nav-item stats-nav-item${
+          view === "stats" ? " active" : ""
+        }`}
+        onClick={() => {
+          openStats();
+          onClose();
+        }}
+      >
+        <span className="material-symbols-rounded" aria-hidden="true">
+          insights
+        </span>
+        <span className="text text-label-large">Statistics</span>
+        <div className="state-layer" />
+      </button>
+
+      <button
+        type="button"
+        className={`nav-item pinned-nav-item${
+          view === "pinned" ? " active" : ""
+        }`}
+        onClick={() => {
+          openPinned();
+          onClose();
+        }}
+      >
+        <span className="material-symbols-rounded" aria-hidden="true">
+          push_pin
+        </span>
+        <span className="text text-label-large">Pinned</span>
+        {showCounts && pinnedCount > 0 && (
+          <span className="pinned-badge text-label-small">{pinnedCount}</span>
+        )}
+        <div className="state-layer" />
+      </button>
 
       <button
         type="button"
