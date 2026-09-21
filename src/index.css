@@ -1986,7 +1986,7 @@ button.tag-chip {
   width: 100%;
 }
 .sidebar-row.is-selected,
-.nav-item.is-selected .nav-item-main {
+.nav-item.is-selected {
   background-color: var(--secondary-container);
   color: var(--on-secondary-container);
   --state-layer-bg: var(--on-secondary-container);
@@ -2017,6 +2017,16 @@ button.tag-chip {
   color: var(--on-surface-variant);
   font-variant-numeric: tabular-nums;
 }
+/* Counts are revealed on hover/focus so the row stays calm at rest. */
+.sidebar-row .sidebar-row-count,
+.nav-item .notebook-count {
+  opacity: 0;
+  transition: opacity var(--tr-duration-short) var(--tr-easing-linear);
+}
+.sidebar-row:where(:hover, :focus-visible) .sidebar-row-count,
+.nav-item:where(:hover, :focus-within) .notebook-count {
+  opacity: 1;
+}
 .sidebar-row.is-selected .sidebar-row-count,
 .nav-item.is-selected .notebook-count {
   background-color: var(--on-secondary-container);
@@ -2030,14 +2040,38 @@ button.tag-chip {
   align-items: center;
   min-width: 0;
   border-radius: var(--radius-medium);
+  color: var(--on-surface-variant);
+  --state-layer-bg: var(--on-surface-variant);
 }
+/* The row (not the inner button) is the interactive surface, so the trailing
+   menu trigger shares the same pill as the label. The main button reserves the
+   trigger's slot on hover so the count and the trigger never collide. */
 .nav-item .nav-item-main {
   flex: 1 1 auto;
+  color: inherit;
+  border-radius: inherit;
+}
+.nav-item:where(:hover, :focus-within) .nav-item-main {
+  padding-inline-end: calc(
+    var(--sidebar-action-size, 28px) + var(--spacing-2)
+  );
+}
+@media (prefers-reduced-motion: no-preference) {
+  .nav-item .nav-item-main {
+    transition: padding-inline-end var(--tr-duration-short)
+      var(--tr-easing-linear);
+  }
+}
+.nav-item.is-selected > .item-menu-trigger {
+  color: inherit;
+}
+.nav-item:has(:focus-visible) > .state-layer {
+  opacity: 0.12;
 }
 .nav-item.is-empty .nav-item-main {
   opacity: 0.6;
 }
-.nav-item.is-empty .nav-item-main:where(:hover, :focus-visible) {
+.nav-item.is-empty:where(:hover, :focus-within) .nav-item-main {
   opacity: 1;
 }
 .nav-item-label {
@@ -2054,13 +2088,20 @@ button.tag-chip {
   font-size: 1.6rem;
   transform: rotate(45deg);
 }
+/* The trigger is anchored to the row's trailing edge so it lines up with the
+   section action; the count stays right-aligned with other rows' counts. */
 .nav-item > .item-menu-trigger {
-  flex-shrink: 0;
+  position: absolute;
+  inset-inline-end: var(--sidebar-action-inset, var(--spacing-1));
+  top: 50%;
+  transform: translateY(-50%);
   opacity: 0;
   visibility: hidden;
   transition: opacity var(--tr-duration-short) var(--tr-easing-linear);
 }
-.nav-item:where(:hover, :focus-within) > .item-menu-trigger {
+.nav-item:where(:hover, :focus-within) > .item-menu-trigger,
+.nav-item
+  > .item-menu-trigger:where([aria-expanded="true"], :focus-visible) {
   opacity: 1;
   visibility: visible;
 }
@@ -2081,11 +2122,30 @@ button.tag-chip {
   margin-block-start: auto;
 }
 .sidebar-section-header {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: var(--spacing-1);
+  gap: 0;
   min-width: 0;
-  padding-inline-end: var(--spacing-1);
+  gap: var(--spacing-1);
+  height: 40px;
+  padding-inline-end: var(--sidebar-action-inset, var(--spacing-1));
+  border-radius: var(--radius-medium);
+  color: var(--on-surface-variant);
+  --state-layer-bg: var(--on-surface-variant);
+}
+/* Trailing action buttons (section "+", notebook three-dot) all share one
+   right edge so their icons line up vertically, and counts sit just before
+   them with a consistent gap. */
+.sidebar {
+  --sidebar-action-size: 28px;
+  --sidebar-action-inset: var(--spacing-1);
+}
+/* Keep the leading action (e.g. the add button) inside the header pill and
+   show the focus overlay when the toggle is keyboard-focused. */
+.sidebar-section-header:has(.sidebar-section-toggle:focus-visible)
+  > .state-layer {
+  opacity: 0.12;
 }
 .sidebar-section-toggle {
   flex: 1 1 auto;
@@ -2093,7 +2153,7 @@ button.tag-chip {
   align-items: center;
   gap: var(--spacing-2);
   min-width: 0;
-  height: 36px;
+  height: 40px;
   padding-inline: var(--spacing-2);
   color: var(--on-surface-variant);
   --state-layer-bg: var(--on-surface-variant);
@@ -2115,9 +2175,20 @@ button.tag-chip {
 }
 .sidebar-section-count {
   flex-shrink: 0;
+  min-width: 20px;
+  height: 20px;
+  padding-inline: var(--spacing-1);
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-full);
+  background-color: var(--surface-container-highest);
   color: var(--on-surface-variant);
-  opacity: 0.75;
   font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transition: opacity var(--tr-duration-short) var(--tr-easing-linear);
+}
+.sidebar-section-header:where(:hover, :focus-within) .sidebar-section-count {
+  opacity: 1;
 }
 .sidebar-section-indicators {
   display: inline-flex;
@@ -2165,6 +2236,11 @@ button.tag-chip {
   gap: var(--spacing-05);
   padding-block: var(--spacing-1);
 }
+/* Rows must keep their height and overflow into a scroll instead of being
+   squeezed when there are many notebooks. */
+.sidebar-section-scroll > * {
+  flex-shrink: 0;
+}
 .sidebar-more .sidebar-section-scroll {
   height: auto;
   overflow: visible;
@@ -2207,6 +2283,9 @@ button.tag-chip {
   min-height: 100vh;
 }
 .main .header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   display: flex;
   align-items: flex-start;
   gap: var(--spacing-2);
@@ -2214,6 +2293,7 @@ button.tag-chip {
   padding-block: var(--spacing-4);
   padding-inline: var(--main-padding-inline);
   border-block-end: 1px solid var(--outline-variant);
+  background-color: var(--background);
 }
 .main .header .wrapper {
   flex-grow: 1;

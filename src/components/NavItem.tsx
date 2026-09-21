@@ -95,7 +95,6 @@ export const NavItem = ({
               }}
             />
           </span>
-          <div className="state-layer" />
         </div>
       ) : (
         <button
@@ -135,7 +134,6 @@ export const NavItem = ({
               {noteCount}
             </span>
           )}
-          <div className="state-layer" />
         </button>
       )}
 
@@ -187,6 +185,7 @@ export const NavItem = ({
           },
         ]}
       />
+      <div className="state-layer" />
     </div>
   );
 };

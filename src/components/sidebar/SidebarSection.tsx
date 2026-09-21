@@ -74,19 +74,19 @@ export const SidebarSection = ({
           <span className="text text-label-large sidebar-section-title">
             {title}
           </span>
-          {count !== undefined && (
-            <span className="sidebar-section-count text-label-small">
-              {count}
-            </span>
-          )}
           {collapsed && collapsedIndicators && (
             <span className="sidebar-section-indicators">
               {collapsedIndicators}
             </span>
           )}
-          <div className="state-layer" />
         </button>
+        {count !== undefined && (
+          <span className="sidebar-section-count text-label-small">
+            {count}
+          </span>
+        )}
         {action}
+        <div className="state-layer" />
       </div>
 
       <div
