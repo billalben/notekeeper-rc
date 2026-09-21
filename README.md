@@ -23,6 +23,9 @@ rebuilt as a modern React + TypeScript + Vite application.
   toggled manually, and is applied before first paint to avoid a flash.
 - **Responsive** — a collapsible sidebar for small screens and a static one
   for larger displays.
+- **Installable & offline** — a PWA you can install with its own icon; the app
+  shell and fonts are cached so it loads and works without a connection, and
+  new versions surface as an in-app notification.
 
 ## Tech stack
 
@@ -33,6 +36,7 @@ rebuilt as a modern React + TypeScript + Vite application.
 | Build tool      | [Vite](https://vite.dev)                                 |
 | State           | [Zustand](https://zustand.docs.pmnd.rs) (with `persist`) |
 | Linting         | [oxlint](https://oxc.rs)                                 |
+| PWA             | [vite-plugin-pwa](https://vite-pwa-org.netlify.app) (Workbox) |
 | Package manager | [pnpm](https://pnpm.io)                                  |
 
 ## Project structure
@@ -84,6 +88,9 @@ pnpm preview
 
 # Lint the codebase
 pnpm lint
+
+# Regenerate PWA icons from public/favicon.svg (only needed if the source art changes)
+pnpm generate:pwa-assets
 ```
 
 ## Data & storage

@@ -250,6 +250,14 @@ const fr = {
       "Vous pouvez personnaliser l'emplacement des notifications.",
     actionClicked: "Action cliquée",
   },
+  pwa: {
+    updateAvailable: "Une nouvelle version est disponible",
+    updateAvailableDesc: "Rechargez pour obtenir les dernières mises à jour.",
+    reload: "Recharger",
+    offlineReady: "Prêt à fonctionner hors ligne",
+    offlineReadyDesc:
+      "Notekeeper fonctionne désormais sans connexion internet.",
+  },
   settings: {
     title: "Paramètres",
     sectionsAria: "Sections des paramètres",

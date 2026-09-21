@@ -244,6 +244,13 @@ const en = {
     previewTipDesc: "You can customize where notifications appear.",
     actionClicked: "Action clicked",
   },
+  pwa: {
+    updateAvailable: "A new version is available",
+    updateAvailableDesc: "Reload to get the latest updates.",
+    reload: "Reload",
+    offlineReady: "Ready to work offline",
+    offlineReadyDesc: "Notekeeper now works without an internet connection.",
+  },
   settings: {
     title: "Settings",
     sectionsAria: "Settings sections",
@@ -442,7 +449,8 @@ const en = {
     data: {
       backupGroup: "Backup",
       exportFormatTitle: "Default export format",
-      exportFormatDesc: "Used when downloading a note or a notebook from the app.",
+      exportFormatDesc:
+        "Used when downloading a note or a notebook from the app.",
       exportFormatLabel: "Default export format",
       exportAllTitle: "Export all data",
       exportAllDesc:
@@ -481,7 +489,8 @@ const en = {
       deleteDataDesc: "Remove everything. This cannot be undone.",
       deleteDataAction: "Delete all data",
       confirmDeletion: "Confirm deletion",
-      chooseAction: "Choose a delete action above, then type DELETE to confirm.",
+      chooseAction:
+        "Choose a delete action above, then type DELETE to confirm.",
       typeToConfirm: "Type <strong>DELETE</strong> to confirm",
       actionLabels: {
         notes: "Delete all notes",

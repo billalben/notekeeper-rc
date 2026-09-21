@@ -181,11 +181,11 @@ const ar = {
     deleteTitle: "حذف {{title}} نهائيًا",
   },
   confirm: {
-    deleteQuestion: 'هل أنت متأكد من حذف <strong>«{{title}}»</strong>؟',
+    deleteQuestion: "هل أنت متأكد من حذف <strong>«{{title}}»</strong>؟",
     delete: "حذف",
   },
   move: {
-    title: 'نقل <strong>«{{title}}»</strong> إلى',
+    title: "نقل <strong>«{{title}}»</strong> إلى",
     noDestinations: "لا توجد دفاتر أخرى للنقل إليها.",
     label: "نقل الملاحظة",
   },
@@ -222,7 +222,7 @@ const ar = {
     emptyMore: "{{list}} و{{count}} أخرى",
   },
   toasts: {
-    noteMovedTo: 'نُقلت الملاحظة إلى «{{name}}»',
+    noteMovedTo: "نُقلت الملاحظة إلى «{{name}}»",
     goToNotebook: "الانتقال إلى الدفتر",
     moveUndone: "تم التراجع عن النقل",
     noteTrashed: "نُقلت الملاحظة إلى السلة",
@@ -246,7 +246,7 @@ const ar = {
     shortcutsReset: "أُعيد تعيين الاختصارات",
     shortcutNotSaved: "لم يُحفظ الاختصار",
     shortcutModifier: "استخدم مفتاح تعديل (⌘/Ctrl، Alt) مع مفتاح آخر.",
-    shortcutConflict: 'مستخدم بالفعل بواسطة «{{action}}».',
+    shortcutConflict: "مستخدم بالفعل بواسطة «{{action}}».",
     storageAlmostFull: "التخزين شبه ممتلئ",
     storageAlmostFullDesc: "أفرغ مساحة أو صدّر نسخة احتياطية قريبًا.",
     previewNoteSaved: "تم حفظ الملاحظة",
@@ -256,6 +256,13 @@ const ar = {
     previewTip: "نصيحة",
     previewTipDesc: "يمكنك تخصيص موضع ظهور الإشعارات.",
     actionClicked: "تم النقر على الإجراء",
+  },
+  pwa: {
+    updateAvailable: "يتوفر إصدار جديد",
+    updateAvailableDesc: "أعد التحميل للحصول على أحدث التحديثات.",
+    reload: "إعادة التحميل",
+    offlineReady: "جاهز للعمل دون اتصال",
+    offlineReadyDesc: "أصبح Notekeeper يعمل بدون اتصال بالإنترنت.",
   },
   settings: {
     title: "الإعدادات",
@@ -456,8 +463,7 @@ const ar = {
       exportFormatDesc: "تُستخدم عند تنزيل ملاحظة أو دفتر.",
       exportFormatLabel: "صيغة التصدير الافتراضية",
       exportAllTitle: "تصدير كل البيانات",
-      exportAllDesc:
-        "تنزيل كل الدفاتر والملاحظات كنسخة JSON احتياطية بإصدار.",
+      exportAllDesc: "تنزيل كل الدفاتر والملاحظات كنسخة JSON احتياطية بإصدار.",
       exportAll: "تصدير الكل",
       exportNotebookTitle: "تصدير دفتر",
       exportNotebookDesc: "تنزيل دفتر واحد بصيغة {{format}}.",
