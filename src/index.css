@@ -1237,6 +1237,9 @@ button.tag-chip {
 .note-icon-btn[aria-pressed="true"] {
   color: var(--primary);
 }
+.note-icon-btn.is-copied {
+  color: var(--primary);
+}
 .note-fav {
   width: 1.9rem;
   height: 1.9rem;

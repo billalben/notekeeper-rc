@@ -108,6 +108,8 @@ const fr = {
     expandShort: "Agrandir",
     collapseShort: "Réduire",
     downloadMarkdown: "Télécharger en Markdown",
+    copyNote: "Copier le texte de la note",
+    copied: "Copié",
     closeTitle: "Fermer (Échap)",
     titlePlaceholder: "Note sans titre",
     bodyPlaceholder: "Commencez à écrire…",
@@ -228,6 +230,8 @@ const fr = {
     notebookRenamed: "Carnet renommé",
     exportNotebookFailed: "Impossible d'exporter le carnet",
     exportNoteFailed: "Impossible d'exporter la note",
+    copyNoteSuccess: "Note copiée dans le presse-papiers",
+    copyNoteFailed: "Impossible de copier la note",
     notebookPermanentlyDeleted: "Carnet supprimé définitivement",
     notePermanentlyDeleted: "Note supprimée définitivement",
     trashEmptied: "Corbeille vidée",
@@ -404,6 +408,11 @@ const fr = {
         downloadNote: {
           label: "Télécharger la note actuelle",
           description: "Télécharger la note ouverte en Markdown.",
+        },
+        copyNote: {
+          label: "Copier la note actuelle",
+          description:
+            "Copier le titre et le texte de la note ouverte dans le presse-papiers.",
         },
         deleteNote: {
           label: "Supprimer la note actuelle",

@@ -6,9 +6,11 @@ import {
   useRef,
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
+  type ClipboardEvent as ReactClipboardEvent,
 } from "react";
 import { useTranslation } from "react-i18next";
 import { countWords } from "../utils";
+import { copyText } from "../utils/clipboard";
 import { useRelativeTime } from "../hooks/useRelativeTime";
 import { formatChord } from "../utils/shortcuts";
 import { downloadFile, MIME_MARKDOWN, slugify } from "../utils/export";
@@ -99,6 +101,7 @@ export const NoteModal = ({
     () => useSettingsStore.getState().editor.presentation === "full",
   );
   const [isConfirmingClose, setIsConfirmingClose] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [savedAt, setSavedAt] = useState<number | null>(updatedOn ?? null);
   const [savedSnapshot, setSavedSnapshot] = useState<NoteDraft>({
     title: initialTitle,
@@ -121,6 +124,7 @@ export const NoteModal = ({
   const pendingSelectionRef = useRef<{ start: number; end: number } | null>(
     null,
   );
+  const copyTimerRef = useRef<number | null>(null);
   const initialIsNewRef = useRef(isNew);
 
   const hasNote = Boolean(noteId);
@@ -135,6 +139,15 @@ export const NoteModal = ({
     if (initialIsNewRef.current) titleRef.current?.focus();
     else bodyRef.current?.focus();
   }, []);
+
+  useEffect(
+    () => () => {
+      if (copyTimerRef.current !== null) {
+        window.clearTimeout(copyTimerRef.current);
+      }
+    },
+    [],
+  );
 
   const draft = useMemo<NoteDraft>(
     () => ({
@@ -303,6 +316,33 @@ export const NoteModal = ({
     }
   };
 
+  const handleCopy = async () => {
+    const content = title.trim() ? `${title}\n\n${text}` : text;
+    const copied = await copyText(content);
+    if (copied) {
+      toast.success(t("toasts.copyNoteSuccess"));
+      setCopied(true);
+      if (copyTimerRef.current !== null) {
+        window.clearTimeout(copyTimerRef.current);
+      }
+      copyTimerRef.current = window.setTimeout(() => setCopied(false), 1500);
+    } else {
+      toast.error(t("toasts.copyNoteFailed"));
+    }
+  };
+
+  const handleTitlePaste = (event: ReactClipboardEvent<HTMLInputElement>) => {
+    if (title.trim() || text.trim()) return;
+    const pasted = event.clipboardData?.getData("text/plain") ?? "";
+    const normalized = pasted.replace(/\r\n?/g, "\n");
+    const splitAt = normalized.indexOf("\n\n");
+    if (splitAt === -1) return;
+    event.preventDefault();
+    setTitle(normalized.slice(0, splitAt).trim());
+    setText(normalized.slice(splitAt + 2).replace(/^\n+/, ""));
+    requestAnimationFrame(() => bodyRef.current?.focus());
+  };
+
   const handleTitleKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       event.preventDefault();
@@ -349,6 +389,7 @@ export const NoteModal = ({
     { enableOnFormTags: true },
   );
   useActionHotkey("downloadNote", handleDownload, { enableOnFormTags: true });
+  useActionHotkey("copyNote", handleCopy, { enableOnFormTags: true });
   useActionHotkey(
     "deleteNote",
     () => {
@@ -451,6 +492,17 @@ export const NoteModal = ({
               </button>
               <button
                 type="button"
+                className={`note-icon-btn${copied ? " is-copied" : ""}`}
+                aria-label={copied ? t("editor.copied") : t("editor.copyNote")}
+                title={copied ? t("editor.copied") : t("editor.copyNote")}
+                onClick={handleCopy}
+              >
+                <span className="material-symbols-rounded" aria-hidden="true">
+                  {copied ? "check" : "content_copy"}
+                </span>
+              </button>
+              <button
+                type="button"
                 className="note-icon-btn"
                 aria-label={t("editor.downloadMarkdown")}
                 title={t("editor.downloadMarkdown")}
@@ -486,6 +538,7 @@ export const NoteModal = ({
               value={title}
               onChange={(event) => setTitle(event.target.value)}
               onKeyDown={handleTitleKeyDown}
+              onPaste={handleTitlePaste}
             />
             <NoteTags
               tags={tags}

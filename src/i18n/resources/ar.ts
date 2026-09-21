@@ -112,6 +112,8 @@ const ar = {
     expandShort: "توسيع",
     collapseShort: "تصغير",
     downloadMarkdown: "تنزيل بصيغة Markdown",
+    copyNote: "نسخ نص الملاحظة",
+    copied: "تم النسخ",
     closeTitle: "إغلاق (Esc)",
     titlePlaceholder: "ملاحظة بلا عنوان",
     bodyPlaceholder: "ابدأ الكتابة…",
@@ -238,6 +240,8 @@ const ar = {
     notebookRenamed: "تمت إعادة تسمية الدفتر",
     exportNotebookFailed: "تعذّر تصدير الدفتر",
     exportNoteFailed: "تعذّر تصدير الملاحظة",
+    copyNoteSuccess: "تم نسخ الملاحظة إلى الحافظة",
+    copyNoteFailed: "تعذّر نسخ الملاحظة",
     notebookPermanentlyDeleted: "حُذف الدفتر نهائيًا",
     notePermanentlyDeleted: "حُذفت الملاحظة نهائيًا",
     trashEmptied: "أُفرغت السلة",
@@ -400,6 +404,10 @@ const ar = {
         downloadNote: {
           label: "تنزيل الملاحظة الحالية",
           description: "تنزيل الملاحظة المفتوحة بصيغة Markdown.",
+        },
+        copyNote: {
+          label: "نسخ الملاحظة الحالية",
+          description: "نسخ عنوان الملاحظة المفتوحة ونصها إلى الحافظة.",
         },
         deleteNote: {
           label: "حذف الملاحظة الحالية",

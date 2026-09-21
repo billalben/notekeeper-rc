@@ -108,6 +108,8 @@ const en = {
     expandShort: "Expand",
     collapseShort: "Collapse",
     downloadMarkdown: "Download as Markdown",
+    copyNote: "Copy note text",
+    copied: "Copied",
     closeTitle: "Close (Esc)",
     titlePlaceholder: "Untitled note",
     bodyPlaceholder: "Start writing…",
@@ -225,6 +227,8 @@ const en = {
     notebookRenamed: "Notebook renamed",
     exportNotebookFailed: "Couldn't export the notebook",
     exportNoteFailed: "Couldn't export the note",
+    copyNoteSuccess: "Note copied to clipboard",
+    copyNoteFailed: "Couldn't copy the note",
     notebookPermanentlyDeleted: "Notebook permanently deleted",
     notePermanentlyDeleted: "Note permanently deleted",
     trashEmptied: "Trash emptied",
@@ -389,6 +393,10 @@ const en = {
         downloadNote: {
           label: "Download current note",
           description: "Download the open note as Markdown.",
+        },
+        copyNote: {
+          label: "Copy current note",
+          description: "Copy the open note's title and text to the clipboard.",
         },
         deleteNote: {
           label: "Delete current note",

@@ -14,6 +14,7 @@ export type ActionId =
   | "saveNote"
   | "togglePreview"
   | "downloadNote"
+  | "copyNote"
   | "deleteNote"
   | "toggleTheme"
   | "closeModal"
@@ -84,6 +85,13 @@ export const SHORTCUT_ACTIONS: ShortcutAction[] = [
     descriptionKey: "settings.shortcuts.actions.downloadNote.description",
     group: "editor",
     defaultChord: "mod+shift+s",
+  },
+  {
+    id: "copyNote",
+    labelKey: "settings.shortcuts.actions.copyNote.label",
+    descriptionKey: "settings.shortcuts.actions.copyNote.description",
+    group: "editor",
+    defaultChord: "mod+alt+c",
   },
   {
     id: "deleteNote",
