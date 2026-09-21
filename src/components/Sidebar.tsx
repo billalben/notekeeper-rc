@@ -6,7 +6,7 @@ import { useSettingsStore } from "../store/useSettingsStore";
 import { toast } from "../store/useToastStore";
 import { useUIStore } from "../store/useUIStore";
 import type { Notebook } from "../types";
-import { sortByPinned, withMoveFlags } from "../utils";
+import { collectRecentNotes, sortByPinned, withMoveFlags } from "../utils";
 import { formatChord } from "../utils/shortcuts";
 import { IconButton } from "./IconButton";
 import { NavItem } from "./NavItem";
@@ -54,6 +54,7 @@ export const Sidebar = ({
   const stopAddingNotebook = useUIStore((state) => state.stopAddingNotebook);
   const view = useUIStore((state) => state.view);
   const openAllNotes = useUIStore((state) => state.openAllNotes);
+  const openRecent = useUIStore((state) => state.openRecent);
   const openTrash = useUIStore((state) => state.openTrash);
   const openFavorites = useUIStore((state) => state.openFavorites);
   const openPinned = useUIStore((state) => state.openPinned);
@@ -92,6 +93,7 @@ export const Sidebar = ({
         .length,
     0,
   );
+  const recentCount = collectRecentNotes(notebooks).length;
 
   const selectNotebook = (notebookId: string) => {
     setActiveNotebook(notebookId);
@@ -257,6 +259,16 @@ export const Sidebar = ({
             selected={view === "favorites"}
             onClick={() => {
               openFavorites();
+              onClose();
+            }}
+          />
+          <SidebarRow
+            icon="history"
+            label={t("sidebar.recent")}
+            count={recentCount}
+            selected={view === "recent"}
+            onClick={() => {
+              openRecent();
               onClose();
             }}
           />

@@ -42,6 +42,7 @@ const ar = {
     allNotes: "كل الملاحظات",
     pinned: "المثبتة",
     favorites: "المفضلة",
+    recent: "الأحدث",
     notebooks: "الدفاتر",
     createNotebook: "إنشاء دفتر",
     more: "المزيد",
@@ -77,6 +78,8 @@ const ar = {
     noNotesYet: "لا ملاحظات بعد",
     noPinned: "لا ملاحظات مثبتة بعد",
     noFavorites: "لا مفضلات بعد",
+    recent: "الأحدث",
+    noRecent: "لا ملاحظات حديثة بعد",
     newNote: "ملاحظة جديدة",
   },
   card: {

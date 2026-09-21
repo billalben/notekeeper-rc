@@ -42,6 +42,7 @@ const en = {
     allNotes: "All notes",
     pinned: "Pinned",
     favorites: "Favorites",
+    recent: "Recent",
     notebooks: "Notebooks",
     createNotebook: "Create new notebook",
     more: "More",
@@ -73,6 +74,8 @@ const en = {
     noNotesYet: "No notes yet",
     noPinned: "No pinned notes yet",
     noFavorites: "No favorites yet",
+    recent: "Recent",
+    noRecent: "No recent notes yet",
     newNote: "New note",
   },
   card: {

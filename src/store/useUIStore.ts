@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 export type MainView =
   | "all"
+  | "recent"
   | "notes"
   | "pinned"
   | "favorites"
@@ -20,6 +21,7 @@ interface UIStore {
   closeSearch: () => void;
   view: MainView;
   openAllNotes: () => void;
+  openRecent: () => void;
   openTrash: () => void;
   openFavorites: () => void;
   openPinned: () => void;
@@ -48,6 +50,7 @@ export const useUIStore = create<UIStore>((set) => ({
   closeSearch: () => set({ isSearchOpen: false }),
   view: "notes",
   openAllNotes: () => set({ view: "all", activeTags: [] }),
+  openRecent: () => set({ view: "recent", activeTags: [] }),
   openTrash: () => set({ view: "trash", activeTags: [] }),
   openFavorites: () => set({ view: "favorites", activeTags: [] }),
   openPinned: () => set({ view: "pinned", activeTags: [] }),

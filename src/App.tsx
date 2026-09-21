@@ -26,6 +26,7 @@ import {
   collectAllNotes,
   collectFavoriteNotes,
   collectPinnedNotes,
+  collectRecentNotes,
   countTagUsageMap,
   filterNotesByTags,
   sortByPinned,
@@ -183,6 +184,12 @@ const App = () => {
     canMoveDown: false,
   }));
 
+  const recentNotes = collectRecentNotes(notebooks).map((note) => ({
+    ...note,
+    canMoveUp: false,
+    canMoveDown: false,
+  }));
+
   const openCreateNote = () => {
     if (visibleNotebooks.length === 0) return;
     setNoteModal({ type: "create" });
@@ -201,6 +208,13 @@ const App = () => {
   };
 
   const openStatsNote = (note: Note) => {
+    setActiveNotebook(note.notebookId);
+    showNotes();
+    clearTagFilter();
+    setNoteModal({ type: "edit", note });
+  };
+
+  const openRecentNote = (note: Note) => {
     setActiveNotebook(note.notebookId);
     showNotes();
     clearTagFilter();
@@ -424,6 +438,26 @@ const App = () => {
               emptyMessage={t("notes.noNotesYet")}
               emptyIcon="note_stack"
               onOpen={openEditNote}
+              onTogglePin={handleToggleNotePin}
+              onToggleFavorite={handleToggleNoteFavorite}
+              onMove={handleMoveNote}
+              onRequestMove={setMoveNoteTarget}
+              onRequestDelete={handleDeleteNote}
+            />
+          </>
+        ) : view === "recent" ? (
+          <>
+            <h2 className="title text-title-medium" data-note-panel-title>
+              {t("notes.recent")}
+            </h2>
+
+            <NoteList
+              notes={recentNotes}
+              canMoveToNotebook={visibleNotebooks.length > 1}
+              notebookNames={notebookNames}
+              emptyMessage={t("notes.noRecent")}
+              emptyIcon="history"
+              onOpen={openRecentNote}
               onTogglePin={handleToggleNotePin}
               onToggleFavorite={handleToggleNoteFavorite}
               onMove={handleMoveNote}

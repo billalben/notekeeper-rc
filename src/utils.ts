@@ -184,6 +184,25 @@ export const collectAllNotes = (notebooks: Notebook[]): Note[] =>
       (a, b) => Number(b.pinned) - Number(a.pinned) || b.updatedOn - a.updatedOn,
     );
 
+/** Maximum number of notes surfaced in the Recent view. */
+export const RECENT_NOTES_LIMIT = 20;
+
+/**
+ * The most recently updated visible (non-trashed) notes across visible
+ * notebooks, newest first, capped at `limit`. Recency wins over pinned order.
+ */
+export const collectRecentNotes = (
+  notebooks: Notebook[],
+  limit = RECENT_NOTES_LIMIT,
+): Note[] =>
+  notebooks
+    .filter((notebook) => notebook.deletedAt === null)
+    .flatMap((notebook) =>
+      notebook.notes.filter((note) => note.deletedAt === null),
+    )
+    .sort((a, b) => b.updatedOn - a.updatedOn)
+    .slice(0, limit);
+
 export type MoveDirection = "up" | "down";
 
 interface Movable {

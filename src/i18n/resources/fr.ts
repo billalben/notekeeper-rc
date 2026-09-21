@@ -42,6 +42,7 @@ const fr = {
     allNotes: "Toutes les notes",
     pinned: "Épinglées",
     favorites: "Favorites",
+    recent: "Récentes",
     notebooks: "Carnets",
     createNotebook: "Créer un carnet",
     more: "Plus",
@@ -73,6 +74,8 @@ const fr = {
     noNotesYet: "Aucune note pour l'instant",
     noPinned: "Aucune note épinglée",
     noFavorites: "Aucune favorite",
+    recent: "Récentes",
+    noRecent: "Aucune note récente",
     newNote: "Nouvelle note",
   },
   card: {
