@@ -1,3 +1,4 @@
+import { Trans, useTranslation } from "react-i18next";
 import { useActionHotkey } from "../hooks/useActionHotkey";
 import { useSettingsStore } from "../store/useSettingsStore";
 import type { Note, Notebook } from "../types";
@@ -16,6 +17,8 @@ export const MoveNoteModal = ({
   onMove,
   onClose,
 }: MoveNoteModalProps) => {
+  const { t } = useTranslation();
+
   useActionHotkey("closeModal", onClose, { enableOnFormTags: true });
 
   const destinations = notebooks.filter(
@@ -25,20 +28,24 @@ export const MoveNoteModal = ({
 
   return (
     <>
-      <div className="modal" role="dialog" aria-label="Move note">
+      <div className="modal" role="dialog" aria-label={t("move.label")}>
         <IconButton
           type="button"
           icon="close"
-          label="Close"
+          label={t("common.close")}
           onClick={onClose}
         />
         <h3 className="modal-title text-title-medium">
-          Move <strong>"{note.title || "Untitled"}"</strong> to
+          <Trans
+            i18nKey="move.title"
+            values={{ title: note.title || t("common.untitled") }}
+            components={{ strong: <strong /> }}
+          />
         </h3>
 
         {destinations.length === 0 ? (
           <div className="move-note-empty text-body-medium">
-            No other notebooks to move to.
+            {t("move.noDestinations")}
           </div>
         ) : (
           <ul className="move-note-list custom-scrollbar">
@@ -65,7 +72,7 @@ export const MoveNoteModal = ({
 
         <div className="modal-footer">
           <button className="btn text" type="button" onClick={onClose}>
-            <span className="text-label-large">Cancel</span>
+            <span className="text-label-large">{t("common.cancel")}</span>
             <div className="state-layer" />
           </button>
         </div>

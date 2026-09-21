@@ -30,6 +30,15 @@
           var storedSettings = localStorage.getItem("settings");
           var settings = storedSettings ? JSON.parse(storedSettings) : null;
           var state = settings && settings.state ? settings.state : null;
+
+          var language = state ? state.language : null;
+          if (language === "en" || language === "fr" || language === "ar") {
+            document.documentElement.setAttribute("lang", language);
+          }
+          if (language === "ar") {
+            document.documentElement.setAttribute("dir", "rtl");
+          }
+
           var motion = state ? state.motion : null;
           if (motion === "reduce" || motion === "full") {
             document.documentElement.setAttribute("data-motion", motion);
@@ -75,6 +84,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <!--! arabic font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
     <!--! material icon -->

@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { useNoteStore } from "../../store/useNoteStore";
 import {
   useSettingsStore,
   type ExportFormat,
 } from "../../store/useSettingsStore";
 import { toast } from "../../store/useToastStore";
-import { TRASH_RETENTION_OPTIONS } from "../../utils";
+import { TRASH_RETENTION_OPTIONS, type TrashRetentionDays } from "../../utils";
 import {
   downloadBackupFile,
   downloadNotebookFile,
@@ -22,16 +23,38 @@ type DeleteScope = "notes" | "notebooks" | "all";
 
 const CONFIRM_WORD = "DELETE";
 
+type ActionLabelKey =
+  | "settings.data.actionLabels.notes"
+  | "settings.data.actionLabels.notebooks"
+  | "settings.data.actionLabels.all";
+
+const ACTION_LABEL_KEYS: Record<DeleteScope, ActionLabelKey> = {
+  notes: "settings.data.actionLabels.notes",
+  notebooks: "settings.data.actionLabels.notebooks",
+  all: "settings.data.actionLabels.all",
+};
+
+type RetentionLabelKey =
+  | "settings.data.retentionD7"
+  | "settings.data.retentionD30"
+  | "settings.data.retentionD90"
+  | "settings.data.retentionForever";
+
+const RETENTION_LABEL_KEYS: Record<string, RetentionLabelKey> = {
+  "7": "settings.data.retentionD7",
+  "30": "settings.data.retentionD30",
+  "90": "settings.data.retentionD90",
+  forever: "settings.data.retentionForever",
+};
+
+const retentionKey = (value: TrashRetentionDays): string =>
+  value === null ? "forever" : String(value);
+
 const blockEdit = (event: { preventDefault: () => void }) =>
   event.preventDefault();
 
-const ACTION_LABELS: Record<DeleteScope, string> = {
-  notes: "Delete all notes",
-  notebooks: "Delete all notebooks",
-  all: "Delete all data",
-};
-
 export const SettingsData = () => {
+  const { t } = useTranslation();
   const notebooks = useNoteStore((state) => state.notebooks);
   const tags = useNoteStore((state) => state.tags);
   const deleteAllNotes = useNoteStore((state) => state.deleteAllNotes);
@@ -95,13 +118,13 @@ export const SettingsData = () => {
 
     if (pending === "notes") {
       deleteAllNotes();
-      toast.success("All notes deleted");
+      toast.success(t("toasts.allNotesDeleted"));
     } else if (pending === "notebooks") {
       deleteAllNotebooks();
-      toast.success("All notebooks deleted");
+      toast.success(t("toasts.allNotebooksDeleted"));
     } else {
       deleteAllData();
-      toast.success("All data deleted");
+      toast.success(t("toasts.allDataDeleted"));
     }
 
     cancel();
@@ -113,7 +136,7 @@ export const SettingsData = () => {
     try {
       downloadBackupFile(notebooks, tags);
     } catch {
-      toast.error("Couldn't export your data");
+      toast.error(t("toasts.exportDataFailed"));
     }
   };
 
@@ -126,38 +149,43 @@ export const SettingsData = () => {
     try {
       downloadNotebookFile(notebook, exportFormat);
     } catch {
-      toast.error("Couldn't export the notebook");
+      toast.error(t("toasts.exportNotebookFailed"));
     }
   };
 
   const describe = (scope: DeleteScope): string => {
-    const notes = `${noteCount} note${noteCount === 1 ? "" : "s"}`;
-    const books = `${notebookCount} notebook${
-      notebookCount === 1 ? "" : "s"
-    }`;
+    const notes = t("settings.data.noteCount", { count: noteCount });
+    const books = t("settings.data.notebookCount", {
+      count: notebookCount,
+    });
 
     if (scope === "notes") {
-      return `Permanently delete ${notes} from ${books}. Your notebooks will remain, but this cannot be undone.`;
+      return t("settings.data.describeNotes", { notes, books });
     }
     if (scope === "notebooks") {
-      return `Permanently delete ${books} and all ${notes} inside them. This cannot be undone.`;
+      return t("settings.data.describeNotebooks", { notes, books });
     }
-    return `Permanently delete ${books} and ${notes}. This cannot be undone.`;
+    return t("settings.data.describeAll", { notes, books });
   };
+
+  const trashKeepDescription =
+    trashedCount > 0
+      ? t("settings.data.trashKeepDesc", { count: trashedCount })
+      : t("settings.data.trashKeepDescNone");
 
   return (
     <>
-      <SettingsGroup title="Backup">
+      <SettingsGroup title={t("settings.data.backupGroup")}>
         <SettingsRow
-          title="Default export format"
-          description="Used when downloading a note or a notebook from the app."
+          title={t("settings.data.exportFormatTitle")}
+          description={t("settings.data.exportFormatDesc")}
         >
           <SettingsSelect
-            label="Default export format"
+            label={t("settings.data.exportFormatLabel")}
             value={exportFormat}
             options={[
-              { value: "json", label: "JSON" },
-              { value: "md", label: "Markdown" },
+              { value: "json", label: t("card.json") },
+              { value: "md", label: t("card.markdown") },
             ]}
             onChange={(value) =>
               setExportSettings({ defaultFormat: value as ExportFormat })
@@ -165,8 +193,8 @@ export const SettingsData = () => {
           />
         </SettingsRow>
         <SettingsRow
-          title="Export all data"
-          description="Download every notebook and note as a versioned JSON backup."
+          title={t("settings.data.exportAllTitle")}
+          description={t("settings.data.exportAllDesc")}
         >
           <button
             className="btn fill"
@@ -174,19 +202,22 @@ export const SettingsData = () => {
             disabled={visibleNotebooks.length === 0}
             onClick={exportAll}
           >
-            <span className="text-label-large">Export all</span>
+            <span className="text-label-large">
+              {t("settings.data.exportAll")}
+            </span>
             <div className="state-layer" />
           </button>
         </SettingsRow>
         <SettingsRow
-          title="Export a notebook"
-          description={`Download a single notebook as ${
-            exportFormat === "md" ? "Markdown" : "JSON"
-          }.`}
+          title={t("settings.data.exportNotebookTitle")}
+          description={t("settings.data.exportNotebookDesc", {
+            format:
+              exportFormat === "md" ? t("card.markdown") : t("card.json"),
+          })}
         >
           <div className="settings-export-controls">
             <SettingsSelect
-              label="Notebook to export"
+              label={t("settings.data.notebookToExportLabel")}
               value={selectedExportId}
               disabled={visibleNotebooks.length === 0}
               options={visibleNotebooks.map((notebook) => ({
@@ -201,40 +232,36 @@ export const SettingsData = () => {
               disabled={!selectedExportId}
               onClick={exportNotebook}
             >
-              <span className="text-label-large">Export</span>
+              <span className="text-label-large">
+                {t("settings.data.export")}
+              </span>
               <div className="state-layer" />
             </button>
           </div>
         </SettingsRow>
         <SettingsRow
-          title="Import notes"
-          description="Restore notes from a previously exported file."
+          title={t("settings.data.importTitle")}
+          description={t("settings.data.importDesc")}
         >
           <ComingSoon />
         </SettingsRow>
       </SettingsGroup>
 
-      <SettingsGroup title="Storage">
+      <SettingsGroup title={t("settings.data.storageGroup")}>
         <StorageMeter />
       </SettingsGroup>
 
-      <SettingsGroup title="Trash">
+      <SettingsGroup title={t("settings.data.trashGroup")}>
         <SettingsRow
-          title="Keep deleted items for"
-          description={
-            trashedCount > 0
-              ? `${trashedCount} item${
-                  trashedCount === 1 ? "" : "s"
-                } currently in Trash. Deleted notes and notebooks move to Trash first.`
-              : "Deleted notes and notebooks move to Trash before being removed."
-          }
+          title={t("settings.data.trashKeepTitle")}
+          description={trashKeepDescription}
         >
           <SettingsSelect
-            label="Trash retention"
-            value={retentionDays === null ? "forever" : String(retentionDays)}
+            label={t("settings.data.trashRetentionLabel")}
+            value={retentionKey(retentionDays)}
             options={TRASH_RETENTION_OPTIONS.map((option) => ({
-              value: option.value === null ? "forever" : String(option.value),
-              label: option.label,
+              value: retentionKey(option),
+              label: t(RETENTION_LABEL_KEYS[retentionKey(option)]),
             }))}
             onChange={(value) =>
               setTrashSettings({
@@ -245,10 +272,10 @@ export const SettingsData = () => {
         </SettingsRow>
       </SettingsGroup>
 
-      <SettingsGroup title="Danger zone">
+      <SettingsGroup title={t("settings.data.dangerGroup")}>
         <SettingsRow
-          title="Delete all notes"
-          description="Remove every note but keep your notebooks."
+          title={t("settings.data.deleteNotesTitle")}
+          description={t("settings.data.deleteNotesDesc")}
         >
           <button
             className="btn fill danger"
@@ -256,14 +283,16 @@ export const SettingsData = () => {
             disabled={noteCount === 0}
             onClick={() => start("notes")}
           >
-            <span className="text-label-large">Delete all notes</span>
+            <span className="text-label-large">
+              {t("settings.data.deleteNotesAction")}
+            </span>
             <div className="state-layer" />
           </button>
         </SettingsRow>
 
         <SettingsRow
-          title="Delete all notebooks"
-          description="Remove every notebook and all notes inside them."
+          title={t("settings.data.deleteNotebooksTitle")}
+          description={t("settings.data.deleteNotebooksDesc")}
         >
           <button
             className="btn fill danger"
@@ -271,14 +300,16 @@ export const SettingsData = () => {
             disabled={notebookCount === 0}
             onClick={() => start("notebooks")}
           >
-            <span className="text-label-large">Delete all notebooks</span>
+            <span className="text-label-large">
+              {t("settings.data.deleteNotebooksAction")}
+            </span>
             <div className="state-layer" />
           </button>
         </SettingsRow>
 
         <SettingsRow
-          title="Delete all data"
-          description="Remove everything. This cannot be undone."
+          title={t("settings.data.deleteDataTitle")}
+          description={t("settings.data.deleteDataDesc")}
         >
           <button
             className="btn fill danger"
@@ -286,7 +317,9 @@ export const SettingsData = () => {
             disabled={notebookCount === 0 && noteCount === 0}
             onClick={() => start("all")}
           >
-            <span className="text-label-large">Delete all data</span>
+            <span className="text-label-large">
+              {t("settings.data.deleteDataAction")}
+            </span>
             <div className="state-layer" />
           </button>
         </SettingsRow>
@@ -311,20 +344,23 @@ export const SettingsData = () => {
             warning
           </span>
           <h4 id="danger-confirm-title" className="text-title-small">
-            {pending ? `${ACTION_LABELS[pending]}?` : "Confirm deletion"}
+            {pending
+              ? `${t(ACTION_LABEL_KEYS[pending])}?`
+              : t("settings.data.confirmDeletion")}
           </h4>
         </div>
         <p className="text-body-small">
-          {pending
-            ? describe(pending)
-            : "Choose a delete action above, then type DELETE to confirm."}
+          {pending ? describe(pending) : t("settings.data.chooseAction")}
         </p>
 
         <label
           className="settings-confirm-label text-body-small"
           htmlFor="danger-confirm-input"
         >
-          Type <strong>{CONFIRM_WORD}</strong> to confirm
+          <Trans
+            i18nKey="settings.data.typeToConfirm"
+            components={{ strong: <strong /> }}
+          />
         </label>
         <input
           ref={inputRef}
@@ -353,7 +389,7 @@ export const SettingsData = () => {
             disabled={!pending}
             onClick={cancel}
           >
-            <span className="text-label-large">Cancel</span>
+            <span className="text-label-large">{t("common.cancel")}</span>
             <div className="state-layer" />
           </button>
           <button
@@ -362,7 +398,7 @@ export const SettingsData = () => {
             disabled={!canConfirm}
             onClick={confirm}
           >
-            <span className="text-label-large">Delete</span>
+            <span className="text-label-large">{t("common.delete")}</span>
             <div className="state-layer" />
           </button>
         </div>

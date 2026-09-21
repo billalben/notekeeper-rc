@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { useActionHotkey } from "../hooks/useActionHotkey";
 import { useSettingsStore } from "../store/useSettingsStore";
 
@@ -15,10 +16,12 @@ export const ConfirmModal = ({
   title,
   heading,
   description,
-  confirmLabel = "Delete",
+  confirmLabel,
   stacked = false,
   onConfirm,
 }: ConfirmModalProps) => {
+  const { t } = useTranslation();
+
   useActionHotkey("closeModal", () => onConfirm(false), {
     enableOnFormTags: true,
   });
@@ -28,9 +31,11 @@ export const ConfirmModal = ({
       <div className={`modal${stacked ? " modal-stacked" : ""}`}>
         <h3 className="modal-title text-title-medium">
           {heading ?? (
-            <>
-              Are you sure you want to delete <strong>"{title}"</strong> ?
-            </>
+            <Trans
+              i18nKey="confirm.deleteQuestion"
+              values={{ title: title ?? "" }}
+              components={{ strong: <strong /> }}
+            />
           )}
         </h3>
         {description && (
@@ -42,7 +47,7 @@ export const ConfirmModal = ({
             type="button"
             onClick={() => onConfirm(false)}
           >
-            <span className="text-label-large">Cancel</span>
+            <span className="text-label-large">{t("common.cancel")}</span>
             <div className="state-layer" />
           </button>
           <button
@@ -50,7 +55,9 @@ export const ConfirmModal = ({
             type="button"
             onClick={() => onConfirm(true)}
           >
-            <span className="text-label-large">{confirmLabel}</span>
+            <span className="text-label-large">
+              {confirmLabel ?? t("confirm.delete")}
+            </span>
             <div className="state-layer" />
           </button>
         </div>

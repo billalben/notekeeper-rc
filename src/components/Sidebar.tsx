@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { useSidebarResize } from "../hooks/useSidebarResize";
 import { useNoteStore } from "../store/useNoteStore";
 import { useSettingsStore } from "../store/useSettingsStore";
@@ -29,6 +30,7 @@ export const Sidebar = ({
   onTogglePin,
   onRequestDeleteNotebook,
 }: SidebarProps) => {
+  const { t } = useTranslation();
   const notebooks = useNoteStore((state) => state.notebooks);
   const activeNotebookId = useNoteStore((state) => state.activeNotebookId);
   const setActiveNotebook = useNoteStore((state) => state.setActiveNotebook);
@@ -157,7 +159,7 @@ export const Sidebar = ({
     stopAddingNotebook();
     if (name) {
       addNotebook(name);
-      toast.success("Notebook created");
+      toast.success(t("toasts.notebookCreated"));
     }
   };
 
@@ -172,7 +174,7 @@ export const Sidebar = ({
         className={`material-symbols-rounded sidebar-indicator${
           view === "stats" ? " is-selected" : ""
         }`}
-        title="Statistics"
+        title={t("sidebar.statistics")}
         aria-hidden="true"
       >
         insights
@@ -181,7 +183,7 @@ export const Sidebar = ({
         className={`material-symbols-rounded sidebar-indicator${
           view === "trash" ? " is-selected" : ""
         }`}
-        title="Trash"
+        title={t("sidebar.trash")}
         aria-hidden="true"
       >
         delete
@@ -199,7 +201,7 @@ export const Sidebar = ({
 
         <IconButton
           icon="close"
-          label="Close Menu"
+          label={t("sidebar.closeMenu")}
           className="menu-btn"
           onClick={onClose}
         />
@@ -214,7 +216,7 @@ export const Sidebar = ({
         <span className="material-symbols-rounded" aria-hidden="true">
           add
         </span>
-        <span className="text text-label-large">New note</span>
+        <span className="text text-label-large">{t("sidebar.newNote")}</span>
         {newNoteChord && (
           <kbd className="sidebar-new-note-kbd">{formatChord(newNoteChord)}</kbd>
         )}
@@ -224,13 +226,13 @@ export const Sidebar = ({
       <nav
         ref={navRef}
         className="sidebar-nav"
-        aria-label="Sidebar"
+        aria-label={t("sidebar.aria")}
         onKeyDown={handleNavKeyDown}
       >
         <div className="sidebar-quick">
           <SidebarRow
             icon="note_stack"
-            label="All notes"
+            label={t("sidebar.allNotes")}
             count={totalNotes}
             selected={view === "all"}
             onClick={() => {
@@ -240,7 +242,7 @@ export const Sidebar = ({
           />
           <SidebarRow
             icon="push_pin"
-            label="Pinned"
+            label={t("sidebar.pinned")}
             count={pinnedCount}
             selected={view === "pinned"}
             onClick={() => {
@@ -250,7 +252,7 @@ export const Sidebar = ({
           />
           <SidebarRow
             icon="star"
-            label="Favorites"
+            label={t("sidebar.favorites")}
             count={favoriteCount}
             selected={view === "favorites"}
             onClick={() => {
@@ -262,7 +264,7 @@ export const Sidebar = ({
 
         <SidebarSection
           id="sidebar-notebooks"
-          title="Notebooks"
+          title={t("sidebar.notebooks")}
           count={visibleNotebooks.length}
           collapsed={notebooksCollapsed}
           onToggle={() =>
@@ -273,8 +275,8 @@ export const Sidebar = ({
             <IconButton
               icon="add"
               size="small"
-              tooltip="Create new notebook"
-              label="Create new notebook"
+              tooltip={t("sidebar.createNotebook")}
+              label={t("sidebar.createNotebook")}
               onClick={startAdd}
             />
           }
@@ -313,7 +315,7 @@ export const Sidebar = ({
                     ref={addInputRef}
                     className="text text-label-large"
                     value={newName}
-                    placeholder="Untitled"
+                    placeholder={t("sidebar.untitled")}
                     onChange={(event) => setNewName(event.target.value)}
                     onBlur={commitAdd}
                     onKeyDown={(event) => {
@@ -330,7 +332,7 @@ export const Sidebar = ({
 
         <SidebarSection
           id="sidebar-more"
-          title="More"
+          title={t("sidebar.more")}
           collapsed={moreCollapsed}
           onToggle={() =>
             setSidebarSettings({ moreCollapsed: !moreCollapsed })
@@ -340,7 +342,7 @@ export const Sidebar = ({
         >
           <SidebarRow
             icon="insights"
-            label="Statistics"
+            label={t("sidebar.statistics")}
             selected={view === "stats"}
             onClick={() => {
               openStats();
@@ -349,7 +351,7 @@ export const Sidebar = ({
           />
           <SidebarRow
             icon="delete"
-            label="Trash"
+            label={t("sidebar.trash")}
             count={trashedCount}
             selected={view === "trash"}
             onClick={() => {
@@ -364,7 +366,7 @@ export const Sidebar = ({
         className={`sidebar-resizer${isResizing ? " resizing" : ""}`}
         role="separator"
         aria-orientation="vertical"
-        aria-label="Resize sidebar"
+        aria-label={t("sidebar.resize")}
         onPointerDown={startResize}
       />
     </header>

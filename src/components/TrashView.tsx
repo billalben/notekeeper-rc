@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNoteStore } from "../store/useNoteStore";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { toast } from "../store/useToastStore";
-import { getRelativeTime, trashRetentionMs } from "../utils";
+import { useRelativeTime } from "../hooks/useRelativeTime";
+import { trashRetentionMs } from "../utils";
 import { ConfirmModal } from "./ConfirmModal";
 import { IconButton } from "./IconButton";
 
@@ -22,6 +24,8 @@ type PendingAction =
   | { kind: "empty" };
 
 export const TrashView = () => {
+  const { t } = useTranslation();
+  const relativeTime = useRelativeTime();
   const notebooks = useNoteStore((state) => state.notebooks);
   const restoreNote = useNoteStore((state) => state.restoreNote);
   const permanentlyDeleteNote = useNoteStore(
@@ -74,13 +78,13 @@ export const TrashView = () => {
 
   const retentionLabel =
     retentionDays === null
-      ? "Items in the Trash are kept until you delete them."
-      : `Items in the Trash are permanently deleted after ${retentionDays} days.`;
+      ? t("trash.retentionNever")
+      : t("trash.retentionDays", { days: retentionDays });
 
   const confirmTitle = (() => {
     if (!pending) return "";
-    if (pending.kind === "empty") return "everything in the Trash";
-    return pending.title || "Untitled";
+    if (pending.kind === "empty") return t("trash.everything");
+    return pending.title || t("common.untitled");
   })();
 
   const handleConfirm = (isConfirm: boolean) => {
@@ -91,13 +95,13 @@ export const TrashView = () => {
 
     if (pending.kind === "notebook") {
       permanentlyDeleteNotebook(pending.id);
-      toast.success("Notebook permanently deleted");
+      toast.success(t("toasts.notebookPermanentlyDeleted"));
     } else if (pending.kind === "note") {
       permanentlyDeleteNote(pending.notebookId, pending.id);
-      toast.success("Note permanently deleted");
+      toast.success(t("toasts.notePermanentlyDeleted"));
     } else {
       emptyTrash();
-      toast.success("Trash emptied");
+      toast.success(t("toasts.trashEmptied"));
     }
 
     setPending(null);
@@ -107,7 +111,7 @@ export const TrashView = () => {
     <div className="trash-view" data-note-panel>
       <div className="trash-header">
         <div>
-          <h2 className="title text-title-medium">Trash</h2>
+          <h2 className="title text-title-medium">{t("trash.title")}</h2>
           <p className="trash-retention text-body-small">{retentionLabel}</p>
         </div>
         <button
@@ -116,7 +120,7 @@ export const TrashView = () => {
           disabled={entries.length === 0}
           onClick={() => setPending({ kind: "empty" })}
         >
-          <span className="text-label-large">Empty Trash</span>
+          <span className="text-label-large">{t("trash.emptyTrash")}</span>
           <div className="state-layer" />
         </button>
       </div>
@@ -126,7 +130,7 @@ export const TrashView = () => {
           <span className="material-symbols-rounded" aria-hidden="true">
             delete
           </span>
-          <div className="text-headline-small">Trash is empty</div>
+          <div className="text-headline-small">{t("trash.empty")}</div>
         </div>
       ) : (
         <ul className="trash-list">
@@ -134,12 +138,16 @@ export const TrashView = () => {
             const isNotebook = entry.kind === "notebook";
             const title = isNotebook
               ? entry.name
-              : entry.title || "Untitled";
+              : entry.title || t("common.untitled");
             const meta = isNotebook
-              ? `${entry.noteCount} note${
-                  entry.noteCount === 1 ? "" : "s"
-                } · Deleted ${getRelativeTime(entry.deletedAt)}`
-              : `Deleted ${getRelativeTime(entry.deletedAt)}`;
+              ? `${t("sidebar.noteCount", {
+                  count: entry.noteCount,
+                })} · ${t("trash.deleted", {
+                  time: relativeTime(entry.deletedAt),
+                })}`
+              : t("trash.deleted", {
+                  time: relativeTime(entry.deletedAt),
+                });
 
             return (
               <li key={`${entry.kind}-${entry.id}`} className="trash-item">
@@ -161,8 +169,8 @@ export const TrashView = () => {
                   <IconButton
                     icon="settings_backup_restore"
                     size="small"
-                    tooltip="Restore"
-                    label={`Restore ${title}`}
+                    tooltip={t("trash.restore")}
+                    label={t("trash.restoreTitle", { title })}
                     onClick={() => {
                       if (entry.kind === "notebook") {
                         restoreNotebook(entry.id);
@@ -170,15 +178,17 @@ export const TrashView = () => {
                         restoreNote(entry.id);
                       }
                       toast.success(
-                        isNotebook ? "Notebook restored" : "Note restored",
+                        isNotebook
+                          ? t("toasts.notebookRestored")
+                          : t("toasts.noteRestored"),
                       );
                     }}
                   />
                   <IconButton
                     icon="delete_forever"
                     size="small"
-                    tooltip="Delete permanently"
-                    label={`Delete ${title} permanently`}
+                    tooltip={t("trash.deletePermanently")}
+                    label={t("trash.deleteTitle", { title })}
                     onClick={() =>
                       setPending(
                         entry.kind === "notebook"

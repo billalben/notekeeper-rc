@@ -1,8 +1,9 @@
 import { useMemo, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { useNoteStore } from "../store/useNoteStore";
 import { useUIStore } from "../store/useUIStore";
 import type { Note } from "../types";
-import { getRelativeTime } from "../utils";
+import { useRelativeTime } from "../hooks/useRelativeTime";
 import { stripMarkdown } from "../utils/search";
 import { computeLibraryStats, type DayActivity } from "../utils/stats";
 import { formatBytes } from "../utils/storage";
@@ -13,27 +14,18 @@ interface StatisticsViewProps {
   onNewNote: () => void;
 }
 
-const formatNumber = (value: number): string => value.toLocaleString();
+const formatNumber = (value: number, locale: string): string =>
+  value.toLocaleString(locale);
 
-const formatAverage = (value: number): string =>
+const formatAverage = (value: number, locale: string): string =>
   Number.isInteger(value)
-    ? value.toLocaleString()
-    : value.toLocaleString(undefined, { maximumFractionDigits: 1 });
-
-const noteTitle = (note: Note): string => note.title.trim() || "Untitled";
+    ? value.toLocaleString(locale)
+    : value.toLocaleString(locale, { maximumFractionDigits: 1 });
 
 const notePreview = (note: Note): string => {
   const text = stripMarkdown(note.text).replace(/\s+/g, " ").trim();
   if (!text) return "";
   return text.length > 140 ? `${text.slice(0, 140).trimEnd()}…` : text;
-};
-
-const formatEmptyNotebooks = (names: string[]): string => {
-  const shown = names.slice(0, 3);
-  const remaining = names.length - shown.length;
-  const list = remaining > 0 ? `${shown.join(", ")} and ${remaining} more` : shown.join(", ");
-  const noun = names.length === 1 ? "notebook is" : "notebooks are";
-  return `${names.length} ${noun} empty: ${list}.`;
 };
 
 interface WeekBarProps {
@@ -89,10 +81,14 @@ export const StatisticsView = ({
   onOpenNote,
   onNewNote,
 }: StatisticsViewProps) => {
+  const { t, i18n } = useTranslation();
+  const relativeTime = useRelativeTime();
   const notebooks = useNoteStore((state) => state.notebooks);
   const activeNotebookId = useNoteStore((state) => state.activeNotebookId);
   const openPinned = useUIStore((state) => state.openPinned);
   const openFavorites = useUIStore((state) => state.openFavorites);
+
+  const locale = i18n.language;
 
   const stats = useMemo(
     () => computeLibraryStats({ notebooks, activeNotebookId }),
@@ -111,25 +107,35 @@ export const StatisticsView = ({
 
   const { supported, bytes, quota, percent } = useStorageUsage();
 
+  const formatEmptyNotebooks = (names: string[]): string => {
+    const shown = names.slice(0, 3);
+    const remaining = names.length - shown.length;
+    const list =
+      remaining > 0
+        ? t("stats.emptyMore", { list: shown.join(", "), count: remaining })
+        : shown.join(", ");
+    return names.length === 1
+      ? t("stats.emptyOne", { list })
+      : t("stats.emptyOther", { count: names.length, list });
+  };
+
   if (stats.noteCount === 0) {
     return (
       <div className="stats-view" data-note-panel>
-        <h2 className="title text-title-medium">Statistics</h2>
+        <h2 className="title text-title-medium">{t("stats.title")}</h2>
         <div className="empty-notes">
           <span className="material-symbols-rounded" aria-hidden="true">
             insights
           </span>
-          <div className="text-headline-small">No notes yet</div>
-          <p className="text-body-small">
-            Write your first note to see your writing stats here.
-          </p>
+          <div className="text-headline-small">{t("stats.noNotesYet")}</div>
+          <p className="text-body-small">{t("stats.noNotesHint")}</p>
           <button
             className="btn fill"
             type="button"
             disabled={stats.notebookCount === 0}
             onClick={onNewNote}
           >
-            <span className="text-label-large">New note</span>
+            <span className="text-label-large">{t("stats.newNote")}</span>
             <div className="state-layer" />
           </button>
         </div>
@@ -148,20 +154,28 @@ export const StatisticsView = ({
   const weekTotal = stats.weekCreated + stats.weekEdited;
   const writesLabel =
     weekTotal === 0
-      ? "No notes written or edited this week."
-      : `${stats.weekCreated} ${
-          stats.weekCreated === 1 ? "note" : "notes"
-        } written, ${stats.weekEdited} edited.`;
-  const chartLabel = `${stats.weekCreated} notes created and ${stats.weekEdited} edited over the last 7 days.`;
+      ? t("stats.noWrites")
+      : t("stats.writes", {
+          created: stats.weekCreated,
+          edited: stats.weekEdited,
+        });
+  const chartLabel = t("stats.chartLabel", {
+    created: stats.weekCreated,
+    edited: stats.weekEdited,
+  });
+
+  const weekday = new Intl.DateTimeFormat(locale, { weekday: "short" });
+  const dayLabel = (day: DayActivity) =>
+    day.isToday ? t("stats.today") : weekday.format(day.date);
 
   const recent = [
     {
-      tag: "Last edited",
+      tag: t("stats.lastEdited"),
       note: stats.lastUpdated,
       time: stats.lastUpdated?.updatedOn,
     },
     {
-      tag: "Last created",
+      tag: t("stats.lastCreated"),
       note: stats.lastCreated,
       time: stats.lastCreated?.postedOn,
     },
@@ -169,10 +183,10 @@ export const StatisticsView = ({
 
   return (
     <div className="stats-view" data-note-panel>
-      <h2 className="title text-title-medium">Statistics</h2>
+      <h2 className="title text-title-medium">{t("stats.title")}</h2>
 
       <div className="stats-layout">
-        <StatCard span={8} title="This week">
+        <StatCard span={8} title={t("stats.thisWeek")}>
           <p className="stats-headline text-title-medium">{writesLabel}</p>
           <div className="week-chart" role="img" aria-label={chartLabel}>
             <div className="week-chart-bars" aria-hidden="true">
@@ -194,7 +208,7 @@ export const StatisticsView = ({
                     />
                   </div>
                   <span className="week-day-label text-label-small">
-                    {day.label}
+                    {dayLabel(day)}
                   </span>
                 </div>
               ))}
@@ -202,41 +216,45 @@ export const StatisticsView = ({
             <div className="week-legend" aria-hidden="true">
               <span className="week-legend-item text-label-small">
                 <span className="week-legend-swatch created" />
-                Created
+                {t("common.created")}
               </span>
               <span className="week-legend-item text-label-small">
                 <span className="week-legend-swatch edited" />
-                Edited
+                {t("common.edited")}
               </span>
             </div>
           </div>
         </StatCard>
 
-        <StatCard span={4} emphasized title="Total writing">
+        <StatCard span={4} emphasized title={t("stats.totalWriting")}>
           <span className="stats-big-number text-display-small">
-            {formatNumber(stats.totalWords)}
+            {formatNumber(stats.totalWords, locale)}
           </span>
-          <span className="stats-big-caption text-body-medium">words</span>
+          <span className="stats-big-caption text-body-medium">
+            {t("stats.words")}
+          </span>
           <dl className="stats-rows">
             <div className="stats-row">
-              <dt className="text-body-small">Characters</dt>
+              <dt className="text-body-small">{t("stats.characters")}</dt>
               <dd className="text-body-medium">
-                {formatNumber(stats.totalChars)}
+                {formatNumber(stats.totalChars, locale)}
               </dd>
             </div>
             <div className="stats-row">
-              <dt className="text-body-small">Avg. words per note</dt>
+              <dt className="text-body-small">{t("stats.avgWordsPerNote")}</dt>
               <dd className="text-body-medium">
-                {formatAverage(stats.wordsPerNote)}
+                {formatAverage(stats.wordsPerNote, locale)}
               </dd>
             </div>
           </dl>
         </StatCard>
 
-        <StatCard span={7} title="Where your notes live">
+        <StatCard span={7} title={t("stats.whereNotesLive")}>
           <p className="stats-card-subtitle text-body-small">
-            {formatNumber(stats.noteCount)} notes across{" "}
-            {stats.notebookStats.length} notebooks
+            {t("stats.notesAcross", {
+              notes: formatNumber(stats.noteCount, locale),
+              notebooks: formatNumber(stats.notebookStats.length, locale),
+            })}
           </p>
 
           <ul className="notebook-bars">
@@ -248,7 +266,7 @@ export const StatisticsView = ({
                   </span>
                   {notebook.id === activeNotebookId && (
                     <span className="notebook-current text-label-small">
-                      Current
+                      {t("stats.current")}
                     </span>
                   )}
                 </span>
@@ -276,7 +294,7 @@ export const StatisticsView = ({
           )}
         </StatCard>
 
-        <StatCard span={5} title="Pinned and Favorites">
+        <StatCard span={5} title={t("stats.pinnedAndFavorites")}>
           <button
             type="button"
             className="stats-link-row"
@@ -289,10 +307,10 @@ export const StatisticsView = ({
               push_pin
             </span>
             <span className="stats-link-count text-title-medium">
-              {formatNumber(stats.pinnedCount)}
+              {formatNumber(stats.pinnedCount, locale)}
             </span>
             <span className="stats-link-label text-body-medium">
-              Pinned notes
+              {t("stats.pinnedNotes")}
             </span>
             <span
               className="material-symbols-rounded stats-link-arrow"
@@ -314,9 +332,11 @@ export const StatisticsView = ({
               star
             </span>
             <span className="stats-link-count text-title-medium">
-              {formatNumber(stats.favoriteCount)}
+              {formatNumber(stats.favoriteCount, locale)}
             </span>
-            <span className="stats-link-label text-body-medium">Favorites</span>
+            <span className="stats-link-label text-body-medium">
+              {t("stats.favorites")}
+            </span>
             <span
               className="material-symbols-rounded stats-link-arrow"
               aria-hidden="true"
@@ -326,7 +346,7 @@ export const StatisticsView = ({
           </button>
         </StatCard>
 
-        <StatCard span={12} title="Pick up where you left off">
+        <StatCard span={12} title={t("stats.pickUp")}>
           <div className="stats-recent">
             {recent.map((item) => {
               const notebookName = item.note
@@ -345,7 +365,9 @@ export const StatisticsView = ({
                   }}
                 >
                   <span className="recent-item-title text-title-small">
-                    {item.note ? noteTitle(item.note) : "No notes yet"}
+                    {item.note
+                      ? item.note.title.trim() || t("common.untitled")
+                      : t("stats.noNotesYet")}
                   </span>
                   <span className="recent-item-preview text-body-small">
                     {preview || notebookName || "—"}
@@ -356,7 +378,7 @@ export const StatisticsView = ({
                     </span>
                     {item.note && item.time && (
                       <span className="recent-time text-body-small">
-                        {getRelativeTime(item.time)}
+                        {relativeTime(item.time)}
                       </span>
                     )}
                   </span>
@@ -366,7 +388,7 @@ export const StatisticsView = ({
           </div>
         </StatCard>
 
-        <StatCard span={12} title="Storage" className="stats-storage">
+        <StatCard span={12} title={t("stats.storage")} className="stats-storage">
           {supported ? (
             <div className="stats-storage-body">
               <span className="stats-big-number text-display-small">
@@ -378,7 +400,7 @@ export const StatisticsView = ({
                     percent >= 80 ? " warning" : ""
                   }`}
                   role="progressbar"
-                  aria-label="Storage used"
+                  aria-label={t("stats.storageUsed")}
                   aria-valuemin={0}
                   aria-valuemax={100}
                   aria-valuenow={Math.round(percent)}
@@ -389,14 +411,20 @@ export const StatisticsView = ({
                   />
                 </div>
                 <div className="stats-storage-meta text-body-small">
-                  <span>{percent.toFixed(1)}% used</span>
-                  <span>~{formatBytes(quota)} browser limit</span>
+                  <span>
+                    {t("stats.percentUsed", {
+                      percent: percent.toFixed(1),
+                    })}
+                  </span>
+                  <span>
+                    {t("stats.browserLimit", { size: formatBytes(quota) })}
+                  </span>
                 </div>
               </div>
             </div>
           ) : (
             <p className="stats-card-subtitle text-body-small">
-              Storage information isn't available in this browser.
+              {t("stats.storageUnavailable")}
             </p>
           )}
         </StatCard>

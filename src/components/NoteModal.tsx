@@ -7,7 +7,9 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
-import { countWords, getRelativeTime } from "../utils";
+import { useTranslation } from "react-i18next";
+import { countWords } from "../utils";
+import { useRelativeTime } from "../hooks/useRelativeTime";
 import { formatChord } from "../utils/shortcuts";
 import { downloadFile, MIME_MARKDOWN, slugify } from "../utils/export";
 import { toast } from "../store/useToastStore";
@@ -84,6 +86,8 @@ export const NoteModal = ({
   onDelete,
   onClose,
 }: NoteModalProps) => {
+  const { t } = useTranslation();
+  const relativeTime = useRelativeTime();
   const [title, setTitle] = useState(initialTitle);
   const [text, setText] = useState(initialText);
   const [tags, setTags] = useState(initialTags);
@@ -152,7 +156,7 @@ export const NoteModal = ({
     : (notebooks[0]?.id ?? "");
 
   const words = useMemo(() => countWords(text), [text]);
-  const wordCountLabel = `${words} ${words === 1 ? "word" : "words"}`;
+  const wordCountLabel = t("editor.wordCount", { count: words });
 
   const showEdited =
     postedOn !== undefined &&
@@ -291,11 +295,11 @@ export const NoteModal = ({
       const filename = `${slugify(title) || "note"}.md`;
       downloadFile(
         filename,
-        `# ${title || "Untitled note"}\n\n${text}`,
+        `# ${title || t("common.untitledNote")}\n\n${text}`,
         MIME_MARKDOWN,
       );
     } catch {
-      toast.error("Couldn't export the note");
+      toast.error(t("toasts.exportNoteFailed"));
     }
   };
 
@@ -355,9 +359,9 @@ export const NoteModal = ({
 
   const statusLabel = dirty
     ? autosave && status === "saving"
-      ? "Saving…"
-      : "Unsaved changes"
-    : "All changes saved";
+      ? t("editor.statusSaving")
+      : t("editor.statusDirty")
+    : t("editor.statusSaved");
 
   return (
     <>
@@ -375,12 +379,15 @@ export const NoteModal = ({
           aria-labelledby={titleId}
         >
           <div className="note-top">
-            <label className="note-notebook" title="Move to notebook">
+            <label
+              className="note-notebook"
+              title={t("editor.moveToNotebookTitle")}
+            >
               <span className="material-symbols-rounded" aria-hidden="true">
                 folder
               </span>
               <select
-                aria-label="Notebook"
+                aria-label={t("editor.notebookLabel")}
                 value={notebookValue}
                 onChange={(event) =>
                   setSelectedNotebookId(event.target.value)
@@ -406,9 +413,15 @@ export const NoteModal = ({
                 className="note-icon-btn"
                 aria-pressed={favorite}
                 aria-label={
-                  favorite ? "Remove from favorites" : "Add to favorites"
+                  favorite
+                    ? t("editor.favoriteRemove")
+                    : t("editor.favoriteAdd")
                 }
-                title={favorite ? "Remove from favorites" : "Add to favorites"}
+                title={
+                  favorite
+                    ? t("editor.favoriteRemove")
+                    : t("editor.favoriteAdd")
+                }
                 onClick={() => setFavorite((current) => !current)}
               >
                 <svg
@@ -422,8 +435,14 @@ export const NoteModal = ({
               <button
                 type="button"
                 className="note-icon-btn note-expand"
-                aria-label={isFull ? "Collapse editor" : "Expand editor"}
-                title={isFull ? "Collapse" : "Expand"}
+                aria-label={
+                  isFull ? t("editor.collapse") : t("editor.expand")
+                }
+                title={
+                  isFull
+                    ? t("editor.collapseShort")
+                    : t("editor.expandShort")
+                }
                 onClick={() => setIsFull((current) => !current)}
               >
                 <span className="material-symbols-rounded" aria-hidden="true">
@@ -433,8 +452,8 @@ export const NoteModal = ({
               <button
                 type="button"
                 className="note-icon-btn"
-                aria-label="Download as Markdown"
-                title="Download as Markdown"
+                aria-label={t("editor.downloadMarkdown")}
+                title={t("editor.downloadMarkdown")}
                 onClick={handleDownload}
               >
                 <span className="material-symbols-rounded" aria-hidden="true">
@@ -445,8 +464,8 @@ export const NoteModal = ({
               <button
                 type="button"
                 className="note-icon-btn"
-                aria-label="Close"
-                title="Close (Esc)"
+                aria-label={t("common.close")}
+                title={t("editor.closeTitle")}
                 onClick={requestClose}
               >
                 <span className="material-symbols-rounded" aria-hidden="true">
@@ -462,7 +481,7 @@ export const NoteModal = ({
               ref={titleRef}
               type="text"
               className="note-title-input"
-              placeholder="Untitled note"
+              placeholder={t("editor.titlePlaceholder")}
               autoComplete="off"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
@@ -488,7 +507,7 @@ export const NoteModal = ({
             <textarea
               ref={bodyRef}
               className="note-textarea custom-scrollbar"
-              placeholder="Start writing…"
+              placeholder={t("editor.bodyPlaceholder")}
               spellCheck
               value={text}
               disabled={mode === "preview"}
@@ -500,7 +519,9 @@ export const NoteModal = ({
                 {text.trim() ? (
                   <MarkdownContent text={text} className="markdown-body" />
                 ) : (
-                  <p className="note-preview-empty">Nothing to preview yet.</p>
+                  <p className="note-preview-empty">
+                    {t("editor.previewEmpty")}
+                  </p>
                 )}
               </div>
             )}
@@ -517,12 +538,16 @@ export const NoteModal = ({
               </span>
               {postedOn !== undefined && (
                 <span className="note-created">
-                  Created {getRelativeTime(postedOn)}
+                  {t("editor.createdRelative", {
+                    time: relativeTime(postedOn),
+                  })}
                 </span>
               )}
               {showEdited && savedAt !== null && (
                 <span className="note-updated">
-                  Edited {getRelativeTime(savedAt)}
+                  {t("editor.editedRelative", {
+                    time: relativeTime(savedAt),
+                  })}
                 </span>
               )}
               {showWordCount && <span>{wordCountLabel}</span>}
@@ -535,7 +560,7 @@ export const NoteModal = ({
                   className="note-btn is-ghost"
                   onClick={handleDiscard}
                 >
-                  Discard
+                  {t("editor.discard")}
                 </button>
               )}
               {!autosave && (
@@ -545,7 +570,7 @@ export const NoteModal = ({
                   disabled={!dirty || !isSavable}
                   onClick={handleSave}
                 >
-                  Save
+                  {t("editor.save")}
                   <kbd>{formatChord(saveChord)}</kbd>
                 </button>
               )}
@@ -556,9 +581,9 @@ export const NoteModal = ({
 
       {isConfirmingClose && (
         <ConfirmModal
-          heading="You have unsaved changes"
-          description="Close the editor without saving?"
-          confirmLabel="Discard"
+          heading={t("editor.unsavedTitle")}
+          description={t("editor.unsavedDescription")}
+          confirmLabel={t("editor.discard")}
           stacked
           onConfirm={(confirm) => {
             setIsConfirmingClose(false);

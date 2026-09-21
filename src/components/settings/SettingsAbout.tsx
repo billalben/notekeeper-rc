@@ -1,24 +1,34 @@
+import { useTranslation } from "react-i18next";
 import { SettingsGroup, SettingsRow } from "./SettingsSection";
 
-export const SettingsAbout = () => (
-  <>
-    <SettingsGroup title="About Notekeeper">
-      <SettingsRow
-        title="Notekeeper"
-        description="A simple, intuitive note-taking app that keeps your notes organized in notebooks — stored locally in your browser."
-      />
-      <SettingsRow
-        title="Storage"
-        description="Your notes never leave this device unless you export them."
-      />
-    </SettingsGroup>
+export const SettingsAbout = () => {
+  const { t } = useTranslation();
 
-    <SettingsGroup title="Credits">
-      <SettingsRow title="Made by" description="Billal Benz" />
-      <SettingsRow
-        title="Copyright"
-        description={`© ${new Date().getFullYear()} Billal Benz`}
-      />
-    </SettingsGroup>
-  </>
-);
+  return (
+    <>
+      <SettingsGroup title={t("settings.about.aboutGroup")}>
+        <SettingsRow
+          title={t("settings.about.notekeeperTitle")}
+          description={t("settings.about.notekeeperDesc")}
+        />
+        <SettingsRow
+          title={t("settings.about.storageTitle")}
+          description={t("settings.about.storageDesc")}
+        />
+      </SettingsGroup>
+
+      <SettingsGroup title={t("settings.about.creditsGroup")}>
+        <SettingsRow
+          title={t("settings.about.madeByTitle")}
+          description={t("settings.about.madeByDesc")}
+        />
+        <SettingsRow
+          title={t("settings.about.copyrightTitle")}
+          description={t("settings.about.copyrightDesc", {
+            year: new Date().getFullYear(),
+          })}
+        />
+      </SettingsGroup>
+    </>
+  );
+};

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ComponentType } from "react";
+import { useTranslation } from "react-i18next";
 import { useActionHotkey } from "../../hooks/useActionHotkey";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { useUIStore } from "../../store/useUIStore";
@@ -20,33 +21,48 @@ type SectionId =
 
 interface Section {
   id: SectionId;
-  label: string;
+  labelKey: `settings.sections.${SectionId}`;
   icon: string;
   Component: ComponentType;
 }
 
 const SECTIONS: Section[] = [
-  { id: "general", label: "General", icon: "tune", Component: SettingsGeneral },
+  {
+    id: "general",
+    labelKey: "settings.sections.general",
+    icon: "tune",
+    Component: SettingsGeneral,
+  },
   {
     id: "appearance",
-    label: "Appearance",
+    labelKey: "settings.sections.appearance",
     icon: "palette",
     Component: SettingsAppearance,
   },
   {
     id: "shortcuts",
-    label: "Shortcuts",
+    labelKey: "settings.sections.shortcuts",
     icon: "keyboard",
     Component: SettingsShortcuts,
   },
   {
     id: "notifications",
-    label: "Notifications",
+    labelKey: "settings.sections.notifications",
     icon: "notifications",
     Component: SettingsNotifications,
   },
-  { id: "data", label: "Data", icon: "database", Component: SettingsData },
-  { id: "about", label: "About", icon: "info", Component: SettingsAbout },
+  {
+    id: "data",
+    labelKey: "settings.sections.data",
+    icon: "database",
+    Component: SettingsData,
+  },
+  {
+    id: "about",
+    labelKey: "settings.sections.about",
+    icon: "info",
+    Component: SettingsAbout,
+  },
 ];
 
 interface SettingsModalProps {
@@ -54,6 +70,7 @@ interface SettingsModalProps {
 }
 
 export const SettingsModal = ({ onClose }: SettingsModalProps) => {
+  const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState<SectionId>("general");
   const [mobilePane, setMobilePane] = useState<"list" | "content">("list");
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -105,11 +122,11 @@ export const SettingsModal = ({ onClose }: SettingsModalProps) => {
               settings
             </span>
             <h2 id="settings-modal-title" className="text-title-medium">
-              Settings
+              {t("settings.title")}
             </h2>
           </div>
 
-          <nav className="settings-nav" aria-label="Settings sections">
+          <nav className="settings-nav" aria-label={t("settings.sectionsAria")}>
             {SECTIONS.map((section) => (
               <button
                 key={section.id}
@@ -128,7 +145,7 @@ export const SettingsModal = ({ onClose }: SettingsModalProps) => {
                 >
                   {section.icon}
                 </span>
-                <span className="text-label-large">{section.label}</span>
+                <span className="text-label-large">{t(section.labelKey)}</span>
                 <div className="state-layer" />
               </button>
             ))}
@@ -139,14 +156,16 @@ export const SettingsModal = ({ onClose }: SettingsModalProps) => {
           <div className="settings-main-header">
             <IconButton
               icon="arrow_back"
-              label="Back to settings sections"
+              label={t("settings.back")}
               className="settings-back-btn"
               onClick={() => setMobilePane("list")}
             />
-            <h2 className="text-title-medium">{active?.label}</h2>
+            <h2 className="text-title-medium">
+              {active ? t(active.labelKey) : ""}
+            </h2>
             <IconButton
               icon="close"
-              label="Close settings"
+              label={t("settings.close")}
               className="settings-close-btn"
               onClick={onClose}
             />

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ConfirmModal } from "./components/ConfirmModal";
 import { Fab } from "./components/Fab";
 import { Header } from "./components/Header";
@@ -14,6 +15,7 @@ import { TagFilterBar } from "./components/TagFilterBar";
 import { ToastRegion } from "./components/ToastRegion";
 import { TrashView } from "./components/TrashView";
 import { useActionHotkey } from "./hooks/useActionHotkey";
+import i18n, { directionFor } from "./i18n";
 import { useNoteStore } from "./store/useNoteStore";
 import { useSettingsStore } from "./store/useSettingsStore";
 import { useThemeStore } from "./store/useThemeStore";
@@ -37,6 +39,7 @@ type NoteModalState = { type: "create" } | { type: "edit"; note: Note };
 type ConfirmState = { notebookId: string; title: string };
 
 const App = () => {
+  const { t } = useTranslation();
   const theme = useThemeStore((state) => state.theme);
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
 
@@ -66,6 +69,7 @@ const App = () => {
 
   const retentionDays = useSettingsStore((state) => state.trash.retentionDays);
   const motion = useSettingsStore((state) => state.motion);
+  const language = useSettingsStore((state) => state.language);
   const appearance = useSettingsStore((state) => state.appearance);
 
   const startAddingNotebook = useUIStore((state) => state.startAddingNotebook);
@@ -92,6 +96,13 @@ const App = () => {
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    if (i18n.language !== language) i18n.changeLanguage(language);
+    document.documentElement.lang = language;
+    document.documentElement.dir = directionFor(language);
+    document.title = i18n.t("common.appTitle");
+  }, [language]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -260,12 +271,12 @@ const App = () => {
     moveNoteToNotebook(sourceNotebookId, note.id, targetNotebookId);
     setMoveNoteTarget(null);
 
-    const targetName = target?.name ?? "notebook";
-    toast.success(`Note moved to "${targetName}"`, {
+    const targetName = target?.name ?? t("common.untitled");
+    toast.success(t("toasts.noteMovedTo", { name: targetName }), {
       duration: 6000,
       actions: [
         {
-          label: "Go to notebook",
+          label: t("toasts.goToNotebook"),
           onClick: () => {
             setActiveNotebook(targetNotebookId);
             showNotes();
@@ -273,7 +284,7 @@ const App = () => {
           },
         },
         {
-          label: "Undo",
+          label: t("common.undo"),
           onClick: () => {
             moveNoteToNotebook(
               targetNotebookId,
@@ -281,7 +292,7 @@ const App = () => {
               sourceNotebookId,
               sourceIndex,
             );
-            toast.success("Move undone");
+            toast.success(t("toasts.moveUndone"));
           },
         },
       ],
@@ -290,14 +301,14 @@ const App = () => {
 
   const handleDeleteNote = (note: Note) => {
     deleteNote(note.notebookId, note.id);
-    toast.success("Note moved to Trash", {
-      description: "You can restore it from the Trash view.",
+    toast.success(t("toasts.noteTrashed"), {
+      description: t("toasts.trashHint"),
       duration: 6000,
       action: {
-        label: "Undo",
+        label: t("common.undo"),
         onClick: () => {
           restoreNote(note.id);
-          toast.success("Note restored");
+          toast.success(t("toasts.noteRestored"));
         },
       },
     });
@@ -317,7 +328,7 @@ const App = () => {
   const handleDeleteTag = (tag: string) => {
     deleteTag(tag);
     removeTagFilter(tag);
-    toast.success(`Tag #${tag} deleted`);
+    toast.success(t("toasts.tagDeleted", { tag }));
   };
 
   const handleDeleteNoteById = (noteId: string) => {
@@ -363,14 +374,14 @@ const App = () => {
     if (confirm && isConfirm) {
       const { notebookId } = confirm;
       deleteNotebook(notebookId);
-      toast.success("Notebook moved to Trash", {
-        description: "You can restore it from the Trash view.",
+      toast.success(t("toasts.notebookTrashed"), {
+        description: t("toasts.trashHint"),
         duration: 6000,
         action: {
-          label: "Undo",
+          label: t("common.undo"),
           onClick: () => {
             restoreNotebook(notebookId);
-            toast.success("Notebook restored");
+            toast.success(t("toasts.notebookRestored"));
           },
         },
       });
@@ -403,14 +414,14 @@ const App = () => {
         ) : view === "all" ? (
           <>
             <h2 className="title text-title-medium" data-note-panel-title>
-              All notes
+              {t("notes.allNotes")}
             </h2>
 
             <NoteList
               notes={allNotes}
               canMoveToNotebook={visibleNotebooks.length > 1}
               notebookNames={notebookNames}
-              emptyMessage="No notes yet"
+              emptyMessage={t("notes.noNotesYet")}
               emptyIcon="note_stack"
               onOpen={openEditNote}
               onTogglePin={handleToggleNotePin}
@@ -423,14 +434,14 @@ const App = () => {
         ) : view === "pinned" ? (
           <>
             <h2 className="title text-title-medium" data-note-panel-title>
-              Pinned
+              {t("notes.pinned")}
             </h2>
 
             <NoteList
               notes={pinnedNotes}
               canMoveToNotebook={visibleNotebooks.length > 1}
               notebookNames={notebookNames}
-              emptyMessage="No pinned notes yet"
+              emptyMessage={t("notes.noPinned")}
               emptyIcon="push_pin"
               onOpen={openEditNote}
               onTogglePin={handleToggleNotePin}
@@ -443,14 +454,14 @@ const App = () => {
         ) : view === "favorites" ? (
           <>
             <h2 className="title text-title-medium" data-note-panel-title>
-              Favorites
+              {t("notes.favorites")}
             </h2>
 
             <NoteList
               notes={favoriteNotes}
               canMoveToNotebook={visibleNotebooks.length > 1}
               notebookNames={notebookNames}
-              emptyMessage="No favorites yet"
+              emptyMessage={t("notes.noFavorites")}
               emptyIcon="star"
               onOpen={openEditNote}
               onTogglePin={handleToggleNotePin}
@@ -464,7 +475,7 @@ const App = () => {
           <>
             <h2 className="title text-title-medium" data-note-panel-title>
               {isFiltering
-                ? `Notes tagged ${tagFilterLabel}`
+                ? t("notes.notesTagged", { tags: tagFilterLabel })
                 : (activeNotebook?.name ?? "")}
             </h2>
 
@@ -480,7 +491,9 @@ const App = () => {
                   <span className="material-symbols-rounded" aria-hidden="true">
                     note_stack
                   </span>
-                  <div className="text-headline-small">No notebooks yet</div>
+                  <div className="text-headline-small">
+                    {t("notes.noNotebooks")}
+                  </div>
                   <button
                     className="btn fill"
                     type="button"
@@ -489,7 +502,9 @@ const App = () => {
                       setSidebarOpen(true);
                     }}
                   >
-                    <span className="text-label-large">Create notebook</span>
+                    <span className="text-label-large">
+                      {t("notes.createNotebook")}
+                    </span>
                     <div className="state-layer" />
                   </button>
                 </div>
@@ -501,8 +516,8 @@ const App = () => {
                 notebookNames={isFiltering ? notebookNames : undefined}
                 emptyMessage={
                   isFiltering
-                    ? `No notes tagged ${tagFilterLabel}`
-                    : "No notes"
+                    ? t("notes.noNotesTagged", { tags: tagFilterLabel })
+                    : t("notes.noNotes")
                 }
                 onOpen={openEditNote}
                 onTogglePin={handleToggleNotePin}
@@ -514,7 +529,7 @@ const App = () => {
             )}
 
             <Fab
-              label="New note"
+              label={t("notes.newNote")}
               disabled={visibleNotebooks.length === 0}
               onClick={openCreateNote}
             />

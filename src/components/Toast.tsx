@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { ToastType } from "../types";
 import { useSettingsStore } from "../store/useSettingsStore";
 import type { ToastItem } from "../store/useToastStore";
@@ -18,6 +19,7 @@ interface ToastProps {
 }
 
 export const Toast = ({ toast, onDismiss }: ToastProps) => {
+  const { t } = useTranslation();
   const defaultDuration = useSettingsStore((state) => state.toasts.duration);
   const showCloseButton = useSettingsStore(
     (state) => state.toasts.showCloseButton,
@@ -101,7 +103,7 @@ export const Toast = ({ toast, onDismiss }: ToastProps) => {
         <IconButton
           icon="close"
           size="small"
-          label="Dismiss notification"
+          label={t("common.dismissNotification")}
           className="toast-close"
           onClick={requestDismiss}
         />

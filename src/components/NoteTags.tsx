@@ -1,4 +1,5 @@
 import { useMemo, useState, type KeyboardEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { addTag, hasTag, removeTag } from "../utils";
 
 const MAX_SUGGESTIONS = 8;
@@ -20,6 +21,7 @@ export const NoteTags = ({
   onCreateTag,
   onDeleteTag,
 }: NoteTagsProps) => {
+  const { t } = useTranslation();
   const [input, setInput] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -107,7 +109,7 @@ export const NoteTags = ({
             <button
               type="button"
               className="tag-chip-remove"
-              aria-label={`Remove tag ${tag}`}
+              aria-label={t("tags.removeTag", { tag })}
               onClick={() => onChange(removeTag(tags, tag))}
             >
               <span className="material-symbols-rounded" aria-hidden="true">
@@ -119,8 +121,8 @@ export const NoteTags = ({
         <input
           type="text"
           className="tag-input"
-          placeholder={tags.length === 0 ? "Add a tag..." : undefined}
-          aria-label="Add a tag"
+          placeholder={tags.length === 0 ? t("tags.addPlaceholder") : undefined}
+          aria-label={t("tags.addLabel")}
           value={input}
           role="combobox"
           aria-expanded={showSuggestions && matches.length > 0}
@@ -145,7 +147,7 @@ export const NoteTags = ({
           id="tag-suggestions"
           className="tag-suggestions custom-scrollbar"
           role="listbox"
-          aria-label="Tag suggestions"
+          aria-label={t("tags.suggestions")}
         >
           {matches.map((tag, index) => {
             const usage = tagUsage[tag.toLowerCase()] ?? 0;
@@ -176,14 +178,14 @@ export const NoteTags = ({
                     </span>
                     <span className="text-label-large">{tag}</span>
                     <span className="tag-suggestion-count text-label-small">
-                      {usage} {usage === 1 ? "note" : "notes"}
+                      {t("tags.noteCount", { count: usage })}
                     </span>
                   </button>
                   <button
                     type="button"
                     className="tag-suggestion-delete"
-                    aria-label={`Delete tag ${tag}`}
-                    title={`Delete tag ${tag}`}
+                    aria-label={t("tags.deleteTag", { tag })}
+                    title={t("tags.deleteTag", { tag })}
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={(event) => {
                       event.stopPropagation();

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { Note } from "../types";
 import type { MoveDirection } from "../utils";
 import { NoteCard } from "./NoteCard";
@@ -25,7 +26,7 @@ export const NoteList = ({
   notes,
   canMoveToNotebook,
   notebookNames,
-  emptyMessage = "No notes",
+  emptyMessage,
   emptyIcon = "note_stack",
   onOpen,
   onTogglePin,
@@ -34,6 +35,8 @@ export const NoteList = ({
   onRequestMove,
   onRequestDelete,
 }: NoteListProps) => {
+  const { t } = useTranslation();
+
   return (
     <div className="note-list" data-note-panel>
       {notes.length > 0 ? (
@@ -58,7 +61,9 @@ export const NoteList = ({
           <span className="material-symbols-rounded" aria-hidden="true">
             {emptyIcon}
           </span>
-          <div className="text-headline-small">{emptyMessage}</div>
+          <div className="text-headline-small">
+            {emptyMessage ?? t("notes.noNotes")}
+          </div>
         </div>
       )}
     </div>

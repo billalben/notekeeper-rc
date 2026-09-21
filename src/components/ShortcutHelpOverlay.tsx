@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useActionHotkey } from "../hooks/useActionHotkey";
 import { useFocusTrap } from "../hooks/useFocusTrap";
 import { useSettingsStore } from "../store/useSettingsStore";
@@ -13,9 +14,10 @@ interface ShortcutHelpOverlayProps {
   onClose: () => void;
 }
 
-const GROUPS: ShortcutGroup[] = ["General", "Editor", "Navigation"];
+const GROUPS: ShortcutGroup[] = ["general", "editor", "navigation"];
 
 export const ShortcutHelpOverlay = ({ onClose }: ShortcutHelpOverlayProps) => {
+  const { t } = useTranslation();
   const shortcuts = useSettingsStore((state) => state.shortcuts);
   const dialogRef = useRef<HTMLDivElement>(null);
 
@@ -36,11 +38,11 @@ export const ShortcutHelpOverlay = ({ onClose }: ShortcutHelpOverlayProps) => {
       >
         <div className="shortcut-help-header">
           <h2 id="shortcut-help-title" className="text-title-medium">
-            Keyboard shortcuts
+            {t("header.keyboardShortcuts")}
           </h2>
           <IconButton
             icon="close"
-            label="Close shortcuts"
+            label={t("common.close")}
             onClick={onClose}
           />
         </div>
@@ -49,14 +51,16 @@ export const ShortcutHelpOverlay = ({ onClose }: ShortcutHelpOverlayProps) => {
           {GROUPS.map((group) => (
             <section key={group} className="shortcut-help-group">
               <h3 className="shortcut-help-group-title text-label-large">
-                {group}
+                {t(`settings.shortcuts.groups.${group}`)}
               </h3>
               <ul className="shortcut-help-list">
                 {SHORTCUT_ACTIONS.filter(
                   (action) => action.group === group,
                 ).map((action) => (
                   <li key={action.id} className="shortcut-help-row">
-                    <span className="text-body-medium">{action.label}</span>
+                    <span className="text-body-medium">
+                      {t(action.labelKey)}
+                    </span>
                     <kbd className="shortcut-key text-label-large">
                       {formatChord(shortcuts[action.id])}
                     </kbd>

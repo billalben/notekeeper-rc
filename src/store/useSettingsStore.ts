@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { DEFAULT_LANGUAGE, isLanguage, type Language } from "../i18n";
 import type { ToastPosition } from "../types";
 import {
   TRASH_RETENTION_DAYS,
@@ -64,7 +65,7 @@ export const DEFAULT_TRASH_SETTINGS: TrashSettings = {
 };
 
 const isRetentionOption = (value: unknown): value is TrashRetentionDays =>
-  TRASH_RETENTION_OPTIONS.some((option) => option.value === value);
+  TRASH_RETENTION_OPTIONS.some((option) => option === value);
 
 export type ExportFormat = "md" | "json";
 
@@ -213,6 +214,9 @@ const isMotionPreference = (value: unknown): value is MotionPreference =>
 const normalizeMotion = (value: unknown): MotionPreference =>
   isMotionPreference(value) ? value : DEFAULT_MOTION;
 
+const normalizeLanguage = (value: unknown): Language =>
+  isLanguage(value) ? value : DEFAULT_LANGUAGE;
+
 const ACCENT_COLORS: AccentColor[] = [
   "orange",
   "blue",
@@ -272,10 +276,12 @@ interface SettingsStore {
   sidebar: SidebarSettings;
   header: HeaderSettings;
   motion: MotionPreference;
+  language: Language;
   appearance: AppearanceSettings;
   export: ExportSettings;
   shortcuts: ShortcutBindings;
   setMotion: (motion: MotionPreference) => void;
+  setLanguage: (language: Language) => void;
   setAppearanceSettings: (partial: Partial<AppearanceSettings>) => void;
   resetAppearanceSettings: () => void;
   setToastSettings: (partial: Partial<ToastSettings>) => void;
@@ -292,7 +298,7 @@ interface SettingsStore {
 }
 
 const STORAGE_KEY = "settings";
-const STORAGE_VERSION = 15;
+const STORAGE_VERSION = 16;
 
 export const useSettingsStore = create<SettingsStore>()(
   persist(
@@ -303,11 +309,14 @@ export const useSettingsStore = create<SettingsStore>()(
       sidebar: DEFAULT_SIDEBAR_SETTINGS,
       header: DEFAULT_HEADER_SETTINGS,
       motion: DEFAULT_MOTION,
+      language: DEFAULT_LANGUAGE,
       appearance: DEFAULT_APPEARANCE_SETTINGS,
       export: DEFAULT_EXPORT_SETTINGS,
       shortcuts: DEFAULT_SHORTCUTS,
 
       setMotion: (motion) => set({ motion: normalizeMotion(motion) }),
+
+      setLanguage: (language) => set({ language: normalizeLanguage(language) }),
 
       setAppearanceSettings: (partial) =>
         set((state) => ({
@@ -379,6 +388,7 @@ export const useSettingsStore = create<SettingsStore>()(
         sidebar: state.sidebar,
         header: state.header,
         motion: state.motion,
+        language: state.language,
         appearance: state.appearance,
         export: state.export,
         shortcuts: state.shortcuts,
@@ -392,6 +402,7 @@ export const useSettingsStore = create<SettingsStore>()(
               sidebar?: Partial<SidebarSettings>;
               header?: Partial<HeaderSettings>;
               motion?: unknown;
+              language?: unknown;
               appearance?: Partial<AppearanceSettings>;
               export?: Partial<ExportSettings>;
               shortcuts?: unknown;
@@ -404,6 +415,7 @@ export const useSettingsStore = create<SettingsStore>()(
           sidebar: normalizeSidebarSettings(state?.sidebar),
           header: normalizeHeaderSettings(state?.header),
           motion: normalizeMotion(state?.motion),
+          language: normalizeLanguage(state?.language),
           appearance: normalizeAppearance(state?.appearance),
           export: normalizeExportSettings(state?.export),
           shortcuts: normalizeShortcuts(state?.shortcuts),
@@ -418,6 +430,7 @@ export const useSettingsStore = create<SettingsStore>()(
               sidebar?: Partial<SidebarSettings>;
               header?: Partial<HeaderSettings>;
               motion?: unknown;
+              language?: unknown;
               appearance?: Partial<AppearanceSettings>;
               export?: Partial<ExportSettings>;
               shortcuts?: unknown;
@@ -431,6 +444,7 @@ export const useSettingsStore = create<SettingsStore>()(
           sidebar: normalizeSidebarSettings(state?.sidebar),
           header: normalizeHeaderSettings(state?.header),
           motion: normalizeMotion(state?.motion),
+          language: normalizeLanguage(state?.language),
           appearance: normalizeAppearance(state?.appearance),
           export: normalizeExportSettings(state?.export),
           shortcuts: normalizeShortcuts(state?.shortcuts),

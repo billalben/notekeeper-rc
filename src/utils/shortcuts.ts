@@ -19,12 +19,18 @@ export type ActionId =
   | "closeModal"
   | "shortcutHelp";
 
-export type ShortcutGroup = "General" | "Editor" | "Navigation";
+export type ShortcutGroup = "general" | "editor" | "navigation";
+
+export type ShortcutGroupKey = `settings.shortcuts.groups.${ShortcutGroup}`;
+
+export type ShortcutActionKey =
+  | `settings.shortcuts.actions.${ActionId}.label`
+  | `settings.shortcuts.actions.${ActionId}.description`;
 
 export interface ShortcutAction {
   id: ActionId;
-  label: string;
-  description: string;
+  labelKey: ShortcutActionKey;
+  descriptionKey: ShortcutActionKey;
   group: ShortcutGroup;
   defaultChord: string;
 }
@@ -32,65 +38,65 @@ export interface ShortcutAction {
 export const SHORTCUT_ACTIONS: ShortcutAction[] = [
   {
     id: "newNote",
-    label: "New note",
-    description: "Create a note in the active notebook.",
-    group: "General",
+    labelKey: "settings.shortcuts.actions.newNote.label",
+    descriptionKey: "settings.shortcuts.actions.newNote.description",
+    group: "general",
     defaultChord: "mod+alt+n",
   },
   {
     id: "openSearch",
-    label: "Search notes",
-    description: "Open the search palette.",
-    group: "General",
+    labelKey: "settings.shortcuts.actions.openSearch.label",
+    descriptionKey: "settings.shortcuts.actions.openSearch.description",
+    group: "general",
     defaultChord: "mod+k",
   },
   {
     id: "toggleTheme",
-    label: "Toggle theme",
-    description: "Switch between light and dark mode.",
-    group: "General",
+    labelKey: "settings.shortcuts.actions.toggleTheme.label",
+    descriptionKey: "settings.shortcuts.actions.toggleTheme.description",
+    group: "general",
     defaultChord: "mod+alt+t",
   },
   {
     id: "shortcutHelp",
-    label: "Show shortcuts",
-    description: "Open the keyboard shortcut reference.",
-    group: "General",
+    labelKey: "settings.shortcuts.actions.shortcutHelp.label",
+    descriptionKey: "settings.shortcuts.actions.shortcutHelp.description",
+    group: "general",
     defaultChord: "mod+slash",
   },
   {
     id: "saveNote",
-    label: "Save / flush now",
-    description: "Save the open note immediately.",
-    group: "Editor",
+    labelKey: "settings.shortcuts.actions.saveNote.label",
+    descriptionKey: "settings.shortcuts.actions.saveNote.description",
+    group: "editor",
     defaultChord: "mod+s",
   },
   {
     id: "togglePreview",
-    label: "Toggle Markdown preview",
-    description: "Switch the open note between edit and preview.",
-    group: "Editor",
+    labelKey: "settings.shortcuts.actions.togglePreview.label",
+    descriptionKey: "settings.shortcuts.actions.togglePreview.description",
+    group: "editor",
     defaultChord: "mod+e",
   },
   {
     id: "downloadNote",
-    label: "Download current note",
-    description: "Download the open note as Markdown.",
-    group: "Editor",
+    labelKey: "settings.shortcuts.actions.downloadNote.label",
+    descriptionKey: "settings.shortcuts.actions.downloadNote.description",
+    group: "editor",
     defaultChord: "mod+shift+s",
   },
   {
     id: "deleteNote",
-    label: "Delete current note",
-    description: "Move the open note to Trash (undo available).",
-    group: "Editor",
+    labelKey: "settings.shortcuts.actions.deleteNote.label",
+    descriptionKey: "settings.shortcuts.actions.deleteNote.description",
+    group: "editor",
     defaultChord: "mod+backspace",
   },
   {
     id: "closeModal",
-    label: "Close / cancel",
-    description: "Close the topmost dialog or overlay.",
-    group: "Navigation",
+    labelKey: "settings.shortcuts.actions.closeModal.label",
+    descriptionKey: "settings.shortcuts.actions.closeModal.description",
+    group: "navigation",
     defaultChord: "escape",
   },
 ];

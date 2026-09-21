@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+import { LANGUAGES, type Language } from "../../i18n";
 import {
   useSettingsStore,
   type EditorMode,
@@ -11,6 +13,7 @@ import {
 } from "./SettingsSection";
 
 export const SettingsGeneral = () => {
+  const { t } = useTranslation();
   const autosave = useSettingsStore((state) => state.editor.autosave);
   const defaultMode = useSettingsStore((state) => state.editor.defaultMode);
   const presentation = useSettingsStore((state) => state.editor.presentation);
@@ -25,30 +28,55 @@ export const SettingsGeneral = () => {
   const setHeaderSettings = useSettingsStore(
     (state) => state.setHeaderSettings,
   );
+  const language = useSettingsStore((state) => state.language);
+  const setLanguage = useSettingsStore((state) => state.setLanguage);
 
   return (
     <>
-      <SettingsGroup title="Editor">
+      <SettingsGroup title={t("settings.general.languageGroup")}>
         <SettingsRow
-          title="Autosave"
-          description="Edits save automatically as you type."
+          title={t("settings.general.languageTitle")}
+          description={t("settings.general.languageDesc")}
+        >
+          <SettingsSelect
+            label={t("settings.general.languageLabel")}
+            value={language}
+            options={LANGUAGES.map((item) => ({
+              value: item.code,
+              label: item.nativeLabel,
+            }))}
+            onChange={(value) => setLanguage(value as Language)}
+          />
+        </SettingsRow>
+      </SettingsGroup>
+
+      <SettingsGroup title={t("settings.general.editorGroup")}>
+        <SettingsRow
+          title={t("settings.general.autosaveTitle")}
+          description={t("settings.general.autosaveDesc")}
         >
           <SettingsSwitch
             checked={autosave}
-            label="Autosave"
+            label={t("settings.general.autosaveLabel")}
             onChange={(checked) => setEditorSettings({ autosave: checked })}
           />
         </SettingsRow>
         <SettingsRow
-          title="Open notes in"
-          description="Choose the editor size: a centered window or near-fullscreen."
+          title={t("settings.general.openNotesInTitle")}
+          description={t("settings.general.openNotesInDesc")}
         >
           <SettingsSelect
-            label="Editor size"
+            label={t("settings.general.editorSizeLabel")}
             value={presentation}
             options={[
-              { value: "modal", label: "Modal" },
-              { value: "full", label: "Full page" },
+              {
+                value: "modal",
+                label: t("settings.general.presentationModal"),
+              },
+              {
+                value: "full",
+                label: t("settings.general.presentationFull"),
+              },
             ]}
             onChange={(value) =>
               setEditorSettings({
@@ -58,15 +86,15 @@ export const SettingsGeneral = () => {
           />
         </SettingsRow>
         <SettingsRow
-          title="Default view"
-          description="Choose how notes open in the editor."
+          title={t("settings.general.defaultViewTitle")}
+          description={t("settings.general.defaultViewDesc")}
         >
           <SettingsSelect
-            label="Default editor view"
+            label={t("settings.general.defaultViewLabel")}
             value={defaultMode}
             options={[
-              { value: "preview", label: "Preview" },
-              { value: "edit", label: "Edit" },
+              { value: "preview", label: t("settings.general.preview") },
+              { value: "edit", label: t("settings.general.edit") },
             ]}
             onChange={(value) =>
               setEditorSettings({ defaultMode: value as EditorMode })
@@ -74,25 +102,25 @@ export const SettingsGeneral = () => {
           />
         </SettingsRow>
         <SettingsRow
-          title="Word count"
-          description="Show live word and character counts in the editor."
+          title={t("settings.general.wordCountTitle")}
+          description={t("settings.general.wordCountDesc")}
         >
           <SettingsSwitch
             checked={showWordCount}
-            label="Word count"
+            label={t("settings.general.wordCountLabel")}
             onChange={(checked) => setEditorSettings({ showWordCount: checked })}
           />
         </SettingsRow>
       </SettingsGroup>
 
-      <SettingsGroup title="Modals">
+      <SettingsGroup title={t("settings.general.modalsGroup")}>
         <SettingsRow
-          title="Close on outside click"
-          description="Clicking the backdrop dismisses a modal. Off by default."
+          title={t("settings.general.closeOutsideTitle")}
+          description={t("settings.general.closeOutsideDesc")}
         >
           <SettingsSwitch
             checked={closeModalOnBackdropClick}
-            label="Close modals when clicking outside"
+            label={t("settings.general.closeOutsideLabel")}
             onChange={(checked) =>
               setEditorSettings({ closeModalOnBackdropClick: checked })
             }
@@ -100,38 +128,38 @@ export const SettingsGeneral = () => {
         </SettingsRow>
       </SettingsGroup>
 
-      <SettingsGroup title="Header">
+      <SettingsGroup title={t("settings.general.headerGroup")}>
         <SettingsRow
-          title="Search"
-          description="Show the search button in the header."
+          title={t("settings.general.searchTitle")}
+          description={t("settings.general.searchDesc")}
         >
           <SettingsSwitch
             checked={header.showSearch}
-            label="Show search button"
+            label={t("settings.general.searchLabel")}
             onChange={(checked) =>
               setHeaderSettings({ showSearch: checked })
             }
           />
         </SettingsRow>
         <SettingsRow
-          title="Shortcuts"
-          description="Show the keyboard shortcut button in the header."
+          title={t("settings.general.shortcutsTitle")}
+          description={t("settings.general.shortcutsDesc")}
         >
           <SettingsSwitch
             checked={header.showShortcuts}
-            label="Show shortcuts button"
+            label={t("settings.general.shortcutsLabel")}
             onChange={(checked) =>
               setHeaderSettings({ showShortcuts: checked })
             }
           />
         </SettingsRow>
         <SettingsRow
-          title="Theme toggle"
-          description="Show the light/dark mode button in the header."
+          title={t("settings.general.themeToggleTitle")}
+          description={t("settings.general.themeToggleDesc")}
         >
           <SettingsSwitch
             checked={header.showTheme}
-            label="Show theme toggle"
+            label={t("settings.general.themeToggleLabel")}
             onChange={(checked) =>
               setHeaderSettings({ showTheme: checked })
             }

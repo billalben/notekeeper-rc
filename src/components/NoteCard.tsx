@@ -1,7 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { toast } from "../store/useToastStore";
 import { useSettingsStore } from "../store/useSettingsStore";
 import type { Note } from "../types";
-import { getRelativeTime, type MoveDirection } from "../utils";
+import { useRelativeTime } from "../hooks/useRelativeTime";
+import type { MoveDirection } from "../utils";
 import { downloadNoteFile } from "../utils/export";
 import { ItemMenu } from "./ItemMenu";
 import { MarkdownContent } from "./MarkdownContent";
@@ -33,17 +35,19 @@ export const NoteCard = ({
   onRequestMove,
   onRequestDelete,
 }: NoteCardProps) => {
+  const { t } = useTranslation();
+  const relativeTime = useRelativeTime();
   const exportFormat = useSettingsStore((state) => state.export.defaultFormat);
   const isEdited = note.updatedOn !== note.postedOn;
   const timeLabel = isEdited
-    ? `Edited ${getRelativeTime(note.updatedOn)}`
-    : getRelativeTime(note.postedOn);
+    ? t("card.editedRelative", { time: relativeTime(note.updatedOn) })
+    : relativeTime(note.postedOn);
 
   const download = (format: "md" | "json") => {
     try {
       downloadNoteFile(note, notebookName ?? null, format);
     } catch {
-      toast.error("Couldn't export the note");
+      toast.error(t("toasts.exportNoteFailed"));
     }
   };
 
@@ -65,8 +69,8 @@ export const NoteCard = ({
             {note.pinned && (
               <span
                 className="material-symbols-rounded pin-badge"
-                aria-label="Pinned"
-                title="Pinned"
+                aria-label={t("card.pinned")}
+                title={t("card.pinned")}
               >
                 push_pin
               </span>
@@ -74,8 +78,8 @@ export const NoteCard = ({
             {note.favorite && (
               <span
                 className="material-symbols-rounded card-favorite-badge"
-                aria-label="Favorite"
-                title="Favorite"
+                aria-label={t("card.favorite")}
+                title={t("card.favorite")}
               >
                 star
               </span>
@@ -107,33 +111,38 @@ export const NoteCard = ({
       <div className="wrapper">
         <span className="card-time text-label-large">{timeLabel}</span>
         <ItemMenu
-          label="Note actions"
+          label={t("card.actions")}
           items={[
             {
               key: "pin",
-              label: note.pinned ? "Unpin note" : "Pin note",
+              label: note.pinned ? t("card.unpin") : t("card.pin"),
               icon: "push_pin",
               onSelect: () => onTogglePin(note),
             },
             {
               key: "favorite",
-              label: note.favorite ? "Unfavorite note" : "Favorite note",
+              label: note.favorite
+                ? t("card.favoriteRemove")
+                : t("card.favoriteAdd"),
               icon: note.favorite ? "star" : "star_border",
               filled: note.favorite,
               onSelect: () => onToggleFavorite(note),
             },
             {
               key: "download",
-              label: `Download as ${
-                exportFormat === "md" ? "Markdown" : "JSON"
-              }`,
+              label: t("card.downloadAs", {
+                format:
+                  exportFormat === "md"
+                    ? t("card.markdown")
+                    : t("card.json"),
+              }),
               icon: "download",
               separatorBefore: true,
               onSelect: () => download(exportFormat),
             },
             {
               key: "move",
-              label: "Move to notebook",
+              label: t("card.moveToNotebook"),
               icon: "drive_file_move",
               disabled: !canMoveToNotebook,
               separatorBefore: true,
@@ -141,7 +150,7 @@ export const NoteCard = ({
             },
             {
               key: "up",
-              label: "Move up",
+              label: t("card.moveUp"),
               icon: "keyboard_arrow_up",
               disabled: !canMoveUp,
               separatorBefore: true,
@@ -149,14 +158,14 @@ export const NoteCard = ({
             },
             {
               key: "down",
-              label: "Move down",
+              label: t("card.moveDown"),
               icon: "keyboard_arrow_down",
               disabled: !canMoveDown,
               onSelect: () => onMove(note, "down"),
             },
             {
               key: "delete",
-              label: "Delete note",
+              label: t("card.delete"),
               icon: "delete",
               danger: true,
               separatorBefore: true,

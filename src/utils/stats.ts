@@ -3,12 +3,9 @@ import { DAY_MS, countWords } from "../utils";
 
 const WEEK_LENGTH = 7;
 
-const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
 export interface DayActivity {
   /** Start-of-day timestamp (local midnight). */
   date: number;
-  label: string;
   created: number;
   edited: number;
   isToday: boolean;
@@ -83,7 +80,6 @@ const buildWeekActivity = (notes: Note[], now: number): DayActivity[] => {
 
     days.push({
       date,
-      label: isToday ? "Today" : DAY_LABELS[new Date(date).getDay()],
       created: notes.filter(
         (note) => note.postedOn >= date && note.postedOn < end,
       ).length,

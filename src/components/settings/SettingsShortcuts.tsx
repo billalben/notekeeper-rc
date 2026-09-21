@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useRecordHotkeys } from "react-hotkeys-hook";
 import { useUIStore } from "../../store/useUIStore";
 import { useSettingsStore } from "../../store/useSettingsStore";
@@ -18,9 +19,10 @@ import {
 } from "../../utils/shortcuts";
 import { SettingsGroup, SettingsRow } from "./SettingsSection";
 
-const GROUPS: ShortcutGroup[] = ["General", "Editor", "Navigation"];
+const GROUPS: ShortcutGroup[] = ["general", "editor", "navigation"];
 
 export const SettingsShortcuts = () => {
+  const { t } = useTranslation();
   const shortcuts = useSettingsStore((state) => state.shortcuts);
   const setShortcut = useSettingsStore((state) => state.setShortcut);
   const resetShortcut = useSettingsStore((state) => state.resetShortcut);
@@ -58,16 +60,18 @@ export const SettingsShortcuts = () => {
     if (!chord) return;
 
     if (!isValidChord(chord)) {
-      toast.error("Shortcut not saved", {
-        description: "Use a modifier (⌘/Ctrl, Alt) plus a key.",
+      toast.error(t("toasts.shortcutNotSaved"), {
+        description: t("toasts.shortcutModifier"),
       });
       return;
     }
 
     const conflict = findConflict(shortcuts, recordingId, chord);
     if (conflict) {
-      toast.error("Shortcut not saved", {
-        description: `Already used by “${SHORTCUT_ACTION_MAP[conflict].label}”.`,
+      toast.error(t("toasts.shortcutNotSaved"), {
+        description: t("toasts.shortcutConflict", {
+          action: t(SHORTCUT_ACTION_MAP[conflict].labelKey),
+        }),
       });
       return;
     }
@@ -82,6 +86,7 @@ export const SettingsShortcuts = () => {
     setRecordingShortcut,
     stop,
     resetKeys,
+    t,
   ]);
   /* eslint-enable react/set-state-in-effect */
 
@@ -115,19 +120,20 @@ export const SettingsShortcuts = () => {
   return (
     <>
       {GROUPS.map((group) => (
-        <SettingsGroup key={group} title={group}>
+        <SettingsGroup key={group} title={t(`settings.shortcuts.groups.${group}`)}>
           {SHORTCUT_ACTIONS.filter((action) => action.group === group).map(
             (action) => {
               const isThisRecording = recordingId === action.id;
               const isCustom =
                 normalizeChord(shortcuts[action.id]) !==
                 normalizeChord(DEFAULT_SHORTCUTS[action.id]);
+              const label = t(action.labelKey);
 
               return (
                 <SettingsRow
                   key={action.id}
-                  title={action.label}
-                  description={action.description}
+                  title={label}
+                  description={t(action.descriptionKey)}
                 >
                   <div className="shortcut-control">
                     <button
@@ -135,7 +141,9 @@ export const SettingsShortcuts = () => {
                       className={`shortcut-key-btn${
                         isThisRecording ? " is-recording" : ""
                       }`}
-                      aria-label={`Change shortcut for ${action.label}`}
+                      aria-label={t("settings.shortcuts.changeShortcut", {
+                        action: label,
+                      })}
                       aria-pressed={isThisRecording}
                       onClick={() =>
                         isThisRecording
@@ -144,15 +152,17 @@ export const SettingsShortcuts = () => {
                       }
                     >
                       {isThisRecording
-                        ? "Recording…"
+                        ? t("settings.shortcuts.recording")
                         : formatChord(shortcuts[action.id])}
                     </button>
                     {isCustom && (
                       <button
                         type="button"
                         className="shortcut-reset-btn"
-                        aria-label={`Reset ${action.label} to default`}
-                        title="Reset to default"
+                        aria-label={t("settings.shortcuts.resetShortcut", {
+                          action: label,
+                        })}
+                        title={t("settings.shortcuts.resetToDefault")}
                         onClick={() => {
                           resetShortcut(action.id);
                         }}
@@ -173,24 +183,26 @@ export const SettingsShortcuts = () => {
         </SettingsGroup>
       ))}
 
-      <SettingsGroup title="More">
+      <SettingsGroup title={t("settings.shortcuts.moreGroup")}>
         <SettingsRow
-          title="Shortcut reference"
-          description="See every shortcut in one place."
+          title={t("settings.shortcuts.referenceTitle")}
+          description={t("settings.shortcuts.referenceDesc")}
         >
           <button
             className="btn text"
             type="button"
             onClick={openShortcutHelp}
           >
-            <span className="text-label-large">View all</span>
+            <span className="text-label-large">
+              {t("settings.shortcuts.viewAll")}
+            </span>
             <div className="state-layer" />
           </button>
         </SettingsRow>
 
         <SettingsRow
-          title="Reset all shortcuts"
-          description="Restore every binding to its default."
+          title={t("settings.shortcuts.resetAllTitle")}
+          description={t("settings.shortcuts.resetAllDesc")}
         >
           <button
             className="btn text"
@@ -198,10 +210,10 @@ export const SettingsShortcuts = () => {
             disabled={isAllDefault}
             onClick={() => {
               resetAllShortcuts();
-              toast.success("Shortcuts reset to defaults");
+              toast.success(t("toasts.shortcutsReset"));
             }}
           >
-            <span className="text-label-large">Reset</span>
+            <span className="text-label-large">{t("common.reset")}</span>
             <div className="state-layer" />
           </button>
         </SettingsRow>

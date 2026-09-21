@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useTranslation } from "react-i18next";
 import type { RangeTuple } from "fuse.js";
 import { useActionHotkey } from "../hooks/useActionHotkey";
 import { useNoteStore } from "../store/useNoteStore";
@@ -50,6 +51,7 @@ const highlight = (
 const itemId = (index: number) => `search-result-${index}`;
 
 export const SearchPalette = ({ onOpenNote, onClose }: SearchPaletteProps) => {
+  const { t } = useTranslation();
   const notebooks = useNoteStore((state) => state.notebooks);
 
   const [query, setQuery] = useState("");
@@ -132,7 +134,7 @@ export const SearchPalette = ({ onOpenNote, onClose }: SearchPaletteProps) => {
           className="search-palette"
           role="dialog"
           aria-modal="true"
-          aria-label="Search notes"
+          aria-label={t("search.label")}
         >
           <div className="search-input-row">
             <span className="material-symbols-rounded" aria-hidden="true">
@@ -142,7 +144,7 @@ export const SearchPalette = ({ onOpenNote, onClose }: SearchPaletteProps) => {
               ref={inputRef}
               type="text"
               className="search-input text-body-large"
-              placeholder="Search notes…"
+              placeholder={t("search.placeholder")}
               value={query}
               onChange={(event) => {
                 setQuery(event.target.value);
@@ -166,7 +168,7 @@ export const SearchPalette = ({ onOpenNote, onClose }: SearchPaletteProps) => {
                   id="search-results"
                   className="search-results custom-scrollbar"
                   role="listbox"
-                  aria-label="Search results"
+                  aria-label={t("search.results")}
                 >
                   {results.map((result: SearchResult, index) => (
                     <li
@@ -184,7 +186,10 @@ export const SearchPalette = ({ onOpenNote, onClose }: SearchPaletteProps) => {
                       onClick={() => onOpenNote(result.note)}
                     >
                       <div className="search-result-title text-body-large">
-                        {highlight(result.note.title || "Untitled", result.titleRanges)}
+                        {highlight(
+                          result.note.title || t("common.untitled"),
+                          result.titleRanges,
+                        )}
                       </div>
                       <div className="search-result-meta text-label-large">
                         <span
@@ -204,7 +209,7 @@ export const SearchPalette = ({ onOpenNote, onClose }: SearchPaletteProps) => {
                   ))}
                 </ul>
                 <div className="search-footer text-label-large">
-                  {results.length} result{results.length === 1 ? "" : "s"}
+                  {t("search.resultCount", { count: results.length })}
                 </div>
               </>
             ) : (
@@ -213,7 +218,7 @@ export const SearchPalette = ({ onOpenNote, onClose }: SearchPaletteProps) => {
                   search_off
                 </span>
                 <div className="text-body-large">
-                  No notes match “{trimmedQuery}”
+                  {t("search.noMatches", { query: trimmedQuery })}
                 </div>
               </div>
             )
@@ -222,9 +227,7 @@ export const SearchPalette = ({ onOpenNote, onClose }: SearchPaletteProps) => {
               <span className="material-symbols-rounded" aria-hidden="true">
                 search
               </span>
-              <div className="text-body-large">
-                Search across every notebook by title or content
-              </div>
+              <div className="text-body-large">{t("search.hint")}</div>
             </div>
           )}
         </div>

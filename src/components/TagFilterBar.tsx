@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 interface TagFilterBarProps {
   tags: string[];
   activeTags: string[];
@@ -9,10 +11,16 @@ export const TagFilterBar = ({
   activeTags,
   onToggle,
 }: TagFilterBarProps) => {
+  const { t } = useTranslation();
+
   if (tags.length === 0) return null;
 
   return (
-    <div className="tag-filter-bar" role="group" aria-label="Filter by tag">
+    <div
+      className="tag-filter-bar"
+      role="group"
+      aria-label={t("tags.filterByTag")}
+    >
       <span
         className="material-symbols-rounded tag-filter-icon"
         aria-hidden="true"

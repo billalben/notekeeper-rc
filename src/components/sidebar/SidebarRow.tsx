@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 interface SidebarRowProps {
   icon: string;
@@ -22,33 +23,37 @@ export const SidebarRow = ({
   dimmed = false,
   onClick,
   trailing,
-}: SidebarRowProps) => (
-  <button
-    type="button"
-    className={`sidebar-row${selected ? " is-selected" : ""}${
-      dimmed ? " is-dimmed" : ""
-    }`}
-    aria-current={selected ? "page" : undefined}
-    title={label}
-    onClick={onClick}
-    data-sidebar-nav-item
-  >
-    <span
-      className="material-symbols-rounded sidebar-row-icon"
-      aria-hidden="true"
+}: SidebarRowProps) => {
+  const { t } = useTranslation();
+
+  return (
+    <button
+      type="button"
+      className={`sidebar-row${selected ? " is-selected" : ""}${
+        dimmed ? " is-dimmed" : ""
+      }`}
+      aria-current={selected ? "page" : undefined}
+      title={label}
+      onClick={onClick}
+      data-sidebar-nav-item
     >
-      {icon}
-    </span>
-    <span className="text text-label-large sidebar-row-label">{label}</span>
-    {trailing}
-    {count !== undefined && (
       <span
-        className="sidebar-row-count text-label-small"
-        aria-label={`${count} notes`}
+        className="material-symbols-rounded sidebar-row-icon"
+        aria-hidden="true"
       >
-        {count}
+        {icon}
       </span>
-    )}
-    <div className="state-layer" />
-  </button>
-);
+      <span className="text text-label-large sidebar-row-label">{label}</span>
+      {trailing}
+      {count !== undefined && (
+        <span
+          className="sidebar-row-count text-label-small"
+          aria-label={t("sidebar.noteCount", { count })}
+        >
+          {count}
+        </span>
+      )}
+      <div className="state-layer" />
+    </button>
+  );
+};

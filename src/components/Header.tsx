@@ -1,16 +1,30 @@
-import { useState } from "react";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { useThemeStore } from "../store/useThemeStore";
 import { useUIStore } from "../store/useUIStore";
 import { formatChord } from "../utils/shortcuts";
-import { getGreetingMsg } from "../utils";
 import { IconButton } from "./IconButton";
 
 interface HeaderProps {
   onOpenSidebar: () => void;
 }
 
+const greetingKey = (hour: number) =>
+  hour < 5
+    ? "night"
+    : hour < 12
+      ? "morning"
+      : hour < 15
+        ? "noon"
+        : hour < 17
+          ? "afternoon"
+          : hour < 20
+            ? "evening"
+            : "night";
+
 export const Header = ({ onOpenSidebar }: HeaderProps) => {
+  const { t, i18n } = useTranslation();
   const openSettings = useUIStore((state) => state.openSettings);
   const openSearch = useUIStore((state) => state.openSearch);
   const openShortcutHelp = useUIStore((state) => state.openShortcutHelp);
@@ -25,10 +39,25 @@ export const Header = ({ onOpenSidebar }: HeaderProps) => {
   );
   const showTheme = useSettingsStore((state) => state.header.showTheme);
 
-  const [greeting] = useState(() => getGreetingMsg(new Date().getHours()));
-  const [date] = useState(() => new Date().toDateString().replace(" ", ", "));
+  const greeting = useMemo(
+    () => t(`header.greeting.${greetingKey(new Date().getHours())}`),
+    [t],
+  );
+  const date = useMemo(
+    () =>
+      new Intl.DateTimeFormat(i18n.language, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }).format(new Date()),
+    [i18n.language],
+  );
 
   const isDark = theme === "dark";
+  const themeLabel = isDark
+    ? t("header.switchToLight")
+    : t("header.switchToDark");
 
   return (
     <div className="header">
@@ -44,8 +73,10 @@ export const Header = ({ onOpenSidebar }: HeaderProps) => {
       {showSearch && (
         <IconButton
           icon="search"
-          tooltip={`Search notes (${formatChord(searchChord)})`}
-          label="Search notes"
+          tooltip={t("header.searchNotesTooltip", {
+            chord: formatChord(searchChord),
+          })}
+          label={t("header.searchNotes")}
           className="search-btn"
           onClick={openSearch}
         />
@@ -54,8 +85,10 @@ export const Header = ({ onOpenSidebar }: HeaderProps) => {
       {showShortcuts && (
         <IconButton
           icon="keyboard"
-          tooltip={`Keyboard shortcuts (${formatChord(helpChord)})`}
-          label="Keyboard shortcuts"
+          tooltip={t("header.keyboardShortcutsTooltip", {
+            chord: formatChord(helpChord),
+          })}
+          label={t("header.keyboardShortcuts")}
           className="shortcut-help-btn"
           onClick={openShortcutHelp}
         />
@@ -64,8 +97,8 @@ export const Header = ({ onOpenSidebar }: HeaderProps) => {
       {showTheme && (
         <IconButton
           icon={isDark ? "light_mode" : "dark_mode"}
-          tooltip={isDark ? "Switch to light mode" : "Switch to dark mode"}
-          label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          tooltip={themeLabel}
+          label={themeLabel}
           className={`theme-btn${isDark ? " is-rotated" : ""}`}
           onClick={toggleTheme}
         />
@@ -73,15 +106,15 @@ export const Header = ({ onOpenSidebar }: HeaderProps) => {
 
       <IconButton
         icon="settings"
-        tooltip="Open settings"
-        label="Open settings"
+        tooltip={t("header.openSettings")}
+        label={t("header.openSettings")}
         className={`settings-btn${isSettingsOpen ? " is-rotated" : ""}`}
         onClick={openSettings}
       />
 
       <IconButton
         icon="menu"
-        label="Open menu"
+        label={t("header.openMenu")}
         className="menu-btn"
         onClick={onOpenSidebar}
       />

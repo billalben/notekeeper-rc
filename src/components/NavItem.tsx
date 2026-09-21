@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { toast } from "../store/useToastStore";
 import type { Notebook } from "../types";
@@ -27,6 +28,7 @@ export const NavItem = ({
   onMove,
   onRequestDelete,
 }: NavItemProps) => {
+  const { t } = useTranslation();
   const exportFormat = useSettingsStore((state) => state.export.defaultFormat);
   const { canMoveUp, canMoveDown } = notebook;
   const [isEditing, setIsEditing] = useState(false);
@@ -47,7 +49,7 @@ export const NavItem = ({
     setIsEditing(false);
     if (nextName !== notebook.name) {
       onRename(notebook.id, nextName);
-      toast.success("Notebook renamed");
+      toast.success(t("toasts.notebookRenamed"));
     }
   };
 
@@ -59,7 +61,7 @@ export const NavItem = ({
     try {
       downloadNotebookFile(notebook, exportFormat);
     } catch {
-      toast.error("Couldn't export the notebook");
+      toast.error(t("toasts.exportNotebookFailed"));
     }
   };
 
@@ -117,8 +119,8 @@ export const NavItem = ({
             {notebook.pinned && (
               <span
                 className="material-symbols-rounded pin-badge"
-                aria-label="Pinned"
-                title="Pinned"
+                aria-label={t("sidebar.pinnedBadge")}
+                title={t("sidebar.pinnedBadge")}
               >
                 push_pin
               </span>
@@ -127,8 +129,8 @@ export const NavItem = ({
           {noteCount > 0 && (
             <span
               className="notebook-count text-label-small"
-              aria-label={`${noteCount} notes`}
-              title={`${noteCount} notes`}
+              aria-label={t("sidebar.noteCount", { count: noteCount })}
+              title={t("sidebar.noteCount", { count: noteCount })}
             >
               {noteCount}
             </span>
@@ -138,44 +140,46 @@ export const NavItem = ({
       )}
 
       <ItemMenu
-        label="Notebook actions"
+        label={t("sidebar.notebookActions")}
         items={[
           {
             key: "rename",
-            label: "Rename",
+            label: t("sidebar.rename"),
             icon: "edit",
             onSelect: startEditing,
           },
           {
             key: "pin",
-            label: notebook.pinned ? "Unpin notebook" : "Pin notebook",
+            label: notebook.pinned
+              ? t("sidebar.unpinNotebook")
+              : t("sidebar.pinNotebook"),
             icon: "push_pin",
             onSelect: () => onTogglePin(notebook),
           },
           {
             key: "export",
-            label: "Export notebook",
+            label: t("sidebar.exportNotebook"),
             icon: "download",
             separatorBefore: true,
             onSelect: exportNotebook,
           },
           {
             key: "up",
-            label: "Move up",
+            label: t("sidebar.moveUp"),
             icon: "keyboard_arrow_up",
             disabled: !canMoveUp,
             onSelect: () => onMove(notebook, "up"),
           },
           {
             key: "down",
-            label: "Move down",
+            label: t("sidebar.moveDown"),
             icon: "keyboard_arrow_down",
             disabled: !canMoveDown,
             onSelect: () => onMove(notebook, "down"),
           },
           {
             key: "delete",
-            label: "Delete notebook",
+            label: t("sidebar.deleteNotebook"),
             icon: "delete",
             danger: true,
             separatorBefore: true,

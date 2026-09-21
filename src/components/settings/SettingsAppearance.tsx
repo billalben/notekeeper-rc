@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useThemeStore } from "../../store/useThemeStore";
 import { toast } from "../../store/useToastStore";
 import {
@@ -16,16 +17,17 @@ import {
   SettingsSwitch,
 } from "./SettingsSection";
 
-const ACCENTS: { id: AccentColor; label: string }[] = [
-  { id: "orange", label: "Orange" },
-  { id: "blue", label: "Blue" },
-  { id: "green", label: "Green" },
-  { id: "teal", label: "Teal" },
-  { id: "violet", label: "Violet" },
-  { id: "rose", label: "Rose" },
+const ACCENTS: AccentColor[] = [
+  "orange",
+  "blue",
+  "green",
+  "teal",
+  "violet",
+  "rose",
 ];
 
 export const SettingsAppearance = () => {
+  const { t } = useTranslation();
   const theme = useThemeStore((state) => state.theme);
   const setTheme = useThemeStore((state) => state.setTheme);
 
@@ -46,41 +48,42 @@ export const SettingsAppearance = () => {
 
   return (
     <>
-      <SettingsGroup title="Theme">
+      <SettingsGroup title={t("settings.appearance.themeGroup")}>
         <SettingsRow
-          title="Dark mode"
-          description="Use a dark color scheme across the app."
+          title={t("settings.appearance.darkModeTitle")}
+          description={t("settings.appearance.darkModeDesc")}
         >
           <SettingsSwitch
             checked={isDark}
-            label="Dark mode"
+            label={t("settings.appearance.darkModeLabel")}
             onChange={(checked) => setTheme(checked ? "dark" : "light")}
           />
         </SettingsRow>
       </SettingsGroup>
 
-      <SettingsGroup title="Accent & size">
+      <SettingsGroup title={t("settings.appearance.accentGroup")}>
         <SettingsRow
-          title="Accent color"
-          description="Recolors buttons, highlights, and active states."
+          title={t("settings.appearance.accentTitle")}
+          description={t("settings.appearance.accentDesc")}
         >
           <div
             className="accent-swatches"
             role="group"
-            aria-label="Accent color"
+            aria-label={t("settings.appearance.accentLabel")}
           >
             {ACCENTS.map((accent) => {
-              const isSelected = appearance.accent === accent.id;
+              const isSelected = appearance.accent === accent;
+              const label = t(`settings.appearance.accents.${accent}`);
               return (
                 <button
-                  key={accent.id}
+                  key={accent}
                   type="button"
                   className="accent-swatch"
-                  style={{ backgroundColor: `var(--swatch-${accent.id})` }}
-                  aria-label={accent.label}
-                  title={accent.label}
+                  style={{ backgroundColor: `var(--swatch-${accent})` }}
+                  aria-label={label}
+                  title={label}
                   aria-pressed={isSelected}
-                  onClick={() => setAppearanceSettings({ accent: accent.id })}
+                  onClick={() => setAppearanceSettings({ accent })}
                 >
                   {isSelected && (
                     <span
@@ -97,16 +100,19 @@ export const SettingsAppearance = () => {
         </SettingsRow>
 
         <SettingsRow
-          title="Font size"
-          description="Scale text and line heights across the app."
+          title={t("settings.appearance.fontSizeTitle")}
+          description={t("settings.appearance.fontSizeDesc")}
         >
           <SettingsSelect
-            label="Font size"
+            label={t("settings.appearance.fontSizeLabel")}
             value={appearance.fontScale}
             options={[
-              { value: "small", label: "Small" },
-              { value: "default", label: "Default" },
-              { value: "large", label: "Large" },
+              { value: "small", label: t("settings.appearance.sizes.small") },
+              {
+                value: "default",
+                label: t("settings.appearance.sizes.default"),
+              },
+              { value: "large", label: t("settings.appearance.sizes.large") },
             ]}
             onChange={(value) =>
               setAppearanceSettings({ fontScale: value as FontScale })
@@ -115,16 +121,25 @@ export const SettingsAppearance = () => {
         </SettingsRow>
 
         <SettingsRow
-          title="Density"
-          description="Adjust padding and spacing throughout the UI."
+          title={t("settings.appearance.densityTitle")}
+          description={t("settings.appearance.densityDesc")}
         >
           <SettingsSelect
-            label="Density"
+            label={t("settings.appearance.densityLabel")}
             value={appearance.density}
             options={[
-              { value: "compact", label: "Compact" },
-              { value: "default", label: "Default" },
-              { value: "comfortable", label: "Comfortable" },
+              {
+                value: "compact",
+                label: t("settings.appearance.densities.compact"),
+              },
+              {
+                value: "default",
+                label: t("settings.appearance.densities.default"),
+              },
+              {
+                value: "comfortable",
+                label: t("settings.appearance.densities.comfortable"),
+              },
             ]}
             onChange={(value) =>
               setAppearanceSettings({ density: value as Density })
@@ -133,16 +148,25 @@ export const SettingsAppearance = () => {
         </SettingsRow>
 
         <SettingsRow
-          title="Corners"
-          description="Choose how rounded corners appear across the UI."
+          title={t("settings.appearance.cornersTitle")}
+          description={t("settings.appearance.cornersDesc")}
         >
           <SettingsSelect
-            label="Corner style"
+            label={t("settings.appearance.cornersLabel")}
             value={appearance.radius}
             options={[
-              { value: "default", label: "Default" },
-              { value: "square", label: "Square" },
-              { value: "rounded", label: "Rounded" },
+              {
+                value: "default",
+                label: t("settings.appearance.corners.default"),
+              },
+              {
+                value: "square",
+                label: t("settings.appearance.corners.square"),
+              },
+              {
+                value: "rounded",
+                label: t("settings.appearance.corners.rounded"),
+              },
             ]}
             onChange={(value) =>
               setAppearanceSettings({ radius: value as RadiusStyle })
@@ -151,12 +175,12 @@ export const SettingsAppearance = () => {
         </SettingsRow>
 
         <SettingsRow
-          title="High contrast"
-          description="Strengthen borders and text for better visibility."
+          title={t("settings.appearance.highContrastTitle")}
+          description={t("settings.appearance.highContrastDesc")}
         >
           <SettingsSwitch
             checked={appearance.highContrast}
-            label="High contrast"
+            label={t("settings.appearance.highContrastLabel")}
             onChange={(checked) =>
               setAppearanceSettings({ highContrast: checked })
             }
@@ -164,8 +188,8 @@ export const SettingsAppearance = () => {
         </SettingsRow>
 
         <SettingsRow
-          title="Reset appearance"
-          description="Restore accent, font size, density, corners, and contrast to defaults."
+          title={t("settings.appearance.resetTitle")}
+          description={t("settings.appearance.resetDesc")}
         >
           <button
             className="btn text"
@@ -173,27 +197,36 @@ export const SettingsAppearance = () => {
             disabled={isDefaultAppearance}
             onClick={() => {
               resetAppearanceSettings();
-              toast.success("Appearance reset to defaults");
+              toast.success(t("toasts.appearanceReset"));
             }}
           >
-            <span className="text-label-large">Reset</span>
+            <span className="text-label-large">{t("common.reset")}</span>
             <div className="state-layer" />
           </button>
         </SettingsRow>
       </SettingsGroup>
 
-      <SettingsGroup title="Motion">
+      <SettingsGroup title={t("settings.appearance.motionGroup")}>
         <SettingsRow
-          title="Reduce motion"
-          description="Honor your system motion preference, or override it."
+          title={t("settings.appearance.reduceMotionTitle")}
+          description={t("settings.appearance.reduceMotionDesc")}
         >
           <SettingsSelect
-            label="Motion preference"
+            label={t("settings.appearance.motionLabel")}
             value={motion}
             options={[
-              { value: "system", label: "System default" },
-              { value: "reduce", label: "Reduce motion" },
-              { value: "full", label: "Full motion" },
+              {
+                value: "system",
+                label: t("settings.appearance.motions.system"),
+              },
+              {
+                value: "reduce",
+                label: t("settings.appearance.motions.reduce"),
+              },
+              {
+                value: "full",
+                label: t("settings.appearance.motions.full"),
+              },
             ]}
             onChange={(value) => setMotion(value as MotionPreference)}
           />

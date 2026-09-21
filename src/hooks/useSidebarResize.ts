@@ -31,6 +31,7 @@ export const useSidebarResize = () => {
   const [isResizing, setIsResizing] = useState(false);
   const [dragWidth, setDragWidth] = useState(width);
   const startRef = useRef({ pointerX: 0, width });
+  const liveWidthRef = useRef(width);
 
   useEffect(() => {
     applySidebarWidth(isResizing ? dragWidth : width);
@@ -43,16 +44,15 @@ export const useSidebarResize = () => {
 
     const handleMove = (event: globalThis.PointerEvent) => {
       const delta = event.clientX - startRef.current.pointerX;
-      setDragWidth(clampWidth(startRef.current.width + delta));
+      const next = clampWidth(startRef.current.width + delta);
+      liveWidthRef.current = next;
+      setDragWidth(next);
     };
 
     const finish = (commit: boolean) => {
       document.body.classList.remove("resizing");
       if (commit) {
-        setDragWidth((current) => {
-          setSidebarSettings({ width: current });
-          return current;
-        });
+        setSidebarSettings({ width: liveWidthRef.current });
       } else {
         setDragWidth(startRef.current.width);
       }
@@ -80,6 +80,7 @@ export const useSidebarResize = () => {
     if (!window.matchMedia(DESKTOP_QUERY).matches) return;
     event.preventDefault();
     startRef.current = { pointerX: event.clientX, width };
+    liveWidthRef.current = width;
     setDragWidth(width);
     setIsResizing(true);
   };
