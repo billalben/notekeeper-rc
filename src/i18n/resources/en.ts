@@ -111,6 +111,8 @@ const en = {
     copyNote: "Copy note text",
     copied: "Copied",
     closeTitle: "Close (Esc)",
+    closePane: "Close editor pane",
+    resizePane: "Resize editor pane",
     titlePlaceholder: "Untitled note",
     bodyPlaceholder: "Start writing…",
     previewEmpty: "Nothing to preview yet.",
@@ -122,6 +124,8 @@ const en = {
     save: "Save",
     unsavedTitle: "You have unsaved changes",
     unsavedDescription: "Close the editor without saving?",
+    unsavedSwitchDescription:
+      "Switch notes and discard your unsaved changes?",
     toolbar: {
       heading: "Heading",
       bold: "Bold",
@@ -278,10 +282,11 @@ const en = {
       autosaveLabel: "Autosave",
       openNotesInTitle: "Open notes in",
       openNotesInDesc:
-        "Choose the editor size: a centered window or near-fullscreen.",
+        "Choose how the editor opens: a centered window, full screen, or a two-pane split view (desktop only).",
       editorSizeLabel: "Editor size",
       presentationModal: "Modal",
       presentationFull: "Full page",
+      presentationSplit: "Split view",
       defaultViewTitle: "Default view",
       defaultViewDesc: "Choose how notes open in the editor.",
       defaultViewLabel: "Default editor view",

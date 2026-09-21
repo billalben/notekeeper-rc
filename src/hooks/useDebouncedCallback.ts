@@ -8,9 +8,10 @@ export interface DebouncedCallback<Args extends unknown[]> {
 
 /**
  * Trailing-edge debounce with imperative controls. The latest callback is kept
- * in a ref so callers don't need to memoize it, and the pending invocation is
- * discarded on unmount. `flush` runs any pending call immediately (used before
- * closing the editor), while `cancel` drops it.
+ * in a ref so callers don't need to memoize it, and a pending invocation is
+ * flushed on unmount so edits aren't dropped when the consumer goes away
+ * (e.g. switching notes in split view). `flush` runs any pending call
+ * immediately (used before closing the editor), while `cancel` drops it.
  */
 export const useDebouncedCallback = <Args extends unknown[]>(
   callback: (...args: Args) => void,
@@ -55,7 +56,7 @@ export const useDebouncedCallback = <Args extends unknown[]>(
     [delay],
   );
 
-  useEffect(() => cancel, [cancel]);
+  useEffect(() => flush, [flush]);
 
   return useMemo(() => ({ run, flush, cancel }), [run, flush, cancel]);
 };

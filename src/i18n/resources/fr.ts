@@ -111,6 +111,8 @@ const fr = {
     copyNote: "Copier le texte de la note",
     copied: "Copié",
     closeTitle: "Fermer (Échap)",
+    closePane: "Fermer le volet de l'éditeur",
+    resizePane: "Redimensionner le volet de l'éditeur",
     titlePlaceholder: "Note sans titre",
     bodyPlaceholder: "Commencez à écrire…",
     previewEmpty: "Rien à prévisualiser pour l'instant.",
@@ -122,6 +124,8 @@ const fr = {
     save: "Enregistrer",
     unsavedTitle: "Vous avez des modifications non enregistrées",
     unsavedDescription: "Fermer l'éditeur sans enregistrer ?",
+    unsavedSwitchDescription:
+      "Changer de note et abandonner vos modifications non enregistrées ?",
     toolbar: {
       heading: "Titre",
       bold: "Gras",
@@ -286,10 +290,11 @@ const fr = {
       autosaveLabel: "Enregistrement automatique",
       openNotesInTitle: "Ouvrir les notes en",
       openNotesInDesc:
-        "Choisissez la taille de l'éditeur : une fenêtre centrée ou presque plein écran.",
+        "Choisissez l'ouverture de l'éditeur : une fenêtre centrée, plein écran, ou une vue divisée à deux volets (bureau uniquement).",
       editorSizeLabel: "Taille de l'éditeur",
       presentationModal: "Fenêtre",
       presentationFull: "Plein écran",
+      presentationSplit: "Vue divisée",
       defaultViewTitle: "Vue par défaut",
       defaultViewDesc:
         "Choisissez comment les notes s'ouvrent dans l'éditeur.",

@@ -14,6 +14,7 @@ interface NoteCardProps {
   canMoveDown: boolean;
   canMoveToNotebook: boolean;
   notebookName?: string;
+  isSelected?: boolean;
   onOpen: (note: Note) => void;
   onTogglePin: (note: Note) => void;
   onToggleFavorite: (note: Note) => void;
@@ -28,6 +29,7 @@ export const NoteCard = ({
   canMoveDown,
   canMoveToNotebook,
   notebookName,
+  isSelected = false,
   onOpen,
   onTogglePin,
   onToggleFavorite,
@@ -53,9 +55,10 @@ export const NoteCard = ({
 
   return (
     <div
-      className="card"
+      className={`card${isSelected ? " is-selected" : ""}`}
       role="button"
       tabIndex={0}
+      aria-current={isSelected ? "true" : undefined}
       onClick={() => onOpen(note)}
       onKeyDown={(event) => {
         if (event.key === "Enter") onOpen(note);

@@ -38,12 +38,17 @@ export const DEFAULT_TOAST_SETTINGS: ToastSettings = {
 
 export type EditorMode = "edit" | "preview";
 
-export type EditorPresentation = "modal" | "full";
+export type EditorPresentation = "modal" | "full" | "split";
+
+export const SPLIT_WIDTH_MIN = 320;
+export const SPLIT_WIDTH_MAX = 800;
+export const SPLIT_WIDTH_DEFAULT = 480;
 
 export interface EditorSettings {
   autosave: boolean;
   defaultMode: EditorMode;
   presentation: EditorPresentation;
+  splitWidth: number;
   showWordCount: boolean;
   closeModalOnBackdropClick: boolean;
 }
@@ -52,6 +57,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
   autosave: true,
   defaultMode: "preview",
   presentation: "modal",
+  splitWidth: SPLIT_WIDTH_DEFAULT,
   showWordCount: true,
   closeModalOnBackdropClick: false,
 };
@@ -179,7 +185,7 @@ const normalizeToastSettings = (
 });
 
 const EDITOR_MODES: EditorMode[] = ["edit", "preview"];
-const EDITOR_PRESENTATIONS: EditorPresentation[] = ["modal", "full"];
+const EDITOR_PRESENTATIONS: EditorPresentation[] = ["modal", "full", "split"];
 
 const normalizeEditorSettings = (
   settings: Partial<EditorSettings> | undefined,
@@ -193,6 +199,11 @@ const normalizeEditorSettings = (
   )
     ? (settings?.presentation as EditorPresentation)
     : DEFAULT_EDITOR_SETTINGS.presentation,
+  splitWidth: clamp(
+    settings?.splitWidth ?? DEFAULT_EDITOR_SETTINGS.splitWidth,
+    SPLIT_WIDTH_MIN,
+    SPLIT_WIDTH_MAX,
+  ),
   showWordCount:
     settings?.showWordCount ?? DEFAULT_EDITOR_SETTINGS.showWordCount,
   closeModalOnBackdropClick:
@@ -298,7 +309,7 @@ interface SettingsStore {
 }
 
 const STORAGE_KEY = "settings";
-const STORAGE_VERSION = 16;
+const STORAGE_VERSION = 18;
 
 export const useSettingsStore = create<SettingsStore>()(
   persist(

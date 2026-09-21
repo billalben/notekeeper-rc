@@ -14,6 +14,7 @@ interface NoteListProps {
   notebookNames?: Record<string, string>;
   emptyMessage?: string;
   emptyIcon?: string;
+  selectedNoteId?: string | null;
   onOpen: (note: Note) => void;
   onTogglePin: (note: Note) => void;
   onToggleFavorite: (note: Note) => void;
@@ -28,6 +29,7 @@ export const NoteList = ({
   notebookNames,
   emptyMessage,
   emptyIcon = "note_stack",
+  selectedNoteId,
   onOpen,
   onTogglePin,
   onToggleFavorite,
@@ -48,6 +50,7 @@ export const NoteList = ({
             canMoveDown={note.canMoveDown}
             canMoveToNotebook={canMoveToNotebook}
             notebookName={notebookNames?.[note.notebookId]}
+            isSelected={note.id === selectedNoteId}
             onOpen={onOpen}
             onTogglePin={onTogglePin}
             onToggleFavorite={onToggleFavorite}

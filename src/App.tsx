@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ConfirmModal } from "./components/ConfirmModal";
 import { Fab } from "./components/Fab";
 import { Header } from "./components/Header";
 import { NoteList } from "./components/NoteList";
+import { NoteEditor } from "./components/NoteEditor";
 import { NoteModal, type NoteSaveInput } from "./components/NoteModal";
 import { MoveNoteModal } from "./components/MoveNoteModal";
 import { SearchPalette } from "./components/SearchPalette";
@@ -15,6 +16,8 @@ import { TagFilterBar } from "./components/TagFilterBar";
 import { ToastRegion } from "./components/ToastRegion";
 import { TrashView } from "./components/TrashView";
 import { useActionHotkey } from "./hooks/useActionHotkey";
+import { useMediaQuery } from "./hooks/useMediaQuery";
+import { useSplitResize } from "./hooks/useSplitResize";
 import i18n, { directionFor } from "./i18n";
 import { useNoteStore } from "./store/useNoteStore";
 import { useSettingsStore } from "./store/useSettingsStore";
@@ -28,6 +31,7 @@ import {
   collectPinnedNotes,
   collectRecentNotes,
   countTagUsageMap,
+  DESKTOP_QUERY,
   filterNotesByTags,
   sortByPinned,
   trashRetentionMs,
@@ -72,6 +76,8 @@ const App = () => {
   const motion = useSettingsStore((state) => state.motion);
   const language = useSettingsStore((state) => state.language);
   const appearance = useSettingsStore((state) => state.appearance);
+  const presentation = useSettingsStore((state) => state.editor.presentation);
+  const autosave = useSettingsStore((state) => state.editor.autosave);
 
   const startAddingNotebook = useUIStore((state) => state.startAddingNotebook);
   const isSettingsOpen = useUIStore((state) => state.isSettingsOpen);
@@ -81,6 +87,8 @@ const App = () => {
   const closeSearch = useUIStore((state) => state.closeSearch);
   const view = useUIStore((state) => state.view);
   const showNotes = useUIStore((state) => state.showNotes);
+  const selectedNoteId = useUIStore((state) => state.selectedNoteId);
+  const selectNote = useUIStore((state) => state.selectNote);
   const activeTags = useUIStore((state) => state.activeTags);
   const toggleTag = useUIStore((state) => state.toggleTag);
   const removeTagFilter = useUIStore((state) => state.removeTagFilter);
@@ -93,6 +101,10 @@ const App = () => {
   const [noteModal, setNoteModal] = useState<NoteModalState | null>(null);
   const [confirm, setConfirm] = useState<ConfirmState | null>(null);
   const [moveNoteTarget, setMoveNoteTarget] = useState<Note | null>(null);
+  const [isCreatingInSplit, setIsCreatingInSplit] = useState(false);
+  const [pendingSelectNoteId, setPendingSelectNoteId] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -190,8 +202,41 @@ const App = () => {
     canMoveDown: false,
   }));
 
+  const isWide = useMediaQuery(DESKTOP_QUERY);
+  const isNoteView = view !== "stats" && view !== "trash";
+
+  const selectedNote = useMemo(() => {
+    if (!selectedNoteId) return null;
+    for (const notebook of notebooks) {
+      const note = notebook.notes.find((item) => item.id === selectedNoteId);
+      if (note) return note;
+    }
+    return null;
+  }, [notebooks, selectedNoteId]);
+
+  const activeSplitNote =
+    selectedNote && selectedNote.deletedAt === null ? selectedNote : null;
+
+  const isSplitEnabled = presentation === "split" && isWide && isNoteView;
+  const showSplitPane =
+    isSplitEnabled && (isCreatingInSplit || activeSplitNote !== null);
+
+  const editorDirtyRef = useRef(false);
+  const { isResizing, startResize, onKeyDown: onSplitResizeKeyDown } =
+    useSplitResize();
+
+  useEffect(() => {
+    document.body.classList.toggle("split-open", showSplitPane);
+    return () => document.body.classList.remove("split-open");
+  }, [showSplitPane]);
+
   const openCreateNote = () => {
     if (visibleNotebooks.length === 0) return;
+    if (isSplitEnabled) {
+      setIsCreatingInSplit(true);
+      selectNote(null);
+      return;
+    }
     setNoteModal({ type: "create" });
   };
 
@@ -199,7 +244,49 @@ const App = () => {
     setNoteModal({ type: "edit", note });
   };
 
+  const handleEditorDirtyChange = (dirty: boolean) => {
+    editorDirtyRef.current = dirty;
+  };
+
+  const applySelectNote = (noteId: string | null) => {
+    setIsCreatingInSplit(false);
+    selectNote(noteId);
+  };
+
+  const handleSelectNote = (note: Note) => {
+    if (!isCreatingInSplit && note.id === selectedNoteId) return;
+    if (!autosave && editorDirtyRef.current) {
+      setPendingSelectNoteId(note.id);
+      return;
+    }
+    applySelectNote(note.id);
+  };
+
+  const handleDeselectNote = () => {
+    applySelectNote(null);
+  };
+
+  const handleListOpen = (note: Note) => {
+    if (isSplitEnabled) {
+      handleSelectNote(note);
+      return;
+    }
+    openEditNote(note);
+  };
+
+  const handlePendingSelect = (isConfirm: boolean) => {
+    if (isConfirm && pendingSelectNoteId) {
+      applySelectNote(pendingSelectNoteId);
+    }
+    setPendingSelectNoteId(null);
+  };
+
   const openSearchNote = (note: Note) => {
+    if (isSplitEnabled) {
+      handleSelectNote(note);
+      closeSearch();
+      return;
+    }
     setActiveNotebook(note.notebookId);
     showNotes();
     clearTagFilter();
@@ -221,21 +308,19 @@ const App = () => {
     setNoteModal({ type: "edit", note });
   };
 
-  const handleNoteSave = (noteData: NoteSaveInput): Note | undefined => {
-    if (!noteModal) return;
-
-    if (noteModal.type === "create") {
-      const note = addNote(noteData.notebookId, {
+  const persistNote = (
+    noteId: string | null,
+    noteData: NoteSaveInput,
+  ): Note | undefined => {
+    if (!noteId) {
+      return addNote(noteData.notebookId, {
         title: noteData.title,
         text: noteData.text,
         tags: noteData.tags,
         favorite: noteData.favorite,
       });
-      if (note) setNoteModal({ type: "edit", note });
-      return note;
     }
 
-    const noteId = noteModal.note.id;
     const current = useNoteStore
       .getState()
       .notebooks.flatMap((notebook) => notebook.notes)
@@ -254,7 +339,27 @@ const App = () => {
       setNoteFavorite(noteId, noteData.favorite);
     }
 
-    return current ?? noteModal.note;
+    return current ?? undefined;
+  };
+
+  const handleNoteSave = (noteData: NoteSaveInput): Note | undefined => {
+    if (!noteModal) return;
+    const noteId = noteModal.type === "edit" ? noteModal.note.id : null;
+    const result = persistNote(noteId, noteData);
+    if (noteModal.type === "create" && result) {
+      setNoteModal({ type: "edit", note: result });
+    }
+    return result;
+  };
+
+  const handleSplitSave = (noteData: NoteSaveInput): Note | undefined => {
+    const targetId = isCreatingInSplit ? null : selectedNoteId;
+    const result = persistNote(targetId, noteData);
+    if (isCreatingInSplit && result) {
+      setIsCreatingInSplit(false);
+      selectNote(result.id);
+    }
+    return result;
   };
 
   const handleToggleNotePin = (note: Note) => {
@@ -352,6 +457,7 @@ const App = () => {
       .find((item) => item.id === noteId);
     if (note) handleDeleteNote(note);
     setNoteModal(null);
+    applySelectNote(null);
   };
 
   const anyModalOpen =
@@ -418,158 +524,217 @@ const App = () => {
         onClick={() => setSidebarOpen(false)}
       />
 
-      <main className="main">
-        <Header onOpenSidebar={() => setSidebarOpen(true)} />
+      <div className="app-content">
+        <main className="main">
+          <Header onOpenSidebar={() => setSidebarOpen(true)} />
 
-        {view === "stats" ? (
-          <StatisticsView onOpenNote={openStatsNote} onNewNote={openCreateNote} />
-        ) : view === "trash" ? (
-          <TrashView />
-        ) : view === "all" ? (
-          <>
-            <h2 className="title text-title-medium" data-note-panel-title>
-              {t("notes.allNotes")}
-            </h2>
-
-            <NoteList
-              notes={allNotes}
-              canMoveToNotebook={visibleNotebooks.length > 1}
-              notebookNames={notebookNames}
-              emptyMessage={t("notes.noNotesYet")}
-              emptyIcon="note_stack"
-              onOpen={openEditNote}
-              onTogglePin={handleToggleNotePin}
-              onToggleFavorite={handleToggleNoteFavorite}
-              onMove={handleMoveNote}
-              onRequestMove={setMoveNoteTarget}
-              onRequestDelete={handleDeleteNote}
+          {view === "stats" ? (
+            <StatisticsView
+              onOpenNote={openStatsNote}
+              onNewNote={openCreateNote}
             />
-          </>
-        ) : view === "recent" ? (
-          <>
-            <h2 className="title text-title-medium" data-note-panel-title>
-              {t("notes.recent")}
-            </h2>
+          ) : view === "trash" ? (
+            <TrashView />
+          ) : view === "all" ? (
+            <>
+              <h2 className="title text-title-medium" data-note-panel-title>
+                {t("notes.allNotes")}
+              </h2>
 
-            <NoteList
-              notes={recentNotes}
-              canMoveToNotebook={visibleNotebooks.length > 1}
-              notebookNames={notebookNames}
-              emptyMessage={t("notes.noRecent")}
-              emptyIcon="history"
-              onOpen={openRecentNote}
-              onTogglePin={handleToggleNotePin}
-              onToggleFavorite={handleToggleNoteFavorite}
-              onMove={handleMoveNote}
-              onRequestMove={setMoveNoteTarget}
-              onRequestDelete={handleDeleteNote}
-            />
-          </>
-        ) : view === "pinned" ? (
-          <>
-            <h2 className="title text-title-medium" data-note-panel-title>
-              {t("notes.pinned")}
-            </h2>
-
-            <NoteList
-              notes={pinnedNotes}
-              canMoveToNotebook={visibleNotebooks.length > 1}
-              notebookNames={notebookNames}
-              emptyMessage={t("notes.noPinned")}
-              emptyIcon="push_pin"
-              onOpen={openEditNote}
-              onTogglePin={handleToggleNotePin}
-              onToggleFavorite={handleToggleNoteFavorite}
-              onMove={handleMoveNote}
-              onRequestMove={setMoveNoteTarget}
-              onRequestDelete={handleDeleteNote}
-            />
-          </>
-        ) : view === "favorites" ? (
-          <>
-            <h2 className="title text-title-medium" data-note-panel-title>
-              {t("notes.favorites")}
-            </h2>
-
-            <NoteList
-              notes={favoriteNotes}
-              canMoveToNotebook={visibleNotebooks.length > 1}
-              notebookNames={notebookNames}
-              emptyMessage={t("notes.noFavorites")}
-              emptyIcon="star"
-              onOpen={openEditNote}
-              onTogglePin={handleToggleNotePin}
-              onToggleFavorite={handleToggleNoteFavorite}
-              onMove={handleMoveNote}
-              onRequestMove={setMoveNoteTarget}
-              onRequestDelete={handleDeleteNote}
-            />
-          </>
-        ) : (
-          <>
-            <h2 className="title text-title-medium" data-note-panel-title>
-              {isFiltering
-                ? t("notes.notesTagged", { tags: tagFilterLabel })
-                : (activeNotebook?.name ?? "")}
-            </h2>
-
-            <TagFilterBar
-              tags={allTags}
-              activeTags={activeTags}
-              onToggle={toggleTag}
-            />
-
-            {visibleNotebooks.length === 0 ? (
-              <div className="note-list" data-note-panel>
-                <div className="empty-notes">
-                  <span className="material-symbols-rounded" aria-hidden="true">
-                    note_stack
-                  </span>
-                  <div className="text-headline-small">
-                    {t("notes.noNotebooks")}
-                  </div>
-                  <button
-                    className="btn fill"
-                    type="button"
-                    onClick={() => {
-                      startAddingNotebook();
-                      setSidebarOpen(true);
-                    }}
-                  >
-                    <span className="text-label-large">
-                      {t("notes.createNotebook")}
-                    </span>
-                    <div className="state-layer" />
-                  </button>
-                </div>
-              </div>
-            ) : (
               <NoteList
-                notes={activeNotes}
+                notes={allNotes}
                 canMoveToNotebook={visibleNotebooks.length > 1}
-                notebookNames={isFiltering ? notebookNames : undefined}
-                emptyMessage={
-                  isFiltering
-                    ? t("notes.noNotesTagged", { tags: tagFilterLabel })
-                    : t("notes.noNotes")
-                }
-                onOpen={openEditNote}
+                notebookNames={notebookNames}
+                emptyMessage={t("notes.noNotesYet")}
+                emptyIcon="note_stack"
+                selectedNoteId={isSplitEnabled ? selectedNoteId : undefined}
+                onOpen={handleListOpen}
                 onTogglePin={handleToggleNotePin}
                 onToggleFavorite={handleToggleNoteFavorite}
                 onMove={handleMoveNote}
                 onRequestMove={setMoveNoteTarget}
                 onRequestDelete={handleDeleteNote}
               />
-            )}
+            </>
+          ) : view === "recent" ? (
+            <>
+              <h2 className="title text-title-medium" data-note-panel-title>
+                {t("notes.recent")}
+              </h2>
 
-            <Fab
-              label={t("notes.newNote")}
-              disabled={visibleNotebooks.length === 0}
-              onClick={openCreateNote}
+              <NoteList
+                notes={recentNotes}
+                canMoveToNotebook={visibleNotebooks.length > 1}
+                notebookNames={notebookNames}
+                emptyMessage={t("notes.noRecent")}
+                emptyIcon="history"
+                selectedNoteId={isSplitEnabled ? selectedNoteId : undefined}
+                onOpen={isSplitEnabled ? handleSelectNote : openRecentNote}
+                onTogglePin={handleToggleNotePin}
+                onToggleFavorite={handleToggleNoteFavorite}
+                onMove={handleMoveNote}
+                onRequestMove={setMoveNoteTarget}
+                onRequestDelete={handleDeleteNote}
+              />
+            </>
+          ) : view === "pinned" ? (
+            <>
+              <h2 className="title text-title-medium" data-note-panel-title>
+                {t("notes.pinned")}
+              </h2>
+
+              <NoteList
+                notes={pinnedNotes}
+                canMoveToNotebook={visibleNotebooks.length > 1}
+                notebookNames={notebookNames}
+                emptyMessage={t("notes.noPinned")}
+                emptyIcon="push_pin"
+                selectedNoteId={isSplitEnabled ? selectedNoteId : undefined}
+                onOpen={handleListOpen}
+                onTogglePin={handleToggleNotePin}
+                onToggleFavorite={handleToggleNoteFavorite}
+                onMove={handleMoveNote}
+                onRequestMove={setMoveNoteTarget}
+                onRequestDelete={handleDeleteNote}
+              />
+            </>
+          ) : view === "favorites" ? (
+            <>
+              <h2 className="title text-title-medium" data-note-panel-title>
+                {t("notes.favorites")}
+              </h2>
+
+              <NoteList
+                notes={favoriteNotes}
+                canMoveToNotebook={visibleNotebooks.length > 1}
+                notebookNames={notebookNames}
+                emptyMessage={t("notes.noFavorites")}
+                emptyIcon="star"
+                selectedNoteId={isSplitEnabled ? selectedNoteId : undefined}
+                onOpen={handleListOpen}
+                onTogglePin={handleToggleNotePin}
+                onToggleFavorite={handleToggleNoteFavorite}
+                onMove={handleMoveNote}
+                onRequestMove={setMoveNoteTarget}
+                onRequestDelete={handleDeleteNote}
+              />
+            </>
+          ) : (
+            <>
+              <h2 className="title text-title-medium" data-note-panel-title>
+                {isFiltering
+                  ? t("notes.notesTagged", { tags: tagFilterLabel })
+                  : (activeNotebook?.name ?? "")}
+              </h2>
+
+              <TagFilterBar
+                tags={allTags}
+                activeTags={activeTags}
+                onToggle={toggleTag}
+              />
+
+              {visibleNotebooks.length === 0 ? (
+                <div className="note-list" data-note-panel>
+                  <div className="empty-notes">
+                    <span
+                      className="material-symbols-rounded"
+                      aria-hidden="true"
+                    >
+                      note_stack
+                    </span>
+                    <div className="text-headline-small">
+                      {t("notes.noNotebooks")}
+                    </div>
+                    <button
+                      className="btn fill"
+                      type="button"
+                      onClick={() => {
+                        startAddingNotebook();
+                        setSidebarOpen(true);
+                      }}
+                    >
+                      <span className="text-label-large">
+                        {t("notes.createNotebook")}
+                      </span>
+                      <div className="state-layer" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <NoteList
+                  notes={activeNotes}
+                  canMoveToNotebook={visibleNotebooks.length > 1}
+                  notebookNames={isFiltering ? notebookNames : undefined}
+                  emptyMessage={
+                    isFiltering
+                      ? t("notes.noNotesTagged", { tags: tagFilterLabel })
+                      : t("notes.noNotes")
+                  }
+                  selectedNoteId={isSplitEnabled ? selectedNoteId : undefined}
+                  onOpen={handleListOpen}
+                  onTogglePin={handleToggleNotePin}
+                  onToggleFavorite={handleToggleNoteFavorite}
+                  onMove={handleMoveNote}
+                  onRequestMove={setMoveNoteTarget}
+                  onRequestDelete={handleDeleteNote}
+                />
+              )}
+
+              <Fab
+                label={t("notes.newNote")}
+                disabled={visibleNotebooks.length === 0}
+                onClick={openCreateNote}
+              />
+            </>
+          )}
+        </main>
+
+        {showSplitPane && (
+          <aside className="split-editor" data-split-editor>
+            <div
+              className={`split-resizer${isResizing ? " resizing" : ""}`}
+              role="separator"
+              aria-orientation="vertical"
+              aria-label={t("editor.resizePane")}
+              tabIndex={0}
+              onPointerDown={startResize}
+              onKeyDown={onSplitResizeKeyDown}
             />
-          </>
+            <NoteEditor
+              key={isCreatingInSplit ? "new" : activeSplitNote?.id}
+              variant="split"
+              noteId={isCreatingInSplit ? undefined : activeSplitNote?.id}
+              title={isCreatingInSplit ? undefined : activeSplitNote?.title}
+              text={isCreatingInSplit ? undefined : activeSplitNote?.text}
+              tags={isCreatingInSplit ? undefined : activeSplitNote?.tags}
+              favorite={
+                isCreatingInSplit ? undefined : activeSplitNote?.favorite
+              }
+              notebookId={
+                isCreatingInSplit
+                  ? (activeNotebookId ?? "")
+                  : (activeSplitNote?.notebookId ?? activeNotebookId ?? "")
+              }
+              notebooks={visibleNotebooks}
+              tagSuggestions={allTags}
+              tagUsage={tagUsage}
+              isNew={isCreatingInSplit}
+              postedOn={
+                isCreatingInSplit ? undefined : activeSplitNote?.postedOn
+              }
+              updatedOn={
+                isCreatingInSplit ? undefined : activeSplitNote?.updatedOn
+              }
+              onSave={handleSplitSave}
+              onCreateTag={createTag}
+              onDeleteTag={handleDeleteTag}
+              onDelete={handleDeleteNoteById}
+              onDirtyChange={handleEditorDirtyChange}
+              onClose={handleDeselectNote}
+            />
+          </aside>
         )}
-      </main>
+      </div>
 
       {noteModal && (
         <NoteModal
@@ -605,6 +770,16 @@ const App = () => {
 
       {confirm && (
         <ConfirmModal title={confirm.title} onConfirm={handleConfirm} />
+      )}
+
+      {pendingSelectNoteId && (
+        <ConfirmModal
+          heading={t("editor.unsavedTitle")}
+          description={t("editor.unsavedSwitchDescription")}
+          confirmLabel={t("editor.discard")}
+          stacked
+          onConfirm={handlePendingSelect}
+        />
       )}
 
       {moveNoteTarget && (

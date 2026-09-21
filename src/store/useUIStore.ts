@@ -36,6 +36,8 @@ interface UIStore {
   closeShortcutHelp: () => void;
   isRecordingShortcut: boolean;
   setRecordingShortcut: (recording: boolean) => void;
+  selectedNoteId: string | null;
+  selectNote: (noteId: string | null) => void;
 }
 
 export const useUIStore = create<UIStore>((set) => ({
@@ -80,4 +82,6 @@ export const useUIStore = create<UIStore>((set) => ({
   isRecordingShortcut: false,
   setRecordingShortcut: (recording) =>
     set({ isRecordingShortcut: recording }),
+  selectedNoteId: null,
+  selectNote: (noteId) => set({ selectedNoteId: noteId }),
 }));

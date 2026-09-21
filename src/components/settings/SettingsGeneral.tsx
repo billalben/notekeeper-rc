@@ -77,6 +77,10 @@ export const SettingsGeneral = () => {
                 value: "full",
                 label: t("settings.general.presentationFull"),
               },
+              {
+                value: "split",
+                label: t("settings.general.presentationSplit"),
+              },
             ]}
             onChange={(value) =>
               setEditorSettings({
