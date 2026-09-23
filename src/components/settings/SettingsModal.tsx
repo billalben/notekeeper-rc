@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useActionHotkey } from "../../hooks/useActionHotkey";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { useUIStore } from "../../store/useUIStore";
+import type { SettingsSection } from "../../types";
 import { IconButton } from "../IconButton";
 import { SettingsAbout } from "./SettingsAbout";
 import { SettingsAppearance } from "./SettingsAppearance";
@@ -11,17 +12,9 @@ import { SettingsGeneral } from "./SettingsGeneral";
 import { SettingsNotifications } from "./SettingsNotifications";
 import { SettingsShortcuts } from "./SettingsShortcuts";
 
-type SectionId =
-  | "general"
-  | "appearance"
-  | "shortcuts"
-  | "notifications"
-  | "data"
-  | "about";
-
 interface Section {
-  id: SectionId;
-  labelKey: `settings.sections.${SectionId}`;
+  id: SettingsSection;
+  labelKey: `settings.sections.${SettingsSection}`;
   icon: string;
   Component: ComponentType;
 }
@@ -71,7 +64,8 @@ interface SettingsModalProps {
 
 export const SettingsModal = ({ onClose }: SettingsModalProps) => {
   const { t } = useTranslation();
-  const [activeSection, setActiveSection] = useState<SectionId>("general");
+  const activeSection = useUIStore((state) => state.settingsSection);
+  const setSettingsSection = useUIStore((state) => state.setSettingsSection);
   const [mobilePane, setMobilePane] = useState<"list" | "content">("list");
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeOnBackdropClick = useSettingsStore(
@@ -100,8 +94,8 @@ export const SettingsModal = ({ onClose }: SettingsModalProps) => {
   const active = SECTIONS.find((section) => section.id === activeSection);
   const ActiveSection = active?.Component ?? SettingsGeneral;
 
-  const selectSection = (sectionId: SectionId) => {
-    setActiveSection(sectionId);
+  const selectSection = (sectionId: SettingsSection) => {
+    setSettingsSection(sectionId);
     setMobilePane("content");
   };
 

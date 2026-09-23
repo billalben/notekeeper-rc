@@ -19,6 +19,7 @@ import { useActionHotkey } from "./hooks/useActionHotkey";
 import { useMediaQuery } from "./hooks/useMediaQuery";
 import { useSplitResize } from "./hooks/useSplitResize";
 import i18n, { directionFor } from "./i18n";
+import { useHashRoute } from "./router/useHashRoute";
 import { useNoteStore } from "./store/useNoteStore";
 import { useSettingsStore } from "./store/useSettingsStore";
 import { useThemeStore } from "./store/useThemeStore";
@@ -39,9 +40,16 @@ import {
   type MoveDirection,
 } from "./utils";
 
-type NoteModalState = { type: "create" } | { type: "edit"; note: Note };
-
 type ConfirmState = { notebookId: string; title: string };
+
+const findNoteById = (notebooks: Notebook[], id: string | null): Note | null => {
+  if (!id) return null;
+  for (const notebook of notebooks) {
+    const note = notebook.notes.find((item) => item.id === id);
+    if (note) return note;
+  }
+  return null;
+};
 
 const App = () => {
   const { t } = useTranslation();
@@ -89,6 +97,13 @@ const App = () => {
   const showNotes = useUIStore((state) => state.showNotes);
   const selectedNoteId = useUIStore((state) => state.selectedNoteId);
   const selectNote = useUIStore((state) => state.selectNote);
+  const editorNoteId = useUIStore((state) => state.editorNoteId);
+  const isCreatingNote = useUIStore((state) => state.isCreatingNote);
+  const openNoteModal = useUIStore((state) => state.openNoteModal);
+  const openCreateNoteModal = useUIStore(
+    (state) => state.openCreateNoteModal,
+  );
+  const closeNoteModal = useUIStore((state) => state.closeNoteModal);
   const activeTags = useUIStore((state) => state.activeTags);
   const toggleTag = useUIStore((state) => state.toggleTag);
   const removeTagFilter = useUIStore((state) => state.removeTagFilter);
@@ -98,10 +113,8 @@ const App = () => {
   const closeShortcutHelp = useUIStore((state) => state.closeShortcutHelp);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [noteModal, setNoteModal] = useState<NoteModalState | null>(null);
   const [confirm, setConfirm] = useState<ConfirmState | null>(null);
   const [moveNoteTarget, setMoveNoteTarget] = useState<Note | null>(null);
-  const [isCreatingInSplit, setIsCreatingInSplit] = useState(false);
   const [pendingSelectNoteId, setPendingSelectNoteId] = useState<string | null>(
     null,
   );
@@ -205,21 +218,32 @@ const App = () => {
   const isWide = useMediaQuery(DESKTOP_QUERY);
   const isNoteView = view !== "stats" && view !== "trash";
 
-  const selectedNote = useMemo(() => {
-    if (!selectedNoteId) return null;
-    for (const notebook of notebooks) {
-      const note = notebook.notes.find((item) => item.id === selectedNoteId);
-      if (note) return note;
-    }
-    return null;
-  }, [notebooks, selectedNoteId]);
+  useHashRoute(isWide);
+
+  const selectedNote = useMemo(
+    () => findNoteById(notebooks, selectedNoteId),
+    [notebooks, selectedNoteId],
+  );
+  const editorNote = useMemo(
+    () => findNoteById(notebooks, editorNoteId),
+    [notebooks, editorNoteId],
+  );
 
   const activeSplitNote =
     selectedNote && selectedNote.deletedAt === null ? selectedNote : null;
 
   const isSplitEnabled = presentation === "split" && isWide && isNoteView;
   const showSplitPane =
-    isSplitEnabled && (isCreatingInSplit || activeSplitNote !== null);
+    isSplitEnabled && (isCreatingNote || activeSplitNote !== null);
+  const showNoteModal =
+    !isSplitEnabled &&
+    (isCreatingNote || (editorNote !== null && editorNote.deletedAt === null));
+
+  useEffect(() => {
+    if (editorNoteId && (!editorNote || editorNote.deletedAt !== null)) {
+      closeNoteModal();
+    }
+  }, [editorNoteId, editorNote, closeNoteModal]);
 
   const editorDirtyRef = useRef(false);
   const { isResizing, startResize, onKeyDown: onSplitResizeKeyDown } =
@@ -232,16 +256,12 @@ const App = () => {
 
   const openCreateNote = () => {
     if (visibleNotebooks.length === 0) return;
-    if (isSplitEnabled) {
-      setIsCreatingInSplit(true);
-      selectNote(null);
-      return;
-    }
-    setNoteModal({ type: "create" });
+    if (isSplitEnabled) selectNote(null);
+    openCreateNoteModal();
   };
 
   const openEditNote = (note: Note) => {
-    setNoteModal({ type: "edit", note });
+    openNoteModal(note.id);
   };
 
   const handleEditorDirtyChange = (dirty: boolean) => {
@@ -249,12 +269,12 @@ const App = () => {
   };
 
   const applySelectNote = (noteId: string | null) => {
-    setIsCreatingInSplit(false);
+    closeNoteModal();
     selectNote(noteId);
   };
 
   const handleSelectNote = (note: Note) => {
-    if (!isCreatingInSplit && note.id === selectedNoteId) return;
+    if (!isCreatingNote && note.id === selectedNoteId) return;
     if (!autosave && editorDirtyRef.current) {
       setPendingSelectNoteId(note.id);
       return;
@@ -290,7 +310,7 @@ const App = () => {
     setActiveNotebook(note.notebookId);
     showNotes();
     clearTagFilter();
-    setNoteModal({ type: "edit", note });
+    openEditNote(note);
     closeSearch();
   };
 
@@ -298,14 +318,14 @@ const App = () => {
     setActiveNotebook(note.notebookId);
     showNotes();
     clearTagFilter();
-    setNoteModal({ type: "edit", note });
+    openEditNote(note);
   };
 
   const openRecentNote = (note: Note) => {
     setActiveNotebook(note.notebookId);
     showNotes();
     clearTagFilter();
-    setNoteModal({ type: "edit", note });
+    openEditNote(note);
   };
 
   const persistNote = (
@@ -343,20 +363,19 @@ const App = () => {
   };
 
   const handleNoteSave = (noteData: NoteSaveInput): Note | undefined => {
-    if (!noteModal) return;
-    const noteId = noteModal.type === "edit" ? noteModal.note.id : null;
-    const result = persistNote(noteId, noteData);
-    if (noteModal.type === "create" && result) {
-      setNoteModal({ type: "edit", note: result });
+    const targetId = isCreatingNote ? null : editorNoteId;
+    const result = persistNote(targetId, noteData);
+    if (isCreatingNote && result) {
+      openNoteModal(result.id);
     }
     return result;
   };
 
   const handleSplitSave = (noteData: NoteSaveInput): Note | undefined => {
-    const targetId = isCreatingInSplit ? null : selectedNoteId;
+    const targetId = isCreatingNote ? null : selectedNoteId;
     const result = persistNote(targetId, noteData);
-    if (isCreatingInSplit && result) {
-      setIsCreatingInSplit(false);
+    if (isCreatingNote && result) {
+      closeNoteModal();
       selectNote(result.id);
     }
     return result;
@@ -456,14 +475,14 @@ const App = () => {
       .notebooks.flatMap((notebook) => notebook.notes)
       .find((item) => item.id === noteId);
     if (note) handleDeleteNote(note);
-    setNoteModal(null);
     applySelectNote(null);
   };
 
+  const hasModalNote = !isSplitEnabled && (isCreatingNote || editorNote !== null);
   const anyModalOpen =
     isSettingsOpen ||
     isSearchOpen ||
-    Boolean(noteModal) ||
+    hasModalNote ||
     Boolean(confirm) ||
     Boolean(moveNoteTarget) ||
     isShortcutHelpOpen;
@@ -479,7 +498,7 @@ const App = () => {
       enabled:
         !isSearchOpen &&
         !isSettingsOpen &&
-        !noteModal &&
+        !hasModalNote &&
         !confirm &&
         !moveNoteTarget &&
         !isShortcutHelpOpen,
@@ -701,29 +720,29 @@ const App = () => {
               onKeyDown={onSplitResizeKeyDown}
             />
             <NoteEditor
-              key={isCreatingInSplit ? "new" : activeSplitNote?.id}
+              key={isCreatingNote ? "new" : activeSplitNote?.id}
               variant="split"
-              noteId={isCreatingInSplit ? undefined : activeSplitNote?.id}
-              title={isCreatingInSplit ? undefined : activeSplitNote?.title}
-              text={isCreatingInSplit ? undefined : activeSplitNote?.text}
-              tags={isCreatingInSplit ? undefined : activeSplitNote?.tags}
+              noteId={isCreatingNote ? undefined : activeSplitNote?.id}
+              title={isCreatingNote ? undefined : activeSplitNote?.title}
+              text={isCreatingNote ? undefined : activeSplitNote?.text}
+              tags={isCreatingNote ? undefined : activeSplitNote?.tags}
               favorite={
-                isCreatingInSplit ? undefined : activeSplitNote?.favorite
+                isCreatingNote ? undefined : activeSplitNote?.favorite
               }
               notebookId={
-                isCreatingInSplit
+                isCreatingNote
                   ? (activeNotebookId ?? "")
                   : (activeSplitNote?.notebookId ?? activeNotebookId ?? "")
               }
               notebooks={visibleNotebooks}
               tagSuggestions={allTags}
               tagUsage={tagUsage}
-              isNew={isCreatingInSplit}
+              isNew={isCreatingNote}
               postedOn={
-                isCreatingInSplit ? undefined : activeSplitNote?.postedOn
+                isCreatingNote ? undefined : activeSplitNote?.postedOn
               }
               updatedOn={
-                isCreatingInSplit ? undefined : activeSplitNote?.updatedOn
+                isCreatingNote ? undefined : activeSplitNote?.updatedOn
               }
               onSave={handleSplitSave}
               onCreateTag={createTag}
@@ -736,35 +755,25 @@ const App = () => {
         )}
       </div>
 
-      {noteModal && (
+      {showNoteModal && (
         <NoteModal
-          noteId={noteModal.type === "edit" ? noteModal.note.id : undefined}
-          title={noteModal.type === "edit" ? noteModal.note.title : undefined}
-          text={noteModal.type === "edit" ? noteModal.note.text : undefined}
-          tags={noteModal.type === "edit" ? noteModal.note.tags : undefined}
-          favorite={
-            noteModal.type === "edit" ? noteModal.note.favorite : undefined
-          }
-          notebookId={
-            noteModal.type === "edit"
-              ? noteModal.note.notebookId
-              : (activeNotebookId ?? "")
-          }
+          noteId={editorNote?.id}
+          title={editorNote?.title}
+          text={editorNote?.text}
+          tags={editorNote?.tags}
+          favorite={editorNote?.favorite}
+          notebookId={editorNote?.notebookId ?? activeNotebookId ?? ""}
           notebooks={visibleNotebooks}
           tagSuggestions={allTags}
           tagUsage={tagUsage}
-          isNew={noteModal.type === "create"}
-          postedOn={
-            noteModal.type === "edit" ? noteModal.note.postedOn : undefined
-          }
-          updatedOn={
-            noteModal.type === "edit" ? noteModal.note.updatedOn : undefined
-          }
+          isNew={isCreatingNote}
+          postedOn={editorNote?.postedOn}
+          updatedOn={editorNote?.updatedOn}
           onSave={handleNoteSave}
           onCreateTag={createTag}
           onDeleteTag={handleDeleteTag}
           onDelete={handleDeleteNoteById}
-          onClose={() => setNoteModal(null)}
+          onClose={closeNoteModal}
         />
       )}
 

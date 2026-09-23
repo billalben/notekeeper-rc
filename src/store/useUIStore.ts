@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { SettingsSection } from "../types";
 
 export type MainView =
   | "all"
@@ -14,8 +15,10 @@ interface UIStore {
   startAddingNotebook: () => void;
   stopAddingNotebook: () => void;
   isSettingsOpen: boolean;
-  openSettings: () => void;
+  openSettings: (section?: SettingsSection) => void;
   closeSettings: () => void;
+  settingsSection: SettingsSection;
+  setSettingsSection: (section: SettingsSection) => void;
   isSearchOpen: boolean;
   openSearch: () => void;
   closeSearch: () => void;
@@ -38,6 +41,11 @@ interface UIStore {
   setRecordingShortcut: (recording: boolean) => void;
   selectedNoteId: string | null;
   selectNote: (noteId: string | null) => void;
+  editorNoteId: string | null;
+  isCreatingNote: boolean;
+  openNoteModal: (noteId: string) => void;
+  openCreateNoteModal: () => void;
+  closeNoteModal: () => void;
 }
 
 export const useUIStore = create<UIStore>((set) => ({
@@ -45,8 +53,11 @@ export const useUIStore = create<UIStore>((set) => ({
   startAddingNotebook: () => set({ isAddingNotebook: true }),
   stopAddingNotebook: () => set({ isAddingNotebook: false }),
   isSettingsOpen: false,
-  openSettings: () => set({ isSettingsOpen: true }),
+  openSettings: (section) =>
+    set({ isSettingsOpen: true, settingsSection: section ?? "general" }),
   closeSettings: () => set({ isSettingsOpen: false }),
+  settingsSection: "general",
+  setSettingsSection: (section) => set({ settingsSection: section }),
   isSearchOpen: false,
   openSearch: () => set({ isSearchOpen: true }),
   closeSearch: () => set({ isSearchOpen: false }),
@@ -84,4 +95,12 @@ export const useUIStore = create<UIStore>((set) => ({
     set({ isRecordingShortcut: recording }),
   selectedNoteId: null,
   selectNote: (noteId) => set({ selectedNoteId: noteId }),
+  editorNoteId: null,
+  isCreatingNote: false,
+  openNoteModal: (noteId) =>
+    set({ editorNoteId: noteId, isCreatingNote: false }),
+  openCreateNoteModal: () =>
+    set({ editorNoteId: null, isCreatingNote: true }),
+  closeNoteModal: () =>
+    set({ editorNoteId: null, isCreatingNote: false }),
 }));

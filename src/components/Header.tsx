@@ -109,7 +109,7 @@ export const Header = ({ onOpenSidebar }: HeaderProps) => {
         tooltip={t("header.openSettings")}
         label={t("header.openSettings")}
         className={`settings-btn${isSettingsOpen ? " is-rotated" : ""}`}
-        onClick={openSettings}
+        onClick={() => openSettings()}
       />
 
       <IconButton
