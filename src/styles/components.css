@@ -195,10 +195,20 @@
   gap: var(--spacing-05);
   padding-inline-end: var(--spacing-1);
   color: var(--on-surface-variant);
+  min-width: 0;
+  max-width: 100%;
 }
 
 .card-notebook .material-symbols-rounded {
+  flex: none;
   font-size: 1.6rem;
+}
+
+.card-notebook-name {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .tag-chip {

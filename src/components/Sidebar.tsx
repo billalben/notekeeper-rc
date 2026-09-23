@@ -6,7 +6,12 @@ import { useSettingsStore } from "../store/useSettingsStore";
 import { toast } from "../store/useToastStore";
 import { useUIStore } from "../store/useUIStore";
 import type { Notebook } from "../types";
-import { collectRecentNotes, sortByPinned, withMoveFlags } from "../utils";
+import {
+  collectRecentNotes,
+  MAX_NOTEBOOK_NAME_LENGTH,
+  sortByPinned,
+  withMoveFlags,
+} from "../utils";
 import { formatChord } from "../utils/shortcuts";
 import { IconButton } from "./IconButton";
 import { NavItem } from "./NavItem";
@@ -327,6 +332,7 @@ export const Sidebar = ({
                     ref={addInputRef}
                     className="text text-label-large"
                     value={newName}
+                    maxLength={MAX_NOTEBOOK_NAME_LENGTH}
                     placeholder={t("sidebar.untitled")}
                     onChange={(event) => setNewName(event.target.value)}
                     onBlur={commitAdd}

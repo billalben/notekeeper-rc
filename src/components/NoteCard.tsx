@@ -101,7 +101,7 @@ export const NoteCard = ({
               <span className="material-symbols-rounded" aria-hidden="true">
                 folder
               </span>
-              {notebookName}
+              <span className="card-notebook-name">{notebookName}</span>
             </span>
           )}
           {note.tags.map((tag) => (

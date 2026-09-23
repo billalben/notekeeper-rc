@@ -3,7 +3,11 @@ import { useTranslation } from "react-i18next";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { toast } from "../store/useToastStore";
 import type { Notebook } from "../types";
-import type { MoveDirection, MoveFlags } from "../utils";
+import {
+  MAX_NOTEBOOK_NAME_LENGTH,
+  type MoveDirection,
+  type MoveFlags,
+} from "../utils";
 import { downloadNotebookFile } from "../utils/export";
 import { ItemMenu } from "./ItemMenu";
 
@@ -87,6 +91,7 @@ export const NavItem = ({
               ref={inputRef}
               className="text text-label-large"
               value={draftName}
+              maxLength={MAX_NOTEBOOK_NAME_LENGTH}
               onChange={(event) => setDraftName(event.target.value)}
               onBlur={commitRename}
               onKeyDown={(event) => {

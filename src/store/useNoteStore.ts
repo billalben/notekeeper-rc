@@ -5,6 +5,7 @@ import {
   collectTags,
   generateID,
   hasTag,
+  MAX_NOTEBOOK_NAME_LENGTH,
   mergeTags,
   moveWithinGroup,
   normalizeTag,
@@ -200,7 +201,7 @@ export const useNoteStore = create<NoteStore>()(
       addNotebook: (name) => {
         const notebook: Notebook = {
           id: generateID(),
-          name: name || "Untitled",
+          name: (name || "Untitled").slice(0, MAX_NOTEBOOK_NAME_LENGTH),
           notes: [],
           deletedAt: null,
           pinned: false,
@@ -215,9 +216,12 @@ export const useNoteStore = create<NoteStore>()(
       },
 
       renameNotebook: (notebookId, name) => {
+        const nextName = name.slice(0, MAX_NOTEBOOK_NAME_LENGTH);
         set((state) => ({
           notebooks: state.notebooks.map((notebook) =>
-            notebook.id === notebookId ? { ...notebook, name } : notebook,
+            notebook.id === notebookId
+              ? { ...notebook, name: nextName }
+              : notebook,
           ),
         }));
       },

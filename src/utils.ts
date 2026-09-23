@@ -14,6 +14,9 @@ export const countWords = (text: string): number => {
 
 export const DAY_MS = 24 * 60 * 60 * 1000;
 
+/** Longest allowed notebook name; keeps the sidebar and note cards readable. */
+export const MAX_NOTEBOOK_NAME_LENGTH = 100;
+
 /** Media query shared by the sidebar (drawer vs icon rail) and shortcuts. */
 export const DESKTOP_QUERY = "(min-width: 992px)";
 
