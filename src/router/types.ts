@@ -1,7 +1,5 @@
 import type { SettingsSection } from "../types";
 
-export type { SettingsSection };
-
 export type BaseView =
   "all" | "recent" | "pinned" | "favorites" | "stats" | "trash" | "notebook";
 

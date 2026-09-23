@@ -9,7 +9,7 @@ import { DESKTOP_QUERY } from "../utils";
 const clampWidth = (value: number): number =>
   Math.min(SIDEBAR_WIDTH_MAX, Math.max(SIDEBAR_WIDTH_MIN, value));
 
-export const applySidebarWidth = (width: number): void => {
+const applySidebarWidth = (width: number): void => {
   document.documentElement.style.setProperty("--sidebar-current", `${width}px`);
 };
 

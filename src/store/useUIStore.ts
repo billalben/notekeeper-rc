@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import type { SettingsSection } from "../types";
 
-export type MainView =
+type MainView =
   "all" | "recent" | "notes" | "pinned" | "favorites" | "trash" | "stats";
 
 interface UIStore {

@@ -28,7 +28,7 @@ export interface ToastSettings {
   showCloseButton: boolean;
 }
 
-export const DEFAULT_TOAST_SETTINGS: ToastSettings = {
+const DEFAULT_TOAST_SETTINGS: ToastSettings = {
   enabled: true,
   position: "bottom-center",
   duration: 4000,
@@ -42,7 +42,7 @@ export type EditorPresentation = "modal" | "full" | "split";
 
 export const SPLIT_WIDTH_MIN = 320;
 export const SPLIT_WIDTH_MAX = 800;
-export const SPLIT_WIDTH_DEFAULT = 480;
+const SPLIT_WIDTH_DEFAULT = 480;
 
 export interface EditorSettings {
   autosave: boolean;
@@ -53,7 +53,7 @@ export interface EditorSettings {
   closeModalOnBackdropClick: boolean;
 }
 
-export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
+const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
   autosave: true,
   defaultMode: "preview",
   presentation: "modal",
@@ -66,7 +66,7 @@ export interface TrashSettings {
   retentionDays: TrashRetentionDays;
 }
 
-export const DEFAULT_TRASH_SETTINGS: TrashSettings = {
+const DEFAULT_TRASH_SETTINGS: TrashSettings = {
   retentionDays: TRASH_RETENTION_DAYS,
 };
 
@@ -79,7 +79,7 @@ export interface ExportSettings {
   defaultFormat: ExportFormat;
 }
 
-export const DEFAULT_EXPORT_SETTINGS: ExportSettings = {
+const DEFAULT_EXPORT_SETTINGS: ExportSettings = {
   defaultFormat: "json",
 };
 
@@ -97,11 +97,11 @@ const normalizeExportSettings = (
 
 export const SIDEBAR_WIDTH_MIN = 280;
 export const SIDEBAR_WIDTH_MAX = 480;
-export const SIDEBAR_WIDTH_DEFAULT = 360;
+const SIDEBAR_WIDTH_DEFAULT = 360;
 
 export type MotionPreference = "system" | "reduce" | "full";
 
-export const DEFAULT_MOTION: MotionPreference = "system";
+const DEFAULT_MOTION: MotionPreference = "system";
 
 export type AccentColor =
   "orange" | "blue" | "green" | "teal" | "violet" | "rose";
@@ -134,7 +134,7 @@ export interface SidebarSettings {
   moreCollapsed: boolean;
 }
 
-export const DEFAULT_SIDEBAR_SETTINGS: SidebarSettings = {
+const DEFAULT_SIDEBAR_SETTINGS: SidebarSettings = {
   width: SIDEBAR_WIDTH_DEFAULT,
   notebooksCollapsed: false,
   moreCollapsed: false,
@@ -146,7 +146,7 @@ export interface HeaderSettings {
   showTheme: boolean;
 }
 
-export const DEFAULT_HEADER_SETTINGS: HeaderSettings = {
+const DEFAULT_HEADER_SETTINGS: HeaderSettings = {
   showSearch: true,
   showShortcuts: true,
   showTheme: true,

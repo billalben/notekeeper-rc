@@ -22,9 +22,7 @@ export type ActionId =
 
 export type ShortcutGroup = "general" | "editor" | "navigation";
 
-export type ShortcutGroupKey = `settings.shortcuts.groups.${ShortcutGroup}`;
-
-export type ShortcutActionKey =
+type ShortcutActionKey =
   | `settings.shortcuts.actions.${ActionId}.label`
   | `settings.shortcuts.actions.${ActionId}.description`;
 
@@ -129,12 +127,12 @@ export const DEFAULT_SHORTCUTS: Record<ActionId, string> =
 
 export type ShortcutBindings = Record<ActionId, string>;
 
-export const IS_MAC =
+const IS_MAC =
   typeof navigator !== "undefined" &&
   /mac/i.test(navigator.userAgent) &&
   !/iphone|ipad|ipod/i.test(navigator.userAgent);
 
-export const MODIFIER_KEYS = new Set([
+const MODIFIER_KEYS = new Set([
   "shift",
   "alt",
   "opt",

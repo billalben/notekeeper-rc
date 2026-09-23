@@ -41,7 +41,7 @@ interface NoteDraft {
 
 export type NoteSaveInput = NoteDraft;
 
-export type NoteEditorVariant = "modal" | "split";
+type NoteEditorVariant = "modal" | "split";
 
 const isSameDraft = (a: NoteDraft, b: NoteDraft): boolean =>
   a.title === b.title &&

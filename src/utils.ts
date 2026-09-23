@@ -34,13 +34,10 @@ export const TRASH_RETENTION_OPTIONS: TrashRetentionDays[] = [
 export const trashRetentionMs = (days: TrashRetentionDays): number | null =>
   days === null ? null : days * DAY_MS;
 
-export const isTrashed = (item: { deletedAt: number | null }): boolean =>
-  item.deletedAt !== null;
-
 export const sortByPinned = <T extends { pinned: boolean }>(items: T[]): T[] =>
   [...items].sort((a, b) => Number(b.pinned) - Number(a.pinned));
 
-export const TAG_MAX_LENGTH = 50;
+const TAG_MAX_LENGTH = 50;
 
 /**
  * Normalize a raw tag string: trim, drop a single leading `#`, and collapse
@@ -70,8 +67,7 @@ export const addTag = (tags: string[], raw: string): string[] => {
 export const removeTag = (tags: string[], tag: string): string[] =>
   tags.filter((item) => item.toLowerCase() !== tag.toLowerCase());
 
-export const noteHasTag = (note: Note, tag: string): boolean =>
-  hasTag(note.tags, tag);
+const noteHasTag = (note: Note, tag: string): boolean => hasTag(note.tags, tag);
 
 export const sortTags = (tags: string[]): string[] =>
   [...tags].sort((a, b) =>
@@ -101,14 +97,6 @@ export const collectTags = (notebooks: Notebook[]): string[] => {
 
   return sortTags([...seen.values()]);
 };
-
-/** How many notes (including trashed) carry `tag`. */
-export const countTagUsage = (notebooks: Notebook[], tag: string): number =>
-  notebooks.reduce(
-    (total, notebook) =>
-      total + notebook.notes.filter((note) => noteHasTag(note, tag)).length,
-    0,
-  );
 
 /**
  * Usage count per tag, keyed by lowercased tag name, across all notes
@@ -191,7 +179,7 @@ export const collectAllNotes = (notebooks: Notebook[]): Note[] =>
     );
 
 /** Maximum number of notes surfaced in the Recent view. */
-export const RECENT_NOTES_LIMIT = 20;
+const RECENT_NOTES_LIMIT = 20;
 
 /**
  * The most recently updated visible (non-trashed) notes across visible

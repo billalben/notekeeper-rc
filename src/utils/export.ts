@@ -1,10 +1,10 @@
 import type { Notebook } from "../types";
 import { generateID } from "../utils";
 
-export const EXPORT_APP = "notekeeper";
-export const EXPORT_SCHEMA_VERSION = 1;
+const EXPORT_APP = "notekeeper";
+const EXPORT_SCHEMA_VERSION = 1;
 
-export const MIME_JSON = "application/json";
+const MIME_JSON = "application/json";
 export const MIME_MARKDOWN = "text/markdown";
 
 /**
@@ -12,7 +12,7 @@ export const MIME_MARKDOWN = "text/markdown";
  * shape (Zustand's `{ state, version }`) so exports stay stable and readable.
  * Trashed items are omitted and `notebookId` is implicit from nesting.
  */
-export interface ExportNote {
+interface ExportNote {
   id: string;
   title: string;
   text: string;
@@ -23,14 +23,14 @@ export interface ExportNote {
   favorite: boolean;
 }
 
-export interface ExportNotebook {
+interface ExportNotebook {
   id: string;
   name: string;
   pinned: boolean;
   notes: ExportNote[];
 }
 
-export interface ExportFile {
+interface ExportFile {
   app: typeof EXPORT_APP;
   schemaVersion: number;
   exportedAt: string;
@@ -38,7 +38,7 @@ export interface ExportFile {
   tags: string[];
 }
 
-export interface ExportNoteFile {
+interface ExportNoteFile {
   app: typeof EXPORT_APP;
   schemaVersion: number;
   exportedAt: string;
@@ -58,7 +58,7 @@ export interface NoteContent {
   favorite?: boolean;
 }
 
-export const toExportNote = (note: NoteContent): ExportNote => ({
+const toExportNote = (note: NoteContent): ExportNote => ({
   id: note.id ?? generateID(),
   title: note.title,
   text: note.text,
@@ -69,7 +69,7 @@ export const toExportNote = (note: NoteContent): ExportNote => ({
   favorite: note.favorite ?? false,
 });
 
-export const toExportNotebook = (notebook: Notebook): ExportNotebook => ({
+const toExportNotebook = (notebook: Notebook): ExportNotebook => ({
   id: notebook.id,
   name: notebook.name,
   pinned: notebook.pinned,
@@ -82,7 +82,7 @@ const visibleNotebooks = (notebooks: Notebook[]): Notebook[] =>
   notebooks.filter((notebook) => notebook.deletedAt === null);
 
 /** Versioned backup of every visible notebook plus the tag registry. */
-export const buildExportFile = (
+const buildExportFile = (
   notebooks: Notebook[],
   tags: string[],
   exportedAt: Date = new Date(),
@@ -95,7 +95,7 @@ export const buildExportFile = (
 });
 
 /** Single-notebook export, using the same top-level shape as a full backup. */
-export const buildNotebookExportFile = (
+const buildNotebookExportFile = (
   notebook: Notebook,
   exportedAt: Date = new Date(),
 ): ExportFile => ({
@@ -106,7 +106,7 @@ export const buildNotebookExportFile = (
   tags: [],
 });
 
-export const buildNoteExportFile = (
+const buildNoteExportFile = (
   note: NoteContent,
   notebookName: string | null,
   exportedAt: Date = new Date(),
@@ -118,7 +118,7 @@ export const buildNoteExportFile = (
   note: toExportNote(note),
 });
 
-export const serializeExport = (file: ExportFile | ExportNoteFile): string =>
+const serializeExport = (file: ExportFile | ExportNoteFile): string =>
   JSON.stringify(file, null, 2);
 
 const yamlString = (value: string): string =>
@@ -131,7 +131,7 @@ const isoOrEmpty = (milliseconds: number | undefined): string =>
  * Readable Markdown for a note: YAML frontmatter (metadata) followed by the
  * raw note body. Not intended to round-trip with import.
  */
-export const noteToMarkdown = (
+const noteToMarkdown = (
   note: NoteContent,
   notebookName?: string | null,
 ): string => {
@@ -164,24 +164,24 @@ export const slugify = (value: string): string =>
     .slice(0, 60);
 
 /** Local `YYYY-MM-DD` stamp for descriptive, dated filenames. */
-export const dateStamp = (date: Date = new Date()): string => {
+const dateStamp = (date: Date = new Date()): string => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
 
-export const backupFilename = (date: Date = new Date()): string =>
+const backupFilename = (date: Date = new Date()): string =>
   `notekeeper-backup-${dateStamp(date)}.json`;
 
-export const notebookFilename = (
+const notebookFilename = (
   name: string,
   date: Date = new Date(),
   extension: "md" | "json" = "json",
 ): string =>
   `notekeeper-${slugify(name) || "notebook"}-${dateStamp(date)}.${extension}`;
 
-export const noteFilename = (
+const noteFilename = (
   title: string,
   extension: "md" | "json",
   date: Date = new Date(),
@@ -229,7 +229,7 @@ export const downloadBackupFile = (
  * Markdown for a whole notebook: a frontmatter block followed by each visible
  * note (which carries its own frontmatter).
  */
-export const notebookToMarkdown = (
+const notebookToMarkdown = (
   notebook: Notebook,
   exportedAt: Date = new Date(),
 ): string => {

@@ -57,7 +57,7 @@ export const stripMarkdown = (text: string): string =>
  * start of the note when the query only matched the title or a match range is
  * unavailable.
  */
-export const buildSnippet = (
+const buildSnippet = (
   text: string,
   indices: ReadonlyArray<RangeTuple> | undefined,
 ): string => {

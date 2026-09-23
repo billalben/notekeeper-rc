@@ -53,7 +53,7 @@ interface SettingsSwitchProps {
   label: string;
 }
 
-export interface SettingsSelectOption {
+interface SettingsSelectOption {
   value: string;
   label: string;
 }

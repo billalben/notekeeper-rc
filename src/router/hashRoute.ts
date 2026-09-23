@@ -15,7 +15,7 @@ const SECTION_VIEWS: Record<string, BaseView> = {
   trash: "trash",
 };
 
-export const SETTINGS_SECTIONS: SettingsSection[] = [
+const SETTINGS_SECTIONS: SettingsSection[] = [
   "general",
   "appearance",
   "shortcuts",
@@ -24,7 +24,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
   "about",
 ];
 
-export const isSettingsSection = (
+const isSettingsSection = (
   value: string | undefined,
 ): value is SettingsSection =>
   value !== undefined && SETTINGS_SECTIONS.includes(value as SettingsSection);

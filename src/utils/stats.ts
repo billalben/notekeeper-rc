@@ -11,7 +11,7 @@ export interface DayActivity {
   isToday: boolean;
 }
 
-export interface NotebookStat {
+interface NotebookStat {
   id: string;
   name: string;
   count: number;
@@ -46,7 +46,7 @@ export interface ComputeStatsInput {
  * This is the pool all library statistics are derived from; trashed items are
  * intentionally omitted, matching Favorites, tag filtering, and search.
  */
-export const collectVisibleNotes = (notebooks: Notebook[]): Note[] =>
+const collectVisibleNotes = (notebooks: Notebook[]): Note[] =>
   notebooks
     .filter((notebook) => notebook.deletedAt === null)
     .flatMap((notebook) =>

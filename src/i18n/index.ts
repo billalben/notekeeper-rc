@@ -4,7 +4,7 @@ import ar from "./resources/ar";
 import en from "./resources/en";
 import fr from "./resources/fr";
 
-export const LANGUAGE_CODES = ["en", "fr", "ar"] as const;
+const LANGUAGE_CODES = ["en", "fr", "ar"] as const;
 
 export type Language = (typeof LANGUAGE_CODES)[number];
 
@@ -23,9 +23,9 @@ export const LANGUAGES: LanguageMeta[] = [
   { code: "ar", nativeLabel: "العربية", dir: "rtl" },
 ];
 
-export const defaultNS = "translation" as const;
+const defaultNS = "translation" as const;
 
-export const resources = {
+const resources = {
   en: { translation: en },
   fr: { translation: fr },
   ar: { translation: ar },

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "./useDebouncedCallback";
 
-export const AUTOSAVE_DELAY_MS = 500;
+const AUTOSAVE_DELAY_MS = 500;
 
-export type AutoSaveStatus = "idle" | "saving" | "saved";
+type AutoSaveStatus = "idle" | "saving" | "saved";
 
 interface UseAutoSaveOptions<T> {
   onSave: (value: T) => void;

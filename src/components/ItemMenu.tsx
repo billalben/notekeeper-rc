@@ -13,7 +13,7 @@ const VIEWPORT_MARGIN = 8;
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
 
-export interface ItemMenuItem {
+interface ItemMenuItem {
   key: string;
   label: string;
   icon: string;

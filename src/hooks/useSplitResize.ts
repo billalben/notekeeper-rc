@@ -15,7 +15,7 @@ import { DESKTOP_QUERY } from "../utils";
 const clampWidth = (value: number): number =>
   Math.min(SPLIT_WIDTH_MAX, Math.max(SPLIT_WIDTH_MIN, value));
 
-export const applySplitWidth = (width: number): void => {
+const applySplitWidth = (width: number): void => {
   document.documentElement.style.setProperty("--split-width", `${width}px`);
 };
 

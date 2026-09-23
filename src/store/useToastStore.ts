@@ -8,7 +8,7 @@ import {
   useSettingsStore,
 } from "./useSettingsStore";
 
-export interface ToastAction {
+interface ToastAction {
   label: string;
   onClick: () => void;
 }
