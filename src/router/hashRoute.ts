@@ -1,5 +1,10 @@
 import type { SettingsSection } from "../types";
-import { DEFAULT_ROUTE, type BaseView, type Overlay, type Route } from "./types";
+import {
+  DEFAULT_ROUTE,
+  type BaseView,
+  type Overlay,
+  type Route,
+} from "./types";
 
 const SECTION_VIEWS: Record<string, BaseView> = {
   all: "all",
@@ -22,8 +27,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
 export const isSettingsSection = (
   value: string | undefined,
 ): value is SettingsSection =>
-  value !== undefined &&
-  SETTINGS_SECTIONS.includes(value as SettingsSection);
+  value !== undefined && SETTINGS_SECTIONS.includes(value as SettingsSection);
 
 const decode = (value: string): string => {
   try {
@@ -40,9 +44,7 @@ const decode = (value: string): string => {
 export const normalizeHash = (hash: string): string => {
   if (!hash) return "#/";
   const withoutHash = hash.startsWith("#") ? hash.slice(1) : hash;
-  const path = withoutHash.startsWith("/")
-    ? withoutHash
-    : `/${withoutHash}`;
+  const path = withoutHash.startsWith("/") ? withoutHash : `/${withoutHash}`;
   const trimmed = path.replace(/\/+$/, "");
   return `#${trimmed || "/"}`;
 };
@@ -63,7 +65,12 @@ export const parseHash = (hash: string): Route => {
   } else if (head in SECTION_VIEWS) {
     route.base = SECTION_VIEWS[head];
     index = 1;
-  } else if (head === "note" || head === "settings" || head === "search" || head === "shortcuts") {
+  } else if (
+    head === "note" ||
+    head === "settings" ||
+    head === "search" ||
+    head === "shortcuts"
+  ) {
     index = 0;
   } else {
     return { ...DEFAULT_ROUTE };

@@ -118,9 +118,8 @@ export const buildNoteExportFile = (
   note: toExportNote(note),
 });
 
-export const serializeExport = (
-  file: ExportFile | ExportNoteFile,
-): string => JSON.stringify(file, null, 2);
+export const serializeExport = (file: ExportFile | ExportNoteFile): string =>
+  JSON.stringify(file, null, 2);
 
 const yamlString = (value: string): string =>
   `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n")}"`;

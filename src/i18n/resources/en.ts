@@ -124,8 +124,7 @@ const en = {
     save: "Save",
     unsavedTitle: "You have unsaved changes",
     unsavedDescription: "Close the editor without saving?",
-    unsavedSwitchDescription:
-      "Switch notes and discard your unsaved changes?",
+    unsavedSwitchDescription: "Switch notes and discard your unsaved changes?",
     toolbar: {
       heading: "Heading",
       bold: "Bold",

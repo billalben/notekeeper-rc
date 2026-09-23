@@ -37,7 +37,8 @@ interface WeekBarProps {
 const MAX_BAR_HEIGHT = 100;
 
 const WeekBar = ({ value, max, variant }: WeekBarProps) => {
-  const height = value > 0 ? Math.max(6, Math.round((value / max) * MAX_BAR_HEIGHT)) : 0;
+  const height =
+    value > 0 ? Math.max(6, Math.round((value / max) * MAX_BAR_HEIGHT)) : 0;
 
   return (
     <div className="week-bar-slot">
@@ -295,11 +296,7 @@ export const StatisticsView = ({
         </StatCard>
 
         <StatCard span={5} title={t("stats.pinnedAndFavorites")}>
-          <button
-            type="button"
-            className="stats-link-row"
-            onClick={openPinned}
-          >
+          <button type="button" className="stats-link-row" onClick={openPinned}>
             <span
               className="material-symbols-rounded stats-link-icon"
               aria-hidden="true"
@@ -388,7 +385,11 @@ export const StatisticsView = ({
           </div>
         </StatCard>
 
-        <StatCard span={12} title={t("stats.storage")} className="stats-storage">
+        <StatCard
+          span={12}
+          title={t("stats.storage")}
+          className="stats-storage"
+        >
           {supported ? (
             <div className="stats-storage-body">
               <span className="stats-big-number text-display-small">

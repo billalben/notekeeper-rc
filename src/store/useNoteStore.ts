@@ -249,7 +249,9 @@ export const useNoteStore = create<NoteStore>()(
             (notebook) => notebook.deletedAt === null,
           );
           const notebooks = state.notebooks.map((notebook) =>
-            notebook.id === notebookId ? { ...notebook, deletedAt: now } : notebook,
+            notebook.id === notebookId
+              ? { ...notebook, deletedAt: now }
+              : notebook,
           );
 
           let nextActiveId = state.activeNotebookId;
@@ -268,7 +270,9 @@ export const useNoteStore = create<NoteStore>()(
       restoreNotebook: (notebookId) => {
         set((state) => ({
           notebooks: state.notebooks.map((notebook) =>
-            notebook.id === notebookId ? { ...notebook, deletedAt: null } : notebook,
+            notebook.id === notebookId
+              ? { ...notebook, deletedAt: null }
+              : notebook,
           ),
         }));
       },
@@ -389,7 +393,12 @@ export const useNoteStore = create<NoteStore>()(
         }));
       },
 
-      moveNoteToNotebook: (sourceNotebookId, noteId, targetNotebookId, targetIndex) => {
+      moveNoteToNotebook: (
+        sourceNotebookId,
+        noteId,
+        targetNotebookId,
+        targetIndex,
+      ) => {
         if (sourceNotebookId === targetNotebookId) return;
         set((state) => {
           const source = state.notebooks.find(

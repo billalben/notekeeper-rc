@@ -29,15 +29,15 @@ rebuilt as a modern React + TypeScript + Vite application.
 
 ## Tech stack
 
-| Layer           | Choice                                                   |
-| --------------- | -------------------------------------------------------- |
-| UI              | [React 19](https://react.dev)                            |
-| Language        | [TypeScript](https://www.typescriptlang.org)             |
-| Build tool      | [Vite](https://vite.dev)                                 |
-| State           | [Zustand](https://zustand.docs.pmnd.rs) (with `persist`) |
-| Linting         | [oxlint](https://oxc.rs)                                 |
+| Layer           | Choice                                                        |
+| --------------- | ------------------------------------------------------------- |
+| UI              | [React 19](https://react.dev)                                 |
+| Language        | [TypeScript](https://www.typescriptlang.org)                  |
+| Build tool      | [Vite](https://vite.dev)                                      |
+| State           | [Zustand](https://zustand.docs.pmnd.rs) (with `persist`)      |
+| Linting         | [oxlint](https://oxc.rs)                                      |
 | PWA             | [vite-plugin-pwa](https://vite-pwa-org.netlify.app) (Workbox) |
-| Package manager | [pnpm](https://pnpm.io)                                  |
+| Package manager | [pnpm](https://pnpm.io)                                       |
 
 ## Project structure
 

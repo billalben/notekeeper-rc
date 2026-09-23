@@ -128,15 +128,10 @@ export const SettingsModal = ({ onClose }: SettingsModalProps) => {
                 className={`settings-nav-item${
                   activeSection === section.id ? " active" : ""
                 }`}
-                aria-current={
-                  activeSection === section.id ? "page" : undefined
-                }
+                aria-current={activeSection === section.id ? "page" : undefined}
                 onClick={() => selectSection(section.id)}
               >
-                <span
-                  className="material-symbols-rounded"
-                  aria-hidden="true"
-                >
+                <span className="material-symbols-rounded" aria-hidden="true">
                   {section.icon}
                 </span>
                 <span className="text-label-large">{t(section.labelKey)}</span>
@@ -173,10 +168,7 @@ export const SettingsModal = ({ onClose }: SettingsModalProps) => {
       <div
         className="overlay modal-overlay"
         onClick={(event) => {
-          if (
-            closeOnBackdropClick &&
-            event.target === event.currentTarget
-          ) {
+          if (closeOnBackdropClick && event.target === event.currentTarget) {
             onClose();
           }
         }}

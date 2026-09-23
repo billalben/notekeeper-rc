@@ -177,19 +177,18 @@ const fr = {
   },
   confirm: {
     deleteQuestion:
-      'Voulez-vous vraiment supprimer <strong>« {{title}} »</strong> ?',
+      "Voulez-vous vraiment supprimer <strong>« {{title}} »</strong> ?",
     delete: "Supprimer",
   },
   move: {
-    title: 'Déplacer <strong>« {{title}} »</strong> vers',
+    title: "Déplacer <strong>« {{title}} »</strong> vers",
     noDestinations: "Aucun autre carnet de destination.",
     label: "Déplacer la note",
   },
   stats: {
     title: "Statistiques",
     noNotesYet: "Aucune note pour l'instant",
-    noNotesHint:
-      "Écrivez votre première note pour voir vos statistiques ici.",
+    noNotesHint: "Écrivez votre première note pour voir vos statistiques ici.",
     newNote: "Nouvelle note",
     thisWeek: "Cette semaine",
     noWrites: "Aucune note écrite ou modifiée cette semaine.",
@@ -221,7 +220,7 @@ const fr = {
     emptyMore: "{{list}} et {{count}} de plus",
   },
   toasts: {
-    noteMovedTo: 'Note déplacée vers « {{name}} »',
+    noteMovedTo: "Note déplacée vers « {{name}} »",
     goToNotebook: "Aller au carnet",
     moveUndone: "Déplacement annulé",
     noteTrashed: "Note déplacée vers la corbeille",
@@ -247,7 +246,7 @@ const fr = {
     shortcutsReset: "Raccourcis réinitialisés",
     shortcutNotSaved: "Raccourci non enregistré",
     shortcutModifier: "Utilisez un modificateur (⌘/Ctrl, Alt) plus une touche.",
-    shortcutConflict: 'Déjà utilisé par « {{action}} ».',
+    shortcutConflict: "Déjà utilisé par « {{action}} ».",
     storageAlmostFull: "Stockage presque plein",
     storageAlmostFullDesc:
       "Libérez de l'espace ou exportez une sauvegarde bientôt.",
@@ -296,14 +295,12 @@ const fr = {
       presentationFull: "Plein écran",
       presentationSplit: "Vue divisée",
       defaultViewTitle: "Vue par défaut",
-      defaultViewDesc:
-        "Choisissez comment les notes s'ouvrent dans l'éditeur.",
+      defaultViewDesc: "Choisissez comment les notes s'ouvrent dans l'éditeur.",
       defaultViewLabel: "Vue par défaut de l'éditeur",
       preview: "Aperçu",
       edit: "Modifier",
       wordCountTitle: "Nombre de mots",
-      wordCountDesc:
-        "Afficher le nombre de mots et de caractères en direct.",
+      wordCountDesc: "Afficher le nombre de mots et de caractères en direct.",
       wordCountLabel: "Nombre de mots",
       modalsGroup: "Fenêtres",
       closeOutsideTitle: "Fermer au clic extérieur",
@@ -407,8 +404,7 @@ const fr = {
         },
         togglePreview: {
           label: "Basculer l'aperçu Markdown",
-          description:
-            "Passer la note ouverte entre édition et aperçu.",
+          description: "Passer la note ouverte entre édition et aperçu.",
         },
         downloadNote: {
           label: "Télécharger la note actuelle",
@@ -450,8 +446,7 @@ const fr = {
       errorMessage: "Impossible d'importer les notes",
       errorDesc: "Le fichier sélectionné n'est pas une sauvegarde valide.",
       infoMessage: "Astuce",
-      infoDesc:
-        "Vous pouvez personnaliser l'emplacement des notifications.",
+      infoDesc: "Vous pouvez personnaliser l'emplacement des notifications.",
       toastsGroup: "Notifications",
       enableTitle: "Activer les notifications",
       enableDesc:
@@ -475,8 +470,7 @@ const fr = {
       maxVisibleDesc: "Nombre de notifications empilées simultanément.",
       maxVisibleLabel: "Notifications visibles au maximum",
       closeButtonTitle: "Bouton de fermeture",
-      closeButtonDesc:
-        "Permettre de fermer chaque notification manuellement.",
+      closeButtonDesc: "Permettre de fermer chaque notification manuellement.",
       closeButtonLabel: "Afficher le bouton de fermeture",
       resetGroup: "Réinitialiser",
       resetTitle: "Réinitialiser les notifications",

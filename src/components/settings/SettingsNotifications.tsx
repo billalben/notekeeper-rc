@@ -106,9 +106,7 @@ export const SettingsNotifications = () => {
                 disabled={!toasts.enabled}
                 onClick={() => preview.run(t)}
               >
-                <span className="text-label-large">
-                  {t(preview.labelKey)}
-                </span>
+                <span className="text-label-large">{t(preview.labelKey)}</span>
                 <div className="state-layer" />
               </button>
             ))}
@@ -201,7 +199,9 @@ export const SettingsNotifications = () => {
           <SettingsSwitch
             checked={toasts.showCloseButton}
             label={t("settings.notifications.closeButtonLabel")}
-            onChange={(showCloseButton) => setToastSettings({ showCloseButton })}
+            onChange={(showCloseButton) =>
+              setToastSettings({ showCloseButton })
+            }
           />
         </SettingsRow>
       </SettingsGroup>

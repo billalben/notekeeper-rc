@@ -132,7 +132,8 @@ const ar = {
     save: "حفظ",
     unsavedTitle: "لديك تغييرات غير محفوظة",
     unsavedDescription: "إغلاق المحرر دون حفظ؟",
-    unsavedSwitchDescription: "التبديل إلى ملاحظة أخرى وتجاهل تغييراتك غير المحفوظة؟",
+    unsavedSwitchDescription:
+      "التبديل إلى ملاحظة أخرى وتجاهل تغييراتك غير المحفوظة؟",
     toolbar: {
       heading: "عنوان",
       bold: "غامق",

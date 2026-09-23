@@ -12,9 +12,7 @@ type FormatLabelKey =
   | "editor.toolbar.checklist"
   | "editor.toolbar.code";
 
-type FormatTitleKey =
-  | "editor.toolbar.boldTitle"
-  | "editor.toolbar.italicTitle";
+type FormatTitleKey = "editor.toolbar.boldTitle" | "editor.toolbar.italicTitle";
 
 interface FormatButton {
   kind: FormatKind;

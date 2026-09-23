@@ -88,7 +88,9 @@ const EXPORT_FORMATS: ExportFormat[] = ["md", "json"];
 const normalizeExportSettings = (
   settings: Partial<ExportSettings> | undefined,
 ): ExportSettings => ({
-  defaultFormat: EXPORT_FORMATS.includes(settings?.defaultFormat as ExportFormat)
+  defaultFormat: EXPORT_FORMATS.includes(
+    settings?.defaultFormat as ExportFormat,
+  )
     ? (settings?.defaultFormat as ExportFormat)
     : DEFAULT_EXPORT_SETTINGS.defaultFormat,
 });
@@ -102,12 +104,7 @@ export type MotionPreference = "system" | "reduce" | "full";
 export const DEFAULT_MOTION: MotionPreference = "system";
 
 export type AccentColor =
-  | "orange"
-  | "blue"
-  | "green"
-  | "teal"
-  | "violet"
-  | "rose";
+  "orange" | "blue" | "green" | "teal" | "violet" | "rose";
 
 export type FontScale = "small" | "default" | "large";
 

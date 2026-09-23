@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 interface SidebarSectionProps {
   id: string;
@@ -35,7 +41,9 @@ export const SidebarSection = ({
   const updateFade = useCallback(() => {
     const scroll = scrollRef.current;
     if (!scroll) return;
-    setHasMore(scroll.scrollHeight - scroll.scrollTop - scroll.clientHeight > 1);
+    setHasMore(
+      scroll.scrollHeight - scroll.scrollTop - scroll.clientHeight > 1,
+    );
   }, []);
 
   useEffect(() => {

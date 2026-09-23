@@ -31,9 +31,8 @@ export const TRASH_RETENTION_OPTIONS: TrashRetentionDays[] = [
   null,
 ];
 
-export const trashRetentionMs = (
-  days: TrashRetentionDays,
-): number | null => (days === null ? null : days * DAY_MS);
+export const trashRetentionMs = (days: TrashRetentionDays): number | null =>
+  days === null ? null : days * DAY_MS;
 
 export const isTrashed = (item: { deletedAt: number | null }): boolean =>
   item.deletedAt !== null;
@@ -48,7 +47,12 @@ export const TAG_MAX_LENGTH = 50;
  * internal whitespace to single spaces.
  */
 export const normalizeTag = (raw: string): string =>
-  raw.trim().replace(/^#/, "").trim().replace(/\s+/g, " ").slice(0, TAG_MAX_LENGTH);
+  raw
+    .trim()
+    .replace(/^#/, "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .slice(0, TAG_MAX_LENGTH);
 
 export const hasTag = (tags: string[], tag: string): boolean =>
   tags.some((item) => item.toLowerCase() === tag.toLowerCase());
@@ -155,9 +159,7 @@ export const collectFavoriteNotes = (notebooks: Notebook[]): Note[] =>
   notebooks
     .filter((notebook) => notebook.deletedAt === null)
     .flatMap((notebook) =>
-      notebook.notes.filter(
-        (note) => note.deletedAt === null && note.favorite,
-      ),
+      notebook.notes.filter((note) => note.deletedAt === null && note.favorite),
     )
     .sort((a, b) => b.updatedOn - a.updatedOn);
 
@@ -184,7 +186,8 @@ export const collectAllNotes = (notebooks: Notebook[]): Note[] =>
       notebook.notes.filter((note) => note.deletedAt === null),
     )
     .sort(
-      (a, b) => Number(b.pinned) - Number(a.pinned) || b.updatedOn - a.updatedOn,
+      (a, b) =>
+        Number(b.pinned) - Number(a.pinned) || b.updatedOn - a.updatedOn,
     );
 
 /** Maximum number of notes surfaced in the Recent view. */

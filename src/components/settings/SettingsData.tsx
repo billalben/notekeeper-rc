@@ -7,10 +7,7 @@ import {
 } from "../../store/useSettingsStore";
 import { toast } from "../../store/useToastStore";
 import { TRASH_RETENTION_OPTIONS, type TrashRetentionDays } from "../../utils";
-import {
-  downloadBackupFile,
-  downloadNotebookFile,
-} from "../../utils/export";
+import { downloadBackupFile, downloadNotebookFile } from "../../utils/export";
 import {
   ComingSoon,
   SettingsGroup,
@@ -62,9 +59,7 @@ export const SettingsData = () => {
   const deleteAllData = useNoteStore((state) => state.deleteAllData);
 
   const retentionDays = useSettingsStore((state) => state.trash.retentionDays);
-  const setTrashSettings = useSettingsStore(
-    (state) => state.setTrashSettings,
-  );
+  const setTrashSettings = useSettingsStore((state) => state.setTrashSettings);
   const exportFormat = useSettingsStore((state) => state.export.defaultFormat);
   const setExportSettings = useSettingsStore(
     (state) => state.setExportSettings,
@@ -211,8 +206,7 @@ export const SettingsData = () => {
         <SettingsRow
           title={t("settings.data.exportNotebookTitle")}
           description={t("settings.data.exportNotebookDesc", {
-            format:
-              exportFormat === "md" ? t("card.markdown") : t("card.json"),
+            format: exportFormat === "md" ? t("card.markdown") : t("card.json"),
           })}
         >
           <div className="settings-export-controls">

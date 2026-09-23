@@ -42,7 +42,10 @@ import {
 
 type ConfirmState = { notebookId: string; title: string };
 
-const findNoteById = (notebooks: Notebook[], id: string | null): Note | null => {
+const findNoteById = (
+  notebooks: Notebook[],
+  id: string | null,
+): Note | null => {
   if (!id) return null;
   for (const notebook of notebooks) {
     const note = notebook.notes.find((item) => item.id === id);
@@ -65,14 +68,10 @@ const App = () => {
   const addNote = useNoteStore((state) => state.addNote);
   const updateNote = useNoteStore((state) => state.updateNote);
   const toggleNotePin = useNoteStore((state) => state.toggleNotePin);
-  const toggleNoteFavorite = useNoteStore(
-    (state) => state.toggleNoteFavorite,
-  );
+  const toggleNoteFavorite = useNoteStore((state) => state.toggleNoteFavorite);
   const setNoteFavorite = useNoteStore((state) => state.setNoteFavorite);
   const moveNote = useNoteStore((state) => state.moveNote);
-  const moveNoteToNotebook = useNoteStore(
-    (state) => state.moveNoteToNotebook,
-  );
+  const moveNoteToNotebook = useNoteStore((state) => state.moveNoteToNotebook);
   const deleteNote = useNoteStore((state) => state.deleteNote);
   const restoreNote = useNoteStore((state) => state.restoreNote);
   const deleteNotebook = useNoteStore((state) => state.deleteNotebook);
@@ -100,9 +99,7 @@ const App = () => {
   const editorNoteId = useUIStore((state) => state.editorNoteId);
   const isCreatingNote = useUIStore((state) => state.isCreatingNote);
   const openNoteModal = useUIStore((state) => state.openNoteModal);
-  const openCreateNoteModal = useUIStore(
-    (state) => state.openCreateNoteModal,
-  );
+  const openCreateNoteModal = useUIStore((state) => state.openCreateNoteModal);
   const closeNoteModal = useUIStore((state) => state.closeNoteModal);
   const activeTags = useUIStore((state) => state.activeTags);
   const toggleTag = useUIStore((state) => state.toggleTag);
@@ -246,8 +243,11 @@ const App = () => {
   }, [editorNoteId, editorNote, closeNoteModal]);
 
   const editorDirtyRef = useRef(false);
-  const { isResizing, startResize, onKeyDown: onSplitResizeKeyDown } =
-    useSplitResize();
+  const {
+    isResizing,
+    startResize,
+    onKeyDown: onSplitResizeKeyDown,
+  } = useSplitResize();
 
   useEffect(() => {
     document.body.classList.toggle("split-open", showSplitPane);
@@ -478,7 +478,8 @@ const App = () => {
     applySelectNote(null);
   };
 
-  const hasModalNote = !isSplitEnabled && (isCreatingNote || editorNote !== null);
+  const hasModalNote =
+    !isSplitEnabled && (isCreatingNote || editorNote !== null);
   const anyModalOpen =
     isSettingsOpen ||
     isSearchOpen ||
@@ -726,9 +727,7 @@ const App = () => {
               title={isCreatingNote ? undefined : activeSplitNote?.title}
               text={isCreatingNote ? undefined : activeSplitNote?.text}
               tags={isCreatingNote ? undefined : activeSplitNote?.tags}
-              favorite={
-                isCreatingNote ? undefined : activeSplitNote?.favorite
-              }
+              favorite={isCreatingNote ? undefined : activeSplitNote?.favorite}
               notebookId={
                 isCreatingNote
                   ? (activeNotebookId ?? "")
@@ -738,9 +737,7 @@ const App = () => {
               tagSuggestions={allTags}
               tagUsage={tagUsage}
               isNew={isCreatingNote}
-              postedOn={
-                isCreatingNote ? undefined : activeSplitNote?.postedOn
-              }
+              postedOn={isCreatingNote ? undefined : activeSplitNote?.postedOn}
               updatedOn={
                 isCreatingNote ? undefined : activeSplitNote?.updatedOn
               }

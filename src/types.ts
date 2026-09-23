@@ -20,12 +20,7 @@ export interface Notebook {
 }
 
 export type SettingsSection =
-  | "general"
-  | "appearance"
-  | "shortcuts"
-  | "notifications"
-  | "data"
-  | "about";
+  "general" | "appearance" | "shortcuts" | "notifications" | "data" | "about";
 
 export type ToastType = "success" | "error" | "info";
 

@@ -33,9 +33,10 @@ interface ItemMenuProps {
 export const ItemMenu = ({ label, items, children }: ItemMenuProps) => {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState<{ top: number; left: number } | null>(
-    null,
-  );
+  const [position, setPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
 
   const close = () => setPosition(null);
 
@@ -64,7 +65,10 @@ export const ItemMenu = ({ label, items, children }: ItemMenuProps) => {
     top = clamp(
       top,
       VIEWPORT_MARGIN,
-      Math.max(VIEWPORT_MARGIN, viewportHeight - menuRect.height - VIEWPORT_MARGIN),
+      Math.max(
+        VIEWPORT_MARGIN,
+        viewportHeight - menuRect.height - VIEWPORT_MARGIN,
+      ),
     );
 
     const left = clamp(

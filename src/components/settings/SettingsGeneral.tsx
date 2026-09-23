@@ -112,7 +112,9 @@ export const SettingsGeneral = () => {
           <SettingsSwitch
             checked={showWordCount}
             label={t("settings.general.wordCountLabel")}
-            onChange={(checked) => setEditorSettings({ showWordCount: checked })}
+            onChange={(checked) =>
+              setEditorSettings({ showWordCount: checked })
+            }
           />
         </SettingsRow>
       </SettingsGroup>
@@ -140,9 +142,7 @@ export const SettingsGeneral = () => {
           <SettingsSwitch
             checked={header.showSearch}
             label={t("settings.general.searchLabel")}
-            onChange={(checked) =>
-              setHeaderSettings({ showSearch: checked })
-            }
+            onChange={(checked) => setHeaderSettings({ showSearch: checked })}
           />
         </SettingsRow>
         <SettingsRow
@@ -164,9 +164,7 @@ export const SettingsGeneral = () => {
           <SettingsSwitch
             checked={header.showTheme}
             label={t("settings.general.themeToggleLabel")}
-            onChange={(checked) =>
-              setHeaderSettings({ showTheme: checked })
-            }
+            onChange={(checked) => setHeaderSettings({ showTheme: checked })}
           />
         </SettingsRow>
       </SettingsGroup>

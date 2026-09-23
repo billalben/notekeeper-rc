@@ -7,8 +7,7 @@ const PROBE_KEY = "__notekeeper_storage_probe__";
  * Approximate the number of UTF-8 bytes a string occupies, matching what a
  * browser would store.
  */
-export const estimateBytes = (value: string): number =>
-  new Blob([value]).size;
+export const estimateBytes = (value: string): number => new Blob([value]).size;
 
 /**
  * Whether `localStorage` is usable. A write failure caused by quota still
@@ -28,9 +27,7 @@ export const isLocalStorageAvailable = (): boolean => {
   } catch (error) {
     // A quota failure still means storage exists; a disabled/blocked storage
     // (SecurityError) does not.
-    return (
-      error instanceof DOMException && error.name === "QuotaExceededError"
-    );
+    return error instanceof DOMException && error.name === "QuotaExceededError";
   }
 };
 

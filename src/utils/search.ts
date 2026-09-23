@@ -72,9 +72,7 @@ export const buildSnippet = (
     .trim();
   if (!excerpt) return "";
 
-  return `${start > 0 ? "…" : ""}${excerpt}${
-    end < text.length ? "…" : ""
-  }`;
+  return `${start > 0 ? "…" : ""}${excerpt}${end < text.length ? "…" : ""}`;
 };
 
 export const runSearch = (
@@ -89,7 +87,8 @@ export const runSearch = (
     note: result.item.note,
     notebookName: result.item.notebookName,
     titleRanges:
-      result.matches?.find((match) => match.key === "note.title")?.indices ?? [],
+      result.matches?.find((match) => match.key === "note.title")?.indices ??
+      [],
     snippet: buildSnippet(
       result.item.note.text,
       result.matches?.find((match) => match.key === "note.text")?.indices,

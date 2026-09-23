@@ -16,7 +16,13 @@ type TrashEntry =
       noteCount: number;
       deletedAt: number;
     }
-  | { kind: "note"; id: string; notebookId: string; title: string; deletedAt: number };
+  | {
+      kind: "note";
+      id: string;
+      notebookId: string;
+      title: string;
+      deletedAt: number;
+    };
 
 type PendingAction =
   | { kind: "notebook"; id: string; title: string }
@@ -209,7 +215,9 @@ export const TrashView = () => {
         </ul>
       )}
 
-      {pending && <ConfirmModal title={confirmTitle} onConfirm={handleConfirm} />}
+      {pending && (
+        <ConfirmModal title={confirmTitle} onConfirm={handleConfirm} />
+      )}
     </div>
   );
 };

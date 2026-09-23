@@ -34,9 +34,7 @@ export const Header = ({ onOpenSidebar }: HeaderProps) => {
   const searchChord = useSettingsStore((state) => state.shortcuts.openSearch);
   const helpChord = useSettingsStore((state) => state.shortcuts.shortcutHelp);
   const showSearch = useSettingsStore((state) => state.header.showSearch);
-  const showShortcuts = useSettingsStore(
-    (state) => state.header.showShortcuts,
-  );
+  const showShortcuts = useSettingsStore((state) => state.header.showShortcuts);
   const showTheme = useSettingsStore((state) => state.header.showTheme);
 
   const greeting = useMemo(

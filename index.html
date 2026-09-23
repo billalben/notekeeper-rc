@@ -29,7 +29,7 @@
         try {
           var storedTheme = localStorage.getItem("theme");
           var systemThemeIsDark = window.matchMedia(
-            "(prefers-color-scheme: dark)"
+            "(prefers-color-scheme: dark)",
           ).matches;
           var initialTheme =
             storedTheme || (systemThemeIsDark ? "dark" : "light");
@@ -57,25 +57,25 @@
             if (appearance.accent) {
               document.documentElement.setAttribute(
                 "data-accent",
-                appearance.accent
+                appearance.accent,
               );
             }
             if (appearance.fontScale) {
               document.documentElement.setAttribute(
                 "data-font",
-                appearance.fontScale
+                appearance.fontScale,
               );
             }
             if (appearance.density) {
               document.documentElement.setAttribute(
                 "data-density",
-                appearance.density
+                appearance.density,
               );
             }
             if (appearance.radius) {
               document.documentElement.setAttribute(
                 "data-radius",
-                appearance.radius
+                appearance.radius,
               );
             }
             if (appearance.highContrast) {

@@ -120,7 +120,10 @@ export const SettingsShortcuts = () => {
   return (
     <>
       {GROUPS.map((group) => (
-        <SettingsGroup key={group} title={t(`settings.shortcuts.groups.${group}`)}>
+        <SettingsGroup
+          key={group}
+          title={t(`settings.shortcuts.groups.${group}`)}
+        >
           {SHORTCUT_ACTIONS.filter((action) => action.group === group).map(
             (action) => {
               const isThisRecording = recordingId === action.id;
@@ -188,11 +191,7 @@ export const SettingsShortcuts = () => {
           title={t("settings.shortcuts.referenceTitle")}
           description={t("settings.shortcuts.referenceDesc")}
         >
-          <button
-            className="btn text"
-            type="button"
-            onClick={openShortcutHelp}
-          >
+          <button className="btn text" type="button" onClick={openShortcutHelp}>
             <span className="text-label-large">
               {t("settings.shortcuts.viewAll")}
             </span>

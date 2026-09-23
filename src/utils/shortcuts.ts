@@ -271,8 +271,7 @@ export const findConflict = (
 
   const conflict = SHORTCUT_ACTIONS.find(
     (action) =>
-      action.id !== actionId &&
-      normalizeChord(bindings[action.id]) === target,
+      action.id !== actionId && normalizeChord(bindings[action.id]) === target,
   );
 
   return conflict?.id ?? null;
@@ -338,18 +337,13 @@ const MODIFIER_DISPLAY_RANK_DEFAULT: Record<string, number> = {
 };
 
 /** Human-readable chord, e.g. `⇧⌘S` on macOS or `Ctrl+Shift+S` elsewhere. */
-export const formatChord = (
-  chord: string,
-  mac: boolean = IS_MAC,
-): string => {
+export const formatChord = (chord: string, mac: boolean = IS_MAC): string => {
   const normalized = normalizeChord(chord);
   if (!normalized) return "—";
 
   const parts = normalized.split("+");
   const key = parts[parts.length - 1];
-  const rank = mac
-    ? MODIFIER_DISPLAY_RANK_MAC
-    : MODIFIER_DISPLAY_RANK_DEFAULT;
+  const rank = mac ? MODIFIER_DISPLAY_RANK_MAC : MODIFIER_DISPLAY_RANK_DEFAULT;
   const modifiers = parts
     .slice(0, -1)
     .sort((a, b) => (rank[a] ?? 99) - (rank[b] ?? 99));

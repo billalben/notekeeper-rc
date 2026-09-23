@@ -81,10 +81,7 @@ export const SettingsSelect = ({
   const selected = options.find((option) => option.value === value);
 
   return (
-    <span
-      className="settings-select-wrap"
-      data-value={selected?.label ?? ""}
-    >
+    <span className="settings-select-wrap" data-value={selected?.label ?? ""}>
       <select
         className="settings-select"
         aria-label={label}

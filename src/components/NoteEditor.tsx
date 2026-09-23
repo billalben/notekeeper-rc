@@ -186,9 +186,7 @@ export const NoteEditor = ({
   const wordCountLabel = t("editor.wordCount", { count: words });
 
   const showEdited =
-    postedOn !== undefined &&
-    savedAt !== null &&
-    savedAt - postedOn > 1000;
+    postedOn !== undefined && savedAt !== null && savedAt - postedOn > 1000;
 
   useEffect(() => {
     dirtyChangeRef.current?.(dirty);
@@ -251,7 +249,12 @@ export const NoteEditor = ({
         result = toggleLinePrefix(value, selectionStart, selectionEnd, "- ");
         break;
       case "task":
-        result = toggleLinePrefix(value, selectionStart, selectionEnd, "- [ ] ");
+        result = toggleLinePrefix(
+          value,
+          selectionStart,
+          selectionEnd,
+          "- [ ] ",
+        );
         break;
       case "b":
         result = wrapSelection(

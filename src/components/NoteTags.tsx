@@ -76,9 +76,7 @@ export const NoteTags = ({
     if (event.key === "ArrowDown") {
       event.preventDefault();
       setShowSuggestions(true);
-      setHighlightedIndex((index) =>
-        Math.min(index + 1, matches.length - 1),
-      );
+      setHighlightedIndex((index) => Math.min(index + 1, matches.length - 1));
       return;
     }
 

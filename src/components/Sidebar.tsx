@@ -225,7 +225,9 @@ export const Sidebar = ({
         </span>
         <span className="text text-label-large">{t("sidebar.newNote")}</span>
         {newNoteChord && (
-          <kbd className="sidebar-new-note-kbd">{formatChord(newNoteChord)}</kbd>
+          <kbd className="sidebar-new-note-kbd">
+            {formatChord(newNoteChord)}
+          </kbd>
         )}
         <div className="state-layer" />
       </button>
@@ -302,9 +304,7 @@ export const Sidebar = ({
             <NavItem
               key={notebook.id}
               notebook={notebook}
-              isActive={
-                notebook.id === activeNotebookId && view === "notes"
-              }
+              isActive={notebook.id === activeNotebookId && view === "notes"}
               noteCount={
                 notebook.notes.filter((note) => note.deletedAt === null).length
               }
@@ -352,9 +352,7 @@ export const Sidebar = ({
           id="sidebar-more"
           title={t("sidebar.more")}
           collapsed={moreCollapsed}
-          onToggle={() =>
-            setSidebarSettings({ moreCollapsed: !moreCollapsed })
-          }
+          onToggle={() => setSidebarSettings({ moreCollapsed: !moreCollapsed })}
           className="sidebar-more"
           collapsedIndicators={moreIndicators}
         >

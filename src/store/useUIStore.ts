@@ -2,13 +2,7 @@ import { create } from "zustand";
 import type { SettingsSection } from "../types";
 
 export type MainView =
-  | "all"
-  | "recent"
-  | "notes"
-  | "pinned"
-  | "favorites"
-  | "trash"
-  | "stats";
+  "all" | "recent" | "notes" | "pinned" | "favorites" | "trash" | "stats";
 
 interface UIStore {
   isAddingNotebook: boolean;
@@ -91,16 +85,13 @@ export const useUIStore = create<UIStore>((set) => ({
   openShortcutHelp: () => set({ isShortcutHelpOpen: true }),
   closeShortcutHelp: () => set({ isShortcutHelpOpen: false }),
   isRecordingShortcut: false,
-  setRecordingShortcut: (recording) =>
-    set({ isRecordingShortcut: recording }),
+  setRecordingShortcut: (recording) => set({ isRecordingShortcut: recording }),
   selectedNoteId: null,
   selectNote: (noteId) => set({ selectedNoteId: noteId }),
   editorNoteId: null,
   isCreatingNote: false,
   openNoteModal: (noteId) =>
     set({ editorNoteId: noteId, isCreatingNote: false }),
-  openCreateNoteModal: () =>
-    set({ editorNoteId: null, isCreatingNote: true }),
-  closeNoteModal: () =>
-    set({ editorNoteId: null, isCreatingNote: false }),
+  openCreateNoteModal: () => set({ editorNoteId: null, isCreatingNote: true }),
+  closeNoteModal: () => set({ editorNoteId: null, isCreatingNote: false }),
 }));

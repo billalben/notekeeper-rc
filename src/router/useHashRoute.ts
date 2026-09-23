@@ -155,9 +155,7 @@ const writeHash = (): void => {
   } else if (nextDepth < currentDepth) {
     if (canGoBackTo(next)) goBack();
     else replaceRoute(next);
-  } else if (
-    baseKey(parseHash(next)) !== baseKey(parseHash(current))
-  ) {
+  } else if (baseKey(parseHash(next)) !== baseKey(parseHash(current))) {
     pushRoute(next);
   } else {
     replaceRoute(next);

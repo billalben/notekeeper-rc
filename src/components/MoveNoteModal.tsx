@@ -56,10 +56,7 @@ export const MoveNoteModal = ({
                   className="move-note-item"
                   onClick={() => onMove(notebook.id)}
                 >
-                  <span
-                    className="material-symbols-rounded"
-                    aria-hidden="true"
-                  >
+                  <span className="material-symbols-rounded" aria-hidden="true">
                     folder
                   </span>
                   <span className="text-label-large">{notebook.name}</span>

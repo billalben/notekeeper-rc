@@ -3,13 +3,7 @@ import type { SettingsSection } from "../types";
 export type { SettingsSection };
 
 export type BaseView =
-  | "all"
-  | "recent"
-  | "pinned"
-  | "favorites"
-  | "stats"
-  | "trash"
-  | "notebook";
+  "all" | "recent" | "pinned" | "favorites" | "stats" | "trash" | "notebook";
 
 export type Overlay =
   | { kind: "settings"; section: SettingsSection }

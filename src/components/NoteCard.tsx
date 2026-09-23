@@ -135,9 +135,7 @@ export const NoteCard = ({
               key: "download",
               label: t("card.downloadAs", {
                 format:
-                  exportFormat === "md"
-                    ? t("card.markdown")
-                    : t("card.json"),
+                  exportFormat === "md" ? t("card.markdown") : t("card.json"),
               }),
               icon: "download",
               separatorBefore: true,
