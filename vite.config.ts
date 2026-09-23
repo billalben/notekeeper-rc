@@ -88,4 +88,24 @@ export default defineConfig({
       devOptions: { enabled: false },
     }),
   ],
+  build: {
+    rolldownOptions: {
+      output: {
+        // Keep long-lived vendor code in its own chunks so app/lazy chunks can
+        // be re-deployed without busting the whole cache.
+        codeSplitting: {
+          groups: [
+            {
+              name: "react",
+              test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
+            },
+            {
+              name: "i18n",
+              test: /[\\/]node_modules[\\/](i18next|react-i18next)[\\/]/,
+            },
+          ],
+        },
+      },
+    },
+  },
 });

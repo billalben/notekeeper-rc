@@ -1,48 +1,24 @@
-import { memo } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
-import rehypeHighlight from "rehype-highlight";
-import { common } from "lowlight";
+import { lazy, memo, Suspense } from "react";
+import { PlainText } from "./PlainText";
 
-const sanitizeSchema = {
-  ...defaultSchema,
-  attributes: {
-    ...defaultSchema.attributes,
-    // GFM task lists need the checkbox state; the default schema only keeps
-    // `type` and `disabled`, which would drop completed items.
-    input: [...(defaultSchema.attributes?.input ?? []), "checked"],
-    code: [
-      ...(defaultSchema.attributes?.code ?? []),
-      ["className", /^language-./],
-    ],
-    span: [...(defaultSchema.attributes?.span ?? []), ["className", /^hljs-/]],
-  },
-};
+const MarkdownRenderer = lazy(() => import("./MarkdownRenderer"));
 
-interface MarkdownContentProps {
+export interface MarkdownContentProps {
   text: string;
   className?: string;
 }
 
+/**
+ * Public entry point for rendering markdown. The heavy renderer (react-markdown,
+ * remark-gfm, rehype-sanitize and the syntax highlighter, ~320 KB) is loaded
+ * lazily so it stays out of the initial bundle; plain text is shown until it
+ * arrives.
+ */
 export const MarkdownContent = memo(
   ({ text, className }: MarkdownContentProps) => (
-    <div className={className}>
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[
-          [rehypeSanitize, sanitizeSchema],
-          [rehypeHighlight, { languages: common, detect: false }],
-        ]}
-        components={{
-          a: ({ node: _node, ...props }) => (
-            <a {...props} target="_blank" rel="noopener noreferrer" />
-          ),
-        }}
-      >
-        {text}
-      </ReactMarkdown>
-    </div>
+    <Suspense fallback={<PlainText text={text} className={className} />}>
+      <MarkdownRenderer text={text} className={className} />
+    </Suspense>
   ),
 );
 

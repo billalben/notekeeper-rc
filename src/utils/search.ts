@@ -1,5 +1,6 @@
 import Fuse, { type IFuseOptions, type RangeTuple } from "fuse.js";
 import type { Note, Notebook } from "../types";
+import { stripMarkdown } from "./text";
 
 export interface SearchEntry {
   note: Note;
@@ -43,14 +44,6 @@ export const collectSearchEntries = (notebooks: Notebook[]): SearchEntry[] =>
 export const createNoteSearchIndex = (
   entries: SearchEntry[],
 ): Fuse<SearchEntry> => new Fuse(entries, FUSE_OPTIONS);
-
-export const stripMarkdown = (text: string): string =>
-  text
-    .replace(/```[\s\S]*?```/g, " ")
-    .replace(/`([^`]*)`/g, "$1")
-    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
-    .replace(/^[>#\-*+\d.]+\s+/gm, "")
-    .replace(/[*_~]+/g, "");
 
 /**
  * A short, single-line excerpt around the first body match. Falls back to the

@@ -11,6 +11,12 @@ importers:
       fuse.js:
         specifier: ^7.5.0
         version: 7.5.0
+      hast-util-to-text:
+        specifier: ^4.0.2
+        version: 4.0.2
+      highlight.js:
+        specifier: ~11.11.2
+        version: 11.11.2
       i18next:
         specifier: ^26.4.2
         version: 26.4.2(typescript@6.0.3)
@@ -32,19 +38,22 @@ importers:
       react-markdown:
         specifier: ^10.1.0
         version: 10.1.0(@types/react@19.3.0)(react@19.3.0)
-      rehype-highlight:
-        specifier: ^7.0.2
-        version: 7.0.2
       rehype-sanitize:
         specifier: ^6.0.0
         version: 6.0.0
       remark-gfm:
         specifier: ^4.0.1
         version: 4.0.1
+      unist-util-visit:
+        specifier: ^5.1.0
+        version: 5.1.0
       zustand:
         specifier: ^5.0.15
         version: 5.0.15(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.7.0(react@19.3.0))
     devDependencies:
+      '@types/hast':
+        specifier: ^3.0.5
+        version: 3.0.5
       '@types/node':
         specifier: ^24.13.3
         version: 24.13.4
@@ -2554,9 +2563,6 @@ packages:
   regjsparser@0.13.3:
     resolution: {integrity: sha512-ycwFAS14Jw4mppvmK4GR/J6u3WpWpjkEApehuHtLc/8VpPNpDMbQ4WjqwplXifGeyKOzHSFLmSPqzksDQE2Sfg==}
     hasBin: true
-
-  rehype-highlight@7.0.2:
-    resolution: {integrity: sha512-k158pK7wdC2qL3M5NcZROZ2tR/l7zOzjxXd5VGdcfIyoijjQqpHd3JKtYSBDpDZ38UI2WJWuFAtkMDxmx5kstA==}
 
   rehype-sanitize@6.0.0:
     resolution: {integrity: sha512-CsnhKNsyI8Tub6L4sm5ZFsme4puGfc6pYylvXo1AeqaGbjOYyzNv3qZPwvs0oMJ39eryyeOdmxwUIo94IpEhqg==}
@@ -5649,14 +5655,6 @@ snapshots:
   regjsparser@0.13.3:
     dependencies:
       jsesc: 3.1.0
-
-  rehype-highlight@7.0.2:
-    dependencies:
-      '@types/hast': 3.0.5
-      hast-util-to-text: 4.0.2
-      lowlight: 3.3.0
-      unist-util-visit: 5.1.0
-      vfile: 6.0.3
 
   rehype-sanitize@6.0.0:
     dependencies:

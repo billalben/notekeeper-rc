@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ConfirmModal } from "./components/ConfirmModal";
 import { Fab } from "./components/Fab";
@@ -7,18 +7,14 @@ import { NoteList } from "./components/NoteList";
 import { NoteEditor } from "./components/NoteEditor";
 import { NoteModal, type NoteSaveInput } from "./components/NoteModal";
 import { MoveNoteModal } from "./components/MoveNoteModal";
-import { SearchPalette } from "./components/SearchPalette";
-import { ShortcutHelpOverlay } from "./components/ShortcutHelpOverlay";
-import { SettingsModal } from "./components/settings/SettingsModal";
 import { Sidebar } from "./components/Sidebar";
-import { StatisticsView } from "./components/StatisticsView";
 import { TagFilterBar } from "./components/TagFilterBar";
 import { ToastRegion } from "./components/ToastRegion";
 import { TrashView } from "./components/TrashView";
 import { useActionHotkey } from "./hooks/useActionHotkey";
 import { useMediaQuery } from "./hooks/useMediaQuery";
 import { useSplitResize } from "./hooks/useSplitResize";
-import i18n, { directionFor } from "./i18n";
+import i18n, { directionFor, loadLanguage } from "./i18n";
 import { useHashRoute } from "./router/useHashRoute";
 import { useNoteStore } from "./store/useNoteStore";
 import { useSettingsStore } from "./store/useSettingsStore";
@@ -39,6 +35,29 @@ import {
   withMoveFlags,
   type MoveDirection,
 } from "./utils";
+
+// These are only mounted on demand (open settings, search, stats, shortcuts),
+// so keep them out of the initial bundle.
+const SettingsModal = lazy(() =>
+  import("./components/settings/SettingsModal").then((module) => ({
+    default: module.SettingsModal,
+  })),
+);
+const SearchPalette = lazy(() =>
+  import("./components/SearchPalette").then((module) => ({
+    default: module.SearchPalette,
+  })),
+);
+const StatisticsView = lazy(() =>
+  import("./components/StatisticsView").then((module) => ({
+    default: module.StatisticsView,
+  })),
+);
+const ShortcutHelpOverlay = lazy(() =>
+  import("./components/ShortcutHelpOverlay").then((module) => ({
+    default: module.ShortcutHelpOverlay,
+  })),
+);
 
 type ConfirmState = { notebookId: string; title: string };
 
@@ -121,10 +140,22 @@ const App = () => {
   }, [theme]);
 
   useEffect(() => {
-    if (i18n.language !== language) i18n.changeLanguage(language);
-    document.documentElement.lang = language;
-    document.documentElement.dir = directionFor(language);
-    document.title = i18n.t("common.appTitle");
+    let cancelled = false;
+
+    const applyLanguage = async () => {
+      await loadLanguage(language);
+      if (cancelled) return;
+      if (i18n.language !== language) await i18n.changeLanguage(language);
+      if (cancelled) return;
+      document.documentElement.lang = language;
+      document.documentElement.dir = directionFor(language);
+      document.title = i18n.t("common.appTitle");
+    };
+
+    void applyLanguage();
+    return () => {
+      cancelled = true;
+    };
   }, [language]);
 
   useEffect(() => {
@@ -549,10 +580,12 @@ const App = () => {
           <Header onOpenSidebar={() => setSidebarOpen(true)} />
 
           {view === "stats" ? (
-            <StatisticsView
-              onOpenNote={openStatsNote}
-              onNewNote={openCreateNote}
-            />
+            <Suspense fallback={null}>
+              <StatisticsView
+                onOpenNote={openStatsNote}
+                onNewNote={openCreateNote}
+              />
+            </Suspense>
           ) : view === "trash" ? (
             <TrashView />
           ) : view === "all" ? (
@@ -797,14 +830,22 @@ const App = () => {
         />
       )}
 
-      {isSettingsOpen && <SettingsModal onClose={closeSettings} />}
+      {isSettingsOpen && (
+        <Suspense fallback={null}>
+          <SettingsModal onClose={closeSettings} />
+        </Suspense>
+      )}
 
       {isSearchOpen && (
-        <SearchPalette onOpenNote={openSearchNote} onClose={closeSearch} />
+        <Suspense fallback={null}>
+          <SearchPalette onOpenNote={openSearchNote} onClose={closeSearch} />
+        </Suspense>
       )}
 
       {isShortcutHelpOpen && (
-        <ShortcutHelpOverlay onClose={closeShortcutHelp} />
+        <Suspense fallback={null}>
+          <ShortcutHelpOverlay onClose={closeShortcutHelp} />
+        </Suspense>
       )}
 
       <ToastRegion />

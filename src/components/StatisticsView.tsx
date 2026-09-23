@@ -4,7 +4,7 @@ import { useNoteStore } from "../store/useNoteStore";
 import { useUIStore } from "../store/useUIStore";
 import type { Note } from "../types";
 import { useRelativeTime } from "../hooks/useRelativeTime";
-import { stripMarkdown } from "../utils/search";
+import { stripMarkdown } from "../utils/text";
 import { computeLibraryStats, type DayActivity } from "../utils/stats";
 import { formatBytes } from "../utils/storage";
 import { useStorageUsage } from "../hooks/useStorageUsage";
