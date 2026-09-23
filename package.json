@@ -9,6 +9,8 @@
     "lint": "oxlint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "knip": "knip",
+    "knip:report": "knip --no-progress --reporter markdown --no-exit-code > knip-report.md",
     "preview": "vite preview",
     "generate:pwa-assets": "pwa-assets-generator",
     "prepare": "husky"
@@ -34,6 +36,7 @@
     "@vite-pwa/assets-generator": "^1.0.4",
     "@vitejs/plugin-react": "^6.1.1",
     "husky": "^9.1.7",
+    "knip": "^6.37.0",
     "lint-staged": "^17.5.1",
     "oxlint": "^1.81.0",
     "prettier": "^3.9.8",

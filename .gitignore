@@ -16,6 +16,9 @@ dev-dist
 # Husky internal files
 .husky/_
 
+# Generated reports
+knip-report.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
