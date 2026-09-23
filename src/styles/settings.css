@@ -1,0 +1,390 @@
+/* ?=== #SETTINGS === */
+.settings-modal {
+  --settings-header-height: 52px;
+  max-width: 880px;
+  width: calc(100% - var(--spacing-8));
+  height: min(640px, calc(100svh - var(--spacing-8)));
+  padding: 0;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  overflow: hidden;
+}
+
+.settings-modal:focus {
+  outline: none;
+}
+
+.settings-modal .icon-btn {
+  position: relative;
+  top: auto;
+  inset-inline-end: auto;
+}
+
+.settings-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4);
+  background-color: var(--surface-container-low);
+  border-inline-end: 1px solid var(--outline-variant);
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.settings-sidebar-header {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: var(--spacing-2);
+  height: var(--settings-header-height);
+  padding-inline: var(--spacing-2);
+  color: var(--on-surface);
+}
+
+.settings-sidebar-header .material-symbols-rounded {
+  font-size: 2.4rem;
+  color: var(--primary);
+}
+
+.settings-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.settings-nav-item {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: var(--spacing-3);
+  height: var(--settings-header-height);
+  padding-inline: var(--spacing-3);
+  color: var(--on-surface-variant);
+  --state-layer-bg: var(--on-surface-variant);
+  border-radius: var(--radius-full);
+  text-align: start;
+}
+
+.settings-nav-item.active {
+  background-color: var(--secondary-container);
+  color: var(--on-secondary-container);
+  --state-layer-bg: var(--on-secondary-container);
+}
+
+.settings-nav-item .material-symbols-rounded {
+  font-size: 2rem;
+}
+
+.settings-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.settings-main-header {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: var(--spacing-2);
+  height: var(--settings-header-height);
+  padding-inline: var(--spacing-4);
+  border-block-end: 1px solid var(--outline-variant);
+  color: var(--on-surface);
+}
+
+.settings-main-header h2 {
+  flex-grow: 1;
+}
+
+.settings-back-btn {
+  display: none;
+}
+
+.settings-content {
+  flex-grow: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--spacing-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.settings-group-title {
+  color: var(--on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-p-050);
+}
+
+.settings-group-body {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-medium);
+  overflow: hidden;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4);
+  background-color: var(--surface);
+  color: var(--on-surface);
+}
+
+.settings-row + .settings-row {
+  border-block-start: 1px solid var(--outline-variant);
+}
+
+.settings-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-05);
+  min-width: 0;
+}
+
+.settings-row-description {
+  color: var(--on-surface-variant);
+}
+
+.settings-row-control {
+  flex-shrink: 0;
+}
+
+.settings-export-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+}
+
+.settings-export-controls .settings-select-wrap {
+  max-width: 220px;
+  overflow: hidden;
+}
+
+.settings-badge {
+  display: inline-block;
+  padding: var(--spacing-1) var(--spacing-3);
+  background-color: var(--surface-container-highest);
+  color: var(--on-surface-variant);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.settings-switch {
+  position: relative;
+  width: 52px;
+  height: 32px;
+  padding: var(--spacing-05);
+  background-color: var(--surface-container-highest);
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-full);
+  transition:
+    background-color var(--tr-duration-short) var(--tr-easing-linear),
+    border-color var(--tr-duration-short) var(--tr-easing-linear);
+}
+
+.settings-switch-thumb {
+  display: block;
+  width: 24px;
+  height: 24px;
+  background-color: var(--outline);
+  border-radius: var(--radius-full);
+  transition:
+    transform var(--tr-duration-medium) var(--tr-easing-emphasized),
+    background-color var(--tr-duration-short) var(--tr-easing-linear);
+}
+
+.settings-switch.active {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.settings-switch.active .settings-switch-thumb {
+  background-color: var(--on-primary);
+  transform: translateX(20px);
+}
+
+.settings-select {
+  height: 40px;
+  padding-inline: var(--spacing-3);
+  font: inherit;
+  background-color: var(--surface-container-highest);
+  color: var(--on-surface);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-small);
+  cursor: pointer;
+}
+
+.settings-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.settings-select-wrap {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  height: 40px;
+}
+
+.settings-select-wrap::after {
+  content: attr(data-value);
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 calc(var(--spacing-3) + 20px) 0 var(--spacing-3);
+  visibility: hidden;
+  white-space: pre;
+}
+
+.settings-select-wrap .settings-select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.accent-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+}
+
+.accent-swatch {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--outline-variant);
+  cursor: pointer;
+  transition: box-shadow var(--tr-duration-short) var(--tr-easing-linear);
+}
+
+.accent-swatch:hover {
+  box-shadow: 0 0 0 3px var(--surface-container-highest);
+}
+
+.accent-swatch[aria-pressed="true"] {
+  border-color: var(--on-surface);
+}
+
+.accent-swatch .material-symbols-rounded {
+  color: #ffffff;
+  font-size: 1.6rem;
+}
+
+.settings-range-control {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.settings-range {
+  width: 140px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.settings-range:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.settings-range-value {
+  min-width: 4ch;
+  color: var(--on-surface-variant);
+  text-align: end;
+}
+
+.settings-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-1);
+  justify-content: flex-end;
+}
+
+.settings-danger-confirm {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  background-color: var(--surface);
+  color: var(--on-surface);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-medium);
+}
+
+.settings-danger-confirm h4 {
+  color: var(--danger);
+}
+
+.settings-confirm-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--danger);
+}
+
+.settings-confirm-icon {
+  font-size: 2.4rem;
+  flex-shrink: 0;
+}
+
+.settings-confirm-label {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.settings-confirm-label strong {
+  letter-spacing: var(--ls-p-050);
+}
+
+.settings-confirm-input {
+  height: 48px;
+  padding-inline: var(--spacing-4);
+  background-color: var(--surface-container-highest);
+  color: var(--on-surface);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-small);
+  letter-spacing: var(--ls-p-050);
+}
+
+.settings-confirm-input:focus {
+  border-color: var(--danger);
+}
+
+.settings-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+}
+
+.settings-confirm-lock {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  background-color: color-mix(in srgb, var(--surface) 78%, transparent);
+  border-radius: inherit;
+  cursor: not-allowed;
+}
+
+.settings-confirm-lock-icon {
+  font-size: 2.8rem;
+  color: var(--on-surface-variant);
+}

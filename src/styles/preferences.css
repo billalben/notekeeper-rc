@@ -1,0 +1,136 @@
+/* ?=== #APPEARANCE PREFERENCES === */
+/* Accent presets override the primary/secondary-container base tokens. The
+   [data-theme] blocks above resolve --primary etc. from these variables, so
+   switching data-accent recolors the UI in both themes. "orange" is the
+   default and needs no block. */
+:root {
+  --swatch-orange: #9d4300;
+  --swatch-blue: #1565c0;
+  --swatch-green: #2e6c3f;
+  --swatch-teal: #00696e;
+  --swatch-violet: #6a4fa3;
+  --swatch-rose: #b3265a;
+}
+
+[data-accent="blue"] {
+  --primary-light: #1565c0;
+  --on-primary-light: #ffffff;
+  --primary-container-light: #d6e3ff;
+  --on-primary-container-light: #001b3f;
+  --secondary-container-light: #d6e3ff;
+  --on-secondary-container-light: #001b3f;
+  --primary-dark: #a9c7ff;
+  --on-primary-dark: #003062;
+  --primary-container-dark: #00458f;
+  --on-primary-container-dark: #d6e3ff;
+  --secondary-container-dark: #00458f;
+  --on-secondary-container-dark: #d6e3ff;
+}
+
+[data-accent="green"] {
+  --primary-light: #2e6c3f;
+  --on-primary-light: #ffffff;
+  --primary-container-light: #b4f0bf;
+  --on-primary-container-light: #00210c;
+  --secondary-container-light: #b4f0bf;
+  --on-secondary-container-light: #00210c;
+  --primary-dark: #98d6a4;
+  --on-primary-dark: #00391a;
+  --primary-container-dark: #15522a;
+  --on-primary-container-dark: #b4f0bf;
+  --secondary-container-dark: #15522a;
+  --on-secondary-container-dark: #b4f0bf;
+}
+
+[data-accent="teal"] {
+  --primary-light: #00696e;
+  --on-primary-light: #ffffff;
+  --primary-container-light: #9df0f6;
+  --on-primary-container-light: #002022;
+  --secondary-container-light: #9df0f6;
+  --on-secondary-container-light: #002022;
+  --primary-dark: #83d3d9;
+  --on-primary-dark: #003739;
+  --primary-container-dark: #004f53;
+  --on-primary-container-dark: #9df0f6;
+  --secondary-container-dark: #004f53;
+  --on-secondary-container-dark: #9df0f6;
+}
+
+[data-accent="violet"] {
+  --primary-light: #6a4fa3;
+  --on-primary-light: #ffffff;
+  --primary-container-light: #e9ddff;
+  --on-primary-container-light: #22005d;
+  --secondary-container-light: #e9ddff;
+  --on-secondary-container-light: #22005d;
+  --primary-dark: #cfbcff;
+  --on-primary-dark: #381e72;
+  --primary-container-dark: #4f378a;
+  --on-primary-container-dark: #e9ddff;
+  --secondary-container-dark: #4f378a;
+  --on-secondary-container-dark: #e9ddff;
+}
+
+[data-accent="rose"] {
+  --primary-light: #b3265a;
+  --on-primary-light: #ffffff;
+  --primary-container-light: #ffd9e1;
+  --on-primary-container-light: #3f001d;
+  --secondary-container-light: #ffd9e1;
+  --on-secondary-container-light: #3f001d;
+  --primary-dark: #ffb1c6;
+  --on-primary-dark: #65002f;
+  --primary-container-dark: #8c1d4b;
+  --on-primary-container-dark: #ffd9e1;
+  --secondary-container-dark: #8c1d4b;
+  --on-secondary-container-dark: #ffd9e1;
+}
+
+/* Font scale: --fs-base drives the root font size; line-heights are in rem so
+   the whole type ramp scales together. */
+html[data-font="small"] {
+  --fs-base: 56.25%;
+}
+html[data-font="large"] {
+  --fs-base: 68.75%;
+}
+
+/* Density: spacing is derived from --spacing-base via calc(), so overriding it
+   here changes padding/gaps app-wide. */
+html[data-density="compact"] {
+  --spacing-base: 3px;
+}
+html[data-density="comfortable"] {
+  --spacing-base: 5px;
+}
+
+/* Corner style: overrides the radius scale. "default" uses :root values. */
+html[data-radius="square"] {
+  --radius-extra-small: 0;
+  --radius-small: 0;
+  --radius-medium: 0;
+  --radius-large: 0;
+  --radius-extra-large: 0;
+  --radius-full: 0;
+}
+html[data-radius="rounded"] {
+  --radius-extra-small: 8px;
+  --radius-small: 12px;
+  --radius-medium: 16px;
+  --radius-large: 20px;
+  --radius-extra-large: 32px;
+}
+
+/* High contrast: strengthen borders and secondary text in both themes. */
+html[data-contrast="high"] {
+  --outline-light: #4a3b34;
+  --outline-variant-light: #8a776e;
+  --on-surface-variant-light: #332924;
+  --on-surface-light: #000000;
+  --outline-dark: #ece4df;
+  --outline-variant-dark: #b6a49b;
+  --on-surface-variant-dark: #f4ece7;
+  --on-surface-dark: #ffffff;
+}
+

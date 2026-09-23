@@ -1,0 +1,92 @@
+/* ?=== #MAIN === */
+.main {
+  --main-padding-inline: var(--spacing-4);
+  padding-inline: var(--main-padding-inline);
+  padding-block-end: var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main .header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+  margin-inline: calc(var(--main-padding-inline) * -1);
+  padding-block: var(--spacing-4);
+  padding-inline: var(--main-padding-inline);
+  border-block-end: 1px solid var(--outline-variant);
+  background-color: var(--background);
+}
+
+.main .header .wrapper {
+  flex-grow: 1;
+}
+
+.main .header .title {
+  margin-block-end: var(--spacing-1);
+}
+
+.main .header .text {
+  color: var(--on-surface-variant);
+}
+
+.settings-btn,
+.theme-btn {
+  transition: transform var(--tr-duration-medium) var(--tr-easing-emphasized);
+}
+
+.settings-btn.is-rotated {
+  transform: rotate(90deg);
+}
+
+.theme-btn.is-rotated {
+  transform: rotate(180deg);
+}
+
+.main > .title {
+  margin-block: var(--spacing-3);
+}
+
+.note-list {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  align-content: flex-start;
+  flex-grow: 1;
+  align-items: stretch;
+  gap: var(--spacing-2);
+}
+
+.main .fab {
+  position: fixed;
+  bottom: var(--spacing-4);
+  inset-inline-end: var(--spacing-4);
+  z-index: 2;
+}
+
+.empty-notes {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--on-surface-variant);
+  text-align: center;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.empty-notes .material-symbols-rounded {
+  font-size: 6.8rem;
+  opacity: 0.25;
+  margin-block-end: var(--spacing-4);
+  margin-inline: auto;
+}
+
+.empty-notes .btn {
+  margin-block-start: var(--spacing-4);
+  margin-inline: auto;
+}

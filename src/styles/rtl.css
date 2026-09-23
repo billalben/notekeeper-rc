@@ -1,0 +1,21 @@
+/* Right-to-left support (Arabic). Layout mostly uses logical properties;
+   the rules below cover the few direction-specific cases. */
+html[dir="rtl"] {
+  --font-primary: "Noto Sans Arabic", "Kumbh Sans", sans-serif;
+}
+
+/* The sidebar drawer slides in from the inline-end edge. */
+html[dir="rtl"] .sidebar.active {
+  transform: translateX(-100%);
+}
+
+/* Directional hover/active nudges. */
+html[dir="rtl"]
+  .stats-link-row:where(:hover, :focus-visible)
+  .stats-link-arrow {
+  transform: translateX(-2px);
+}
+
+html[dir="rtl"] .settings-switch.active .settings-switch-thumb {
+  transform: translateX(-20px);
+}

@@ -1,0 +1,25 @@
+/* Aggregates every partial in cascade order. Keep the order below in sync with
+   the section order the app was originally written with; source order defines
+   specificity tie-breaks. */
+
+@import "./variables.css";
+@import "./preferences.css";
+@import "./reset.css";
+@import "./base.css";
+@import "./typography.css";
+@import "./utilities.css";
+@import "./components.css";
+@import "./markdown.css";
+@import "./note-editor.css";
+@import "./sidebar.css";
+@import "./main.css";
+@import "./split-view.css";
+@import "./search.css";
+@import "./trash.css";
+@import "./statistics.css";
+@import "./settings.css";
+@import "./storage-meter.css";
+@import "./toasts.css";
+@import "./responsive.css";
+@import "./shortcuts.css";
+@import "./rtl.css";

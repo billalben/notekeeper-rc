@@ -1,0 +1,115 @@
+/* ?=== #MEDIA QUERIES === */
+/* Responsive for smaller than 768px screen */
+@media (max-width: 767px) {
+  /* ?=== #SETTINGS === */
+  .settings-modal {
+    grid-template-columns: 1fr;
+  }
+  .settings-back-btn {
+    display: grid;
+  }
+  .settings-modal[data-mobile-pane="list"] .settings-main {
+    display: none;
+  }
+  .settings-modal[data-mobile-pane="content"] .settings-sidebar {
+    display: none;
+  }
+}
+
+/* Responsive for larger than 768px screen */
+@media (min-width: 768px) {
+  /* ?=== #MAIN === */
+  .main {
+    --main-padding-inline: var(--spacing-6);
+  }
+}
+
+/* Responsive for larger than 992px screen */
+@media (min-width: 992px) {
+  /* ?=== #BASE === */
+  body {
+    padding-inline-start: var(--sidebar-current);
+    transition: padding-inline-start var(--tr-duration-medium)
+      var(--tr-easing-emphasized);
+  }
+  body.resizing {
+    transition: none;
+    cursor: col-resize;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* ?=== #REUSED STYLE === */
+  .overlay:not(.modal-overlay) {
+    display: none;
+  }
+
+  /* ?=== #SIDEBAR === */
+  .sidebar {
+    visibility: visible;
+    inset-inline-start: 0;
+    height: 100vh;
+    width: var(--sidebar-current);
+    max-width: none;
+    grid-template-rows: max-content max-content minmax(0, 1fr);
+    box-shadow: none;
+    border-radius: 0;
+    transition: width var(--tr-duration-medium) var(--tr-easing-emphasized);
+  }
+
+  .sidebar.active {
+    transform: unset;
+  }
+
+  .sidebar-resizer {
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    inset-inline-end: -3px;
+    width: 6px;
+    cursor: col-resize;
+    z-index: 1;
+    touch-action: none;
+  }
+
+  .sidebar-resizer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: transparent;
+    transition: background-color var(--tr-duration-short)
+      var(--tr-easing-linear);
+  }
+
+  .sidebar-resizer:hover::after,
+  .sidebar-resizer.resizing::after {
+    background-color: var(--primary);
+    opacity: 0.4;
+  }
+
+  body.resizing .sidebar,
+  body.resizing body {
+    transition: none;
+  }
+
+  /* ?=== #MAIN === */
+  .main {
+    --main-padding-inline: var(--spacing-10);
+  }
+
+  .menu-btn,
+  .main .fab {
+    display: none;
+  }
+}
+
+/* Responsive for larger than 1400px screen */
+@media (min-width: 1400px) {
+  /* ?=== #MAIN === */
+  .main {
+    max-width: 1480px;
+    width: 100%;
+    margin-inline: auto;
+  }
+}

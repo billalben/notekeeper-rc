@@ -1,0 +1,459 @@
+.sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  inset-inline-end: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: max-content max-content minmax(0, 1fr);
+  background-color: var(--surface-container-low);
+  max-width: var(--sidebar-width);
+  width: 100%;
+  padding: var(--spacing-3);
+  z-index: 4;
+  visibility: hidden;
+  transition: var(--tr-duration-long) var(--tr-easing-emphasized);
+  transition-property: visibility, transform;
+  box-shadow: var(--shadow-3);
+  border-start-start-radius: 0;
+  border-start-end-radius: var(--radius-large);
+  border-end-start-radius: 0;
+  border-end-end-radius: var(--radius-large);
+  border-inline-end: 1px solid var(--outline-variant);
+}
+
+.sidebar-resizer {
+  display: none;
+}
+
+.sidebar.active {
+  visibility: visible;
+  transform: translateX(100%);
+}
+
+.sidebar > .wrapper {
+  height: 56px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sidebar > .wrapper-1 {
+  padding-inline: var(--spacing-4) var(--spacing-2);
+  margin-block-end: var(--spacing-2);
+}
+
+[data-theme="dark"] .logo-light,
+[data-theme="light"] .logo-dark {
+  display: none;
+}
+
+/* * Sidebar new-note button */
+
+.sidebar-new-note {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  width: 100%;
+  height: 48px;
+  padding-inline: var(--spacing-4);
+  margin-block-end: var(--spacing-3);
+  background-color: var(--primary-container);
+  color: var(--on-primary-container);
+  --state-layer-bg: var(--on-primary-container);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-1);
+  transition: box-shadow var(--tr-duration-short) var(--tr-easing-linear);
+}
+
+.sidebar-new-note:hover:not(:disabled) {
+  box-shadow: var(--shadow-2);
+}
+
+.sidebar-new-note:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.sidebar-new-note .text {
+  flex-grow: 1;
+  text-align: start;
+}
+
+.sidebar-new-note-kbd {
+  flex-shrink: 0;
+  padding: var(--spacing-05) var(--spacing-2);
+  border-radius: var(--radius-extra-small);
+  background-color: color-mix(
+    in srgb,
+    var(--on-primary-container) 12%,
+    transparent
+  );
+  font: var(--fw-medium) 1.1rem var(--font-primary);
+}
+
+/* * Sidebar navigation shell */
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  gap: var(--spacing-2);
+}
+
+.sidebar-quick {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-05);
+  flex-shrink: 0;
+}
+
+/* * Sidebar rows (Quick access + More) */
+
+.sidebar-row,
+.nav-item-main {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  min-width: 0;
+  height: 40px;
+  padding-inline: var(--spacing-3) var(--spacing-4);
+  color: var(--on-surface-variant);
+  --state-layer-bg: var(--on-surface-variant);
+  border-radius: var(--radius-medium);
+  text-align: start;
+  cursor: pointer;
+}
+
+.sidebar-row {
+  width: 100%;
+}
+
+.sidebar-row.is-selected,
+.nav-item.is-selected {
+  background-color: var(--secondary-container);
+  color: var(--on-secondary-container);
+  --state-layer-bg: var(--on-secondary-container);
+}
+
+.sidebar-row-icon,
+.nav-item-icon {
+  flex-shrink: 0;
+  font-size: 2rem;
+}
+
+.sidebar-row-label,
+.nav-item .text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sidebar-row-count,
+.notebook-count {
+  flex-shrink: 0;
+  min-width: 20px;
+  height: 20px;
+  padding-inline: var(--spacing-1);
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-full);
+  background-color: var(--surface-container-highest);
+  color: var(--on-surface-variant);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Counts are revealed on hover/focus so the row stays calm at rest. */
+.sidebar-row .sidebar-row-count,
+.nav-item .notebook-count {
+  opacity: 0;
+  transition: opacity var(--tr-duration-short) var(--tr-easing-linear);
+}
+
+.sidebar-row:where(:hover, :focus-visible) .sidebar-row-count,
+.nav-item:where(:hover, :focus-within) .notebook-count {
+  opacity: 1;
+}
+
+.sidebar-row.is-selected .sidebar-row-count,
+.nav-item.is-selected .notebook-count {
+  background-color: var(--on-secondary-container);
+  color: var(--secondary-container);
+}
+
+/* * Notebook row */
+
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  border-radius: var(--radius-medium);
+  color: var(--on-surface-variant);
+  --state-layer-bg: var(--on-surface-variant);
+}
+
+/* The row (not the inner button) is the interactive surface, so the trailing
+   menu trigger shares the same pill as the label. The main button reserves the
+   trigger's slot on hover so the count and the trigger never collide. */
+.nav-item .nav-item-main {
+  flex: 1 1 auto;
+  color: inherit;
+  border-radius: inherit;
+}
+
+.nav-item:where(:hover, :focus-within) .nav-item-main {
+  padding-inline-end: calc(var(--sidebar-action-size, 28px) + var(--spacing-2));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .nav-item .nav-item-main {
+    transition: padding-inline-end var(--tr-duration-short)
+      var(--tr-easing-linear);
+  }
+}
+.nav-item.is-selected > .item-menu-trigger {
+  color: inherit;
+}
+
+.nav-item:has(:focus-visible) > .state-layer {
+  opacity: 0.12;
+}
+
+.nav-item.is-empty .nav-item-main {
+  opacity: 0.6;
+}
+
+.nav-item.is-empty:where(:hover, :focus-within) .nav-item-main {
+  opacity: 1;
+}
+
+.nav-item-label {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.nav-item-label .pin-badge {
+  flex-shrink: 0;
+  font-size: 1.6rem;
+  transform: rotate(45deg);
+}
+
+/* The trigger is anchored to the row's trailing edge so it lines up with the
+   section action; the count stays right-aligned with other rows' counts. */
+.nav-item > .item-menu-trigger {
+  position: absolute;
+  inset-inline-end: var(--sidebar-action-inset, var(--spacing-1));
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--tr-duration-short) var(--tr-easing-linear);
+}
+
+.nav-item:where(:hover, :focus-within) > .item-menu-trigger,
+.nav-item > .item-menu-trigger:where([aria-expanded="true"], :focus-visible) {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* * Collapsible sidebar sections */
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.sidebar-notebooks {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.sidebar-more {
+  flex: 0 0 auto;
+  margin-block-start: auto;
+}
+
+.sidebar-section-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: 0;
+  gap: var(--spacing-1);
+  height: 40px;
+  padding-inline-end: var(--sidebar-action-inset, var(--spacing-1));
+  border-radius: var(--radius-medium);
+  color: var(--on-surface-variant);
+  --state-layer-bg: var(--on-surface-variant);
+}
+
+/* Trailing action buttons (section "+", notebook three-dot) all share one
+   right edge so their icons line up vertically, and counts sit just before
+   them with a consistent gap. */
+.sidebar {
+  --sidebar-action-size: 28px;
+  --sidebar-action-inset: var(--spacing-1);
+}
+
+/* Keep the leading action (e.g. the add button) inside the header pill and
+   show the focus overlay when the toggle is keyboard-focused. */
+.sidebar-section-header:has(.sidebar-section-toggle:focus-visible)
+  > .state-layer {
+  opacity: 0.12;
+}
+
+.sidebar-section-toggle {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  min-width: 0;
+  height: 40px;
+  padding-inline: var(--spacing-2);
+  color: var(--on-surface-variant);
+  --state-layer-bg: var(--on-surface-variant);
+  border-radius: var(--radius-medium);
+  text-align: start;
+  cursor: pointer;
+}
+
+.sidebar-section-chevron {
+  flex-shrink: 0;
+  font-size: 2rem;
+  transition: transform var(--tr-duration-short) var(--tr-easing-emphasized);
+}
+
+.sidebar-section.is-collapsed .sidebar-section-chevron {
+  transform: rotate(-90deg);
+}
+
+.sidebar-section-title {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.sidebar-section-count {
+  flex-shrink: 0;
+  min-width: 20px;
+  height: 20px;
+  padding-inline: var(--spacing-1);
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-full);
+  background-color: var(--surface-container-highest);
+  color: var(--on-surface-variant);
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transition: opacity var(--tr-duration-short) var(--tr-easing-linear);
+}
+
+.sidebar-section-header:where(:hover, :focus-within) .sidebar-section-count {
+  opacity: 1;
+}
+
+.sidebar-section-indicators {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  margin-inline-start: auto;
+  color: var(--on-surface-variant);
+}
+
+.sidebar-indicator {
+  font-size: 1.8rem;
+}
+
+.sidebar-indicator.is-selected {
+  color: var(--primary);
+  font-variation-settings:
+    "FILL" 1,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
+}
+
+.sidebar-section-body {
+  display: grid;
+  grid-template-rows: 1fr;
+  min-height: 0;
+  transition: grid-template-rows var(--tr-duration-medium)
+    var(--tr-easing-emphasized);
+}
+
+.sidebar-notebooks .sidebar-section-body {
+  flex: 1 1 auto;
+}
+
+.sidebar-section.is-collapsed .sidebar-section-body {
+  grid-template-rows: 0fr;
+  flex: 0 0 auto;
+}
+
+.sidebar-section-inner {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.sidebar-section-scroll {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-05);
+  padding-block: var(--spacing-1);
+}
+
+/* Rows must keep their height and overflow into a scroll instead of being
+   squeezed when there are many notebooks. */
+.sidebar-section-scroll > * {
+  flex-shrink: 0;
+}
+
+.sidebar-more .sidebar-section-scroll {
+  height: auto;
+  overflow: visible;
+}
+
+.sidebar-section-fade {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 28px;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--surface-container-low)
+  );
+  opacity: 0;
+  transition: opacity var(--tr-duration-short) var(--tr-easing-linear);
+}
+
+.sidebar-section-body.has-more .sidebar-section-fade {
+  opacity: 1;
+}
+
+/* * Sidebar focus states */
+
+.sidebar-row:focus-visible,
+.nav-item-main:focus-visible,
+.sidebar-section-toggle:focus-visible,
+.sidebar-new-note:focus-visible,
+.nav-item > .item-menu-trigger:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
