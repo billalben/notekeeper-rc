@@ -60,9 +60,12 @@ Common types: `feat`, `fix`, `perf`, `refactor`, `docs`, `style`, `chore`.
 
 ## Project conventions
 
-- Prefer the existing patterns in `src/components`, `src/hooks`, `src/store`,
-  and `src/utils` before introducing new ones.
-- Keep pure logic in `src/utils` and stores so it stays easy to reason about.
-- New UI strings must be added to every locale in `src/i18n/resources`
+- Prefer the existing patterns in `src/features`, `src/shared/ui`,
+  `src/shared/hooks`, and `src/shared/stores` before introducing new ones.
+- Keep pure logic in `src/shared/lib` and feature `lib/` folders so it stays
+  easy to reason about. Respect the one-way dependency direction
+  (`app` → `features` → `shared`).
+- Use the `@/*` import alias for anything outside the current folder.
+- New UI strings must be added to every locale in `src/app/i18n/resources`
   (`en`, `fr`, `ar`).
 - Do not add code comments unless they explain non-obvious intent.

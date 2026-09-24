@@ -78,25 +78,41 @@ modern React + TypeScript + Vite PWA.
 ├── index.html                  # App shell, fonts, and no-flash bootstrap script
 ├── public/                     # Static assets (favicon, PWA icons)
 ├── src/
+│   ├── app/                    # App shell + infrastructure
+│   │   ├── hooks/              # App-level effects (appearance, language, actions, session)
+│   │   ├── router/             # Hash-route parsing/serialization
+│   │   ├── i18n/               # i18next setup + en/fr/ar resources
+│   │   ├── App.tsx             # Root composition
+│   │   ├── MainPanel.tsx       # View switcher (notes/recent/pinned/favorites/stats/trash)
+│   │   ├── WorkspaceModals.tsx # Dialog/overlay stack
+│   │   ├── SplitEditorPane.tsx # Split-view editor pane
+│   │   ├── Header.tsx          # Top bar (greeting, search, settings, theme)
+│   │   ├── main.tsx            # React entry point
+│   │   └── pwa.ts              # Service-worker registration + update toasts
+│   ├── features/               # Feature slices (UI + feature-only logic)
+│   │   ├── notes/              # Note list, card, editor, tags, toolbar
+│   │   ├── notebooks/          # Sidebar + notebook navigation
+│   │   ├── tags/               # Tag filter bar
+│   │   ├── search/             # Search palette + Fuse index
+│   │   ├── statistics/         # Statistics view, cards, stats math
+│   │   ├── trash/              # Trash view
+│   │   ├── shortcuts/          # Shortcut help + hotkey binding
+│   │   └── settings/           # Settings modal and its sections
+│   ├── shared/                 # Cross-cutting code (no feature imports)
+│   │   ├── ui/                 # Design-system primitives (Button, IconButton, …)
+│   │   ├── hooks/              # Reusable React hooks
+│   │   ├── lib/                # Pure helpers (notes, tags, search, export, …)
+│   │   ├── markdown/           # Markdown renderer + highlight subset
+│   │   ├── stores/             # Zustand stores + settings schema/persistence
+│   │   └── types/              # Shared domain types
 │   ├── assets/                 # Light/dark logos
-│   ├── components/             # UI components
-│   │   ├── settings/           # Settings modal and its sections
-│   │   └── sidebar/            # Sidebar building blocks
-│   ├── hooks/                  # Reusable React hooks (autosave, focus trap, …)
-│   ├── i18n/                   # i18next setup + en/fr/ar resources
-│   ├── markdown/               # Rehype plugin for a highlight.js subset
-│   ├── router/                 # Hash-route parsing/serialization
-│   ├── store/                  # Zustand stores (notes, settings, theme, UI, toasts)
-│   ├── styles/                 # Global CSS, split by concern
-│   ├── utils/                  # Pure helpers (search, stats, export, storage, …)
-│   ├── App.tsx                 # Root component / layout composition
-│   ├── main.tsx                # React entry point
-│   ├── pwa.ts                  # Service-worker registration + update toasts
-│   ├── types.ts                # Shared types
-│   └── utils.ts                # Shared constants and collection helpers
+│   └── styles/                 # Global CSS, split by concern
 ├── pwa-assets.config.ts
 └── vite.config.ts
 ```
+
+Imports use the `@/*` alias for `src/*`. Dependency direction is one-way:
+`app` → `features` → `shared`; `shared` never imports from `features` or `app`.
 
 ## Getting started
 
@@ -147,7 +163,7 @@ The legacy vanilla app stored `{ notebooks: [...] }` directly under
 `noteKeeperDB`; it is converted to Zustand's `{ state, version }` shape
 automatically on first load so existing notes are preserved. Backward
 compatibility for older schemas is handled by versioned migrations in
-`src/store/useNoteStore.ts` and `src/store/useSettingsStore.ts`.
+`src/shared/stores/useNoteStore.ts` and `src/shared/stores/useSettingsStore.ts`.
 
 ## Routing
 
@@ -159,7 +175,7 @@ Navigation uses hash routes, so views are linkable without a server:
 #/settings/:section        #/search        #/shortcuts
 ```
 
-Parsing and serialization live in `src/router/hashRoute.ts`.
+Parsing and serialization live in `src/app/router/hashRoute.ts`.
 
 ## License
 
