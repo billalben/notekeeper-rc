@@ -2,6 +2,28 @@
   "name": "notekeeper-rc",
   "private": true,
   "version": "0.0.0",
+  "description": "Offline-first note-taking PWA that organizes notes into notebooks.",
+  "license": "MIT",
+  "author": "Bilal Ben",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/billalben/notekeeper-rc.git"
+  },
+  "homepage": "https://github.com/billalben/notekeeper-rc#readme",
+  "bugs": {
+    "url": "https://github.com/billalben/notekeeper-rc/issues"
+  },
+  "keywords": [
+    "notes",
+    "note-taking",
+    "notebooks",
+    "markdown",
+    "pwa",
+    "react",
+    "typescript",
+    "vite",
+    "offline-first"
+  ],
   "type": "module",
   "scripts": {
     "dev": "vite",

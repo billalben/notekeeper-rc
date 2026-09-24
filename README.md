@@ -1,71 +1,100 @@
 # Notekeeper
 
-A simple, intuitive note-taking app that lets you organize notes into
-notebooks. Originally built with vanilla HTML, CSS, and JavaScript — now
-rebuilt as a modern React + TypeScript + Vite application.
-
-> **This is the React rewrite.** The original vanilla JS version lives in the
-> [notekeeper](https://github.com/billalben/notekeeper) repo
-> ([live demo](https://billalben.github.io/notekeeper/)), and its source is
-> kept here under [`notekeeper-main/`](./notekeeper-main) for reference.
-> Any notes already saved in your browser are migrated automatically on first
-> load — see [Data & storage](#data--storage).
+A fast, offline-first note-taking app that organizes notes into notebooks.
+Originally built with vanilla HTML, CSS, and JavaScript — now rebuilt as a
+modern React + TypeScript + Vite PWA.
 
 ## Features
 
-- **Notebooks** — create, rename, and delete notebooks to group your notes.
-- **Notes** — create, read, update, and delete notes within a notebook.
-- **Relative timestamps** — each note shows when it was last updated
-  ("Just now", "5 min ago", "2 days ago", …).
-- **Persistent storage** — everything is saved to `localStorage`, so notes
-  survive refreshes and restarts.
+### Organizing
+
+- **Notebooks** — create, rename, pin, reorder, and delete notebooks to group
+  your notes. Deleted notebooks go to the trash and can be restored.
+- **Notes** — create, read, update, and delete notes. Pin, favorite, reorder
+  within a notebook, or move a note to another notebook (with undo).
+- **Tags** — tag notes inline, with suggestions and usage counts, and filter
+  the note list by one or more tags.
+- **Trash** — soft-delete notes and notebooks, restore them, or empty the
+  trash. Items are auto-purged after a configurable retention window
+  (7 / 30 / 90 days or forever).
+- **Smart views** — All notes, Recent, Pinned, and Favorites.
+
+### Writing & finding
+
+- **Markdown editor** — GitHub-flavored Markdown with a live preview, plus
+  sanitized syntax highlighting.
+- **Editor presentations** — open notes in a modal, full screen, or a
+  resizable split pane beside the list. Autosave and a word count are
+  available as options.
+- **Search palette** — fuzzy full-text search across every notebook.
+- **Statistics** — per-notebook and tag-level insights into your notes.
+- **Export** — download everything, a single notebook, or one note as JSON
+  or Markdown. (Importing a backup is on the roadmap.)
+
+### Making it yours
+
 - **Light & dark theme** — follows your system preference by default, can be
   toggled manually, and is applied before first paint to avoid a flash.
-- **Responsive** — a collapsible sidebar for small screens and a static one
-  for larger displays.
+- **Appearance** — accent color, font scale, density, corner radius, and a
+  high-contrast mode.
+- **Languages** — English, French, and Arabic, including full RTL support.
+- **Keyboard shortcuts** — fully customizable bindings with an in-app cheat
+  sheet.
+- **Notifications** — configure toast position, duration, and stacking.
+- **Responsive** — a collapsible sidebar for small screens and a static,
+  resizable one for larger displays.
+
+### Platform
+
 - **Installable & offline** — a PWA you can install with its own icon; the app
   shell and fonts are cached so it loads and works without a connection, and
   new versions surface as an in-app notification.
+- **Deep links** — hash-based routing keeps the current view, note, and open
+  overlay in the URL.
 
 ## Tech stack
 
-| Layer           | Choice                                                        |
-| --------------- | ------------------------------------------------------------- |
-| UI              | [React 19](https://react.dev)                                 |
-| Language        | [TypeScript](https://www.typescriptlang.org)                  |
-| Build tool      | [Vite](https://vite.dev)                                      |
-| State           | [Zustand](https://zustand.docs.pmnd.rs) (with `persist`)      |
-| Linting         | [oxlint](https://oxc.rs)                                      |
-| PWA             | [vite-plugin-pwa](https://vite-pwa-org.netlify.app) (Workbox) |
-| Package manager | [pnpm](https://pnpm.io)                                       |
+| Layer            | Choice                                                                                                |
+| ---------------- | ----------------------------------------------------------------------------------------------------- |
+| UI               | [React 19](https://react.dev)                                                                         |
+| Language         | [TypeScript](https://www.typescriptlang.org)                                                          |
+| Build tool       | [Vite](https://vite.dev)                                                                              |
+| State            | [Zustand](https://zustand.docs.pmnd.rs) (with `persist`)                                              |
+| Markdown         | [react-markdown](https://github.com/remarkjs/react-markdown) + remark-gfm, rehype-sanitize, lowlight  |
+| Search           | [Fuse.js](https://www.fusejs.io)                                                                      |
+| i18n             | [i18next](https://www.i18next.com) + react-i18next                                                    |
+| Shortcuts        | [react-hotkeys-hook](https://github.com/JohannesKlauss/react-hotkeys-hook)                            |
+| PWA              | [vite-plugin-pwa](https://vite-pwa-org.netlify.app) (Workbox)                                         |
+| Linting          | [oxlint](https://oxc.rs)                                                                              |
+| Formatting       | [Prettier](https://prettier.io)                                                                       |
+| Dead-code checks | [knip](https://knip.dev)                                                                              |
+| Git hooks        | [Husky](https://typicode.github.io/husky) + [lint-staged](https://github.com/lint-staged/lint-staged) |
+| Package manager  | [pnpm](https://pnpm.io)                                                                               |
 
 ## Project structure
 
 ```
 .
-├── index.html              # App shell, fonts, and no-flash theme script
-├── public/                 # Static assets (favicon)
+├── index.html                  # App shell, fonts, and no-flash bootstrap script
+├── public/                     # Static assets (favicon, PWA icons)
 ├── src/
-│   ├── assets/             # Light/dark logos
-│   ├── components/         # UI components
-│   │   ├── ConfirmModal.tsx
-│   │   ├── Fab.tsx
-│   │   ├── Header.tsx
-│   │   ├── IconButton.tsx
-│   │   ├── NavItem.tsx
-│   │   ├── NoteCard.tsx
-│   │   ├── NoteList.tsx
-│   │   ├── NoteModal.tsx
-│   │   └── Sidebar.tsx
-│   ├── store/              # Zustand stores
-│   │   ├── useNoteStore.ts # Notebooks + notes (persisted)
-│   │   └── useThemeStore.ts
-│   ├── App.tsx             # Root component / layout composition
-│   ├── main.tsx            # React entry point
-│   ├── types.ts            # Shared `Note` / `Notebook` types
-│   ├── utils.ts            # ID generation, greeting, relative time
-│   └── index.css           # Global styles & theme variables
-├── notekeeper-main/        # Original vanilla HTML/CSS/JS version
+│   ├── assets/                 # Light/dark logos
+│   ├── components/             # UI components
+│   │   ├── settings/           # Settings modal and its sections
+│   │   └── sidebar/            # Sidebar building blocks
+│   ├── hooks/                  # Reusable React hooks (autosave, focus trap, …)
+│   ├── i18n/                   # i18next setup + en/fr/ar resources
+│   ├── markdown/               # Rehype plugin for a highlight.js subset
+│   ├── router/                 # Hash-route parsing/serialization
+│   ├── store/                  # Zustand stores (notes, settings, theme, UI, toasts)
+│   ├── styles/                 # Global CSS, split by concern
+│   ├── utils/                  # Pure helpers (search, stats, export, storage, …)
+│   ├── App.tsx                 # Root component / layout composition
+│   ├── main.tsx                # React entry point
+│   ├── pwa.ts                  # Service-worker registration + update toasts
+│   ├── types.ts                # Shared types
+│   └── utils.ts                # Shared constants and collection helpers
+├── pwa-assets.config.ts
 └── vite.config.ts
 ```
 
@@ -89,18 +118,49 @@ pnpm preview
 # Lint the codebase
 pnpm lint
 
-# Regenerate PWA icons from public/favicon.svg (only needed if the source art changes)
+# Check formatting / format in place
+pnpm format:check
+pnpm format
+
+# Find unused files, exports, and dependencies
+pnpm knip
+
+# Regenerate PWA icons from public/favicon.svg (only if the source art changes)
 pnpm generate:pwa-assets
 ```
 
+A Husky pre-commit hook runs Prettier and oxlint on staged files via
+lint-staged. See [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
+
 ## Data & storage
 
-State is kept in `localStorage` under two keys:
+Everything is stored locally in the browser — there is no backend. Three
+`localStorage` keys are used:
 
-- `noteKeeperDB` — all notebooks and notes, persisted by Zustand's `persist`
-  middleware in the `{ state, version }` shape.
-- `theme` — the user's last chosen theme (`"light"` or `"dark"`).
+| Key            | Contents                                                                | Version |
+| -------------- | ----------------------------------------------------------------------- | ------- |
+| `noteKeeperDB` | Notebooks, notes, the tag registry, and the active notebook (`persist`) | 7       |
+| `settings`     | Editor, appearance, trash, toast, sidebar, and shortcut preferences     | 18      |
+| `theme`        | The last chosen theme (`"light"` or `"dark"`)                           | —       |
+
+The legacy vanilla app stored `{ notebooks: [...] }` directly under
+`noteKeeperDB`; it is converted to Zustand's `{ state, version }` shape
+automatically on first load so existing notes are preserved. Backward
+compatibility for older schemas is handled by versioned migrations in
+`src/store/useNoteStore.ts` and `src/store/useSettingsStore.ts`.
+
+## Routing
+
+Navigation uses hash routes, so views are linkable without a server:
+
+```
+#/notebooks/:id            #/notebooks/:id/note/:noteId
+#/all  #/recent  #/pinned  #/favorites  #/stats  #/trash
+#/settings/:section        #/search        #/shortcuts
+```
+
+Parsing and serialization live in `src/router/hashRoute.ts`.
 
 ## License
 
-Licensed under the MIT License.
+Licensed under the [MIT License](./LICENSE).
