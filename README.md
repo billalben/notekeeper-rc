@@ -74,8 +74,7 @@ modern React + TypeScript + Vite PWA.
 
 ## Project structure
 
-```
-.
+```text
 ├── index.html                  # App shell, fonts, and no-flash bootstrap script
 ├── public/                     # Static assets (favicon, PWA icons)
 ├── src/
@@ -118,7 +117,8 @@ Imports use the `@/*` alias for `src/*`. Dependency direction is one-way:
 
 ## Getting started
 
-**Prerequisites:** Node.js 20+ and [pnpm](https://pnpm.io).
+**Prerequisites:** Node.js 20+ (see `.nvmrc`) and [pnpm](https://pnpm.io). The
+project enforces pnpm — other package managers are blocked at install time.
 
 ```bash
 # Install dependencies
@@ -180,7 +180,7 @@ compatibility for older schemas is handled by versioned migrations in
 
 Navigation uses hash routes, so views are linkable without a server:
 
-```
+```bash
 #/notebooks/:id            #/notebooks/:id/note/:noteId
 #/all  #/recent  #/pinned  #/favorites  #/stats  #/trash
 #/settings/:section        #/search        #/shortcuts

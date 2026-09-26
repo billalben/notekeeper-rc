@@ -5,8 +5,9 @@ workflow and the checks your change should pass before it is merged.
 
 ## Prerequisites
 
-- Node.js 20+
-- [pnpm](https://pnpm.io)
+- Node.js 20+ (see `.nvmrc`)
+- [pnpm](https://pnpm.io) — enforced via `only-allow`; other package managers
+  are blocked at install time
 
 ## Setup
 
@@ -15,7 +16,7 @@ pnpm install
 pnpm dev
 ```
 
-The dev server runs at http://localhost:5173.
+The dev server runs at <http://localhost:5173>.
 
 ## Scripts
 
@@ -83,7 +84,7 @@ percentage. Do not add tests that exist only to raise the number.
 This project uses [Conventional Commits](https://www.conventionalcommits.org).
 Keep the subject in the imperative mood and scope it to the area you touched:
 
-```
+```bash
 feat(shared): add hash for url
 fix(shared): length for note & style for folder
 perf(shared): split initial bundle and trim syntax highlighting
