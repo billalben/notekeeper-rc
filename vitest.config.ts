@@ -12,6 +12,9 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
+    // Reuse one jsdom instance per worker instead of rebuilding it for every
+    // test file; module isolation between files is still preserved.
+    pool: "vmThreads",
     include: ["tests/**/*.test.ts"],
     setupFiles: ["./tests/setup.ts"],
     open: false,
