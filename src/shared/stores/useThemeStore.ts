@@ -1,11 +1,12 @@
 import { create } from "zustand";
+import { THEME_STORAGE_KEY } from "./storageKeys";
 
 type Theme = "light" | "dark";
 
 const getInitialTheme = (): Theme => {
   if (typeof window === "undefined") return "light";
 
-  const storedTheme = localStorage.getItem("theme");
+  const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
   if (storedTheme === "light" || storedTheme === "dark") return storedTheme;
 
   return window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -24,12 +25,12 @@ export const useThemeStore = create<ThemeStore>((set, get) => ({
 
   toggleTheme: () => {
     const newTheme: Theme = get().theme === "light" ? "dark" : "light";
-    localStorage.setItem("theme", newTheme);
+    localStorage.setItem(THEME_STORAGE_KEY, newTheme);
     set({ theme: newTheme });
   },
 
   setTheme: (theme) => {
-    localStorage.setItem("theme", theme);
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
     set({ theme });
   },
 }));

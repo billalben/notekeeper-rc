@@ -75,7 +75,7 @@ modern React + TypeScript + Vite PWA.
 ## Project structure
 
 ```text
-├── index.html                  # App shell, fonts, and no-flash bootstrap script
+├── index.html                  # App shell, fonts, and theme-bootstrap placeholder
 ├── public/                     # Static assets (favicon, PWA icons)
 ├── src/
 │   ├── app/                    # App shell + infrastructure
@@ -88,6 +88,7 @@ modern React + TypeScript + Vite PWA.
 │   │   ├── SplitEditorPane.tsx # Split-view editor pane
 │   │   ├── Header.tsx          # Top bar (greeting, search, settings, theme)
 │   │   ├── main.tsx            # React entry point
+│   │   ├── themeBootstrap.ts   # Pre-paint theme/appearance setup (inlined at build)
 │   │   └── pwa.ts              # Service-worker registration + update toasts
 │   ├── features/               # Feature slices (UI + feature-only logic)
 │   │   ├── notes/              # Note list, card, editor, tags, toolbar
@@ -108,6 +109,7 @@ modern React + TypeScript + Vite PWA.
 │   ├── assets/                 # Light/dark logos
 │   └── styles/                 # Global CSS, split by concern
 ├── tests/                      # Vitest suite (mirrors src/)
+├── vite/                       # Build plugins (inlines the theme bootstrap)
 ├── pwa-assets.config.ts
 └── vite.config.ts
 ```
@@ -175,6 +177,13 @@ The legacy vanilla app stored `{ notebooks: [...] }` directly under
 automatically on first load so existing notes are preserved. Backward
 compatibility for older schemas is handled by versioned migrations in
 `src/shared/stores/useNoteStore.ts` and `src/shared/stores/useSettingsStore.ts`.
+
+Persisted theme, language, motion, and appearance preferences are applied to the
+document root before first paint by `src/app/themeBootstrap.ts`. A Vite plugin
+(`vite/themeBootstrapPlugin.ts`) bundles that module to an inline, render-blocking
+script in place of the placeholder comment in `index.html`, so there is no flash
+of the wrong theme and no extra request. `useDocumentAppearance` and
+`useLanguage` re-sync the same attributes once React has hydrated.
 
 ## Routing
 

@@ -3,12 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <!--! pwa -->
     <meta name="theme-color" content="#FD7014" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Notekeeper" />
+
     <!--! primary meta tags -->
     <title>Notekeeper - Your Everyday Notes | Effortless Note-Taking</title>
     <meta
@@ -19,74 +21,14 @@
       name="description"
       content="Streamline your daily note-taking with Notekeeper. Organize, access, and enhance productivity with ease. Your go-to platform for managing your everyday notes."
     />
+
     <!--! favicon -->
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
-    <!--! theme (set before paint to avoid flash) -->
-    <script>
-      (function () {
-        try {
-          var storedTheme = localStorage.getItem("theme");
-          var systemThemeIsDark = window.matchMedia(
-            "(prefers-color-scheme: dark)",
-          ).matches;
-          var initialTheme =
-            storedTheme || (systemThemeIsDark ? "dark" : "light");
-          document.documentElement.setAttribute("data-theme", initialTheme);
 
-          var storedSettings = localStorage.getItem("settings");
-          var settings = storedSettings ? JSON.parse(storedSettings) : null;
-          var state = settings && settings.state ? settings.state : null;
+    <!--! theme bootstrap (injected) -->
 
-          var language = state ? state.language : null;
-          if (language === "en" || language === "fr" || language === "ar") {
-            document.documentElement.setAttribute("lang", language);
-          }
-          if (language === "ar") {
-            document.documentElement.setAttribute("dir", "rtl");
-          }
-
-          var motion = state ? state.motion : null;
-          if (motion === "reduce" || motion === "full") {
-            document.documentElement.setAttribute("data-motion", motion);
-          }
-
-          var appearance = state ? state.appearance : null;
-          if (appearance) {
-            if (appearance.accent) {
-              document.documentElement.setAttribute(
-                "data-accent",
-                appearance.accent,
-              );
-            }
-            if (appearance.fontScale) {
-              document.documentElement.setAttribute(
-                "data-font",
-                appearance.fontScale,
-              );
-            }
-            if (appearance.density) {
-              document.documentElement.setAttribute(
-                "data-density",
-                appearance.density,
-              );
-            }
-            if (appearance.radius) {
-              document.documentElement.setAttribute(
-                "data-radius",
-                appearance.radius,
-              );
-            }
-            if (appearance.highContrast) {
-              document.documentElement.setAttribute("data-contrast", "high");
-            }
-          }
-        } catch (e) {
-          /* ignore */
-        }
-      })();
-    </script>
     <!--! google fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -94,11 +36,13 @@
       href="https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;500&display=swap"
       rel="stylesheet"
     />
+
     <!--! arabic font -->
     <link
       href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
+
     <!--! material icon -->
     <link
       rel="stylesheet"

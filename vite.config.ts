@@ -2,6 +2,7 @@ import react from "@vitejs/plugin-react";
 import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+import { themeBootstrapPlugin } from "./vite/themeBootstrapPlugin.ts";
 
 const THEME_COLOR = "#FD7014";
 
@@ -13,6 +14,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    themeBootstrapPlugin(),
     react(),
     VitePWA({
       // Surface new versions to the user instead of swapping silently.

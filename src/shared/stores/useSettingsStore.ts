@@ -7,6 +7,7 @@ import {
   type ActionId,
   type ShortcutBindings,
 } from "@/shared/lib/shortcuts";
+import { SETTINGS_STORAGE_KEY } from "./storageKeys";
 import {
   DEFAULT_APPEARANCE_SETTINGS,
   DEFAULT_EDITOR_SETTINGS,
@@ -92,7 +93,7 @@ interface SettingsStore {
   resetAllShortcuts: () => void;
 }
 
-const STORAGE_KEY = "settings";
+const STORAGE_KEY = SETTINGS_STORAGE_KEY;
 const STORAGE_VERSION = 18;
 
 export const useSettingsStore = create<SettingsStore>()(
