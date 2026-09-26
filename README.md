@@ -65,6 +65,7 @@ modern React + TypeScript + Vite PWA.
 | i18n             | [i18next](https://www.i18next.com) + react-i18next                                                    |
 | Shortcuts        | [react-hotkeys-hook](https://github.com/JohannesKlauss/react-hotkeys-hook)                            |
 | PWA              | [vite-plugin-pwa](https://vite-pwa-org.netlify.app) (Workbox)                                         |
+| Testing          | [Vitest](https://vitest.dev) + jsdom                                                                  |
 | Linting          | [oxlint](https://oxc.rs)                                                                              |
 | Formatting       | [Prettier](https://prettier.io)                                                                       |
 | Dead-code checks | [knip](https://knip.dev)                                                                              |
@@ -107,6 +108,7 @@ modern React + TypeScript + Vite PWA.
 │   │   └── types/              # Shared domain types
 │   ├── assets/                 # Light/dark logos
 │   └── styles/                 # Global CSS, split by concern
+├── tests/                      # Vitest suite (mirrors src/)
 ├── pwa-assets.config.ts
 └── vite.config.ts
 ```
@@ -133,6 +135,15 @@ pnpm preview
 
 # Lint the codebase
 pnpm lint
+
+# Run the test suite (or once / with coverage)
+pnpm test
+pnpm test:run
+pnpm test:coverage
+
+# Open the interactive Vitest dashboard
+pnpm test:ui
+pnpm test:coverage:ui
 
 # Check formatting / format in place
 pnpm format:check

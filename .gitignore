@@ -18,6 +18,7 @@ dev-dist
 
 # Generated reports
 knip-report.md
+coverage
 
 # Editor directories and files
 .vscode/*
