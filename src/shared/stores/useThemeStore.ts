@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { THEME_STORAGE_KEY } from "./storageKeys";
 
-type Theme = "light" | "dark";
+export type Theme = "light" | "dark";
 
 const getInitialTheme = (): Theme => {
   if (typeof window === "undefined") return "light";

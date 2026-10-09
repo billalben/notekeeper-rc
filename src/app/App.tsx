@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Header } from "@/app/Header";
 import { useDocumentAppearance } from "@/app/hooks/useDocumentAppearance";
 import { useEditorSession } from "@/app/hooks/useEditorSession";
@@ -12,6 +12,7 @@ import { useNoteCollections } from "@/features/notes/hooks/useNoteCollections";
 import { useSplitResize } from "@/features/notes/hooks/useSplitResize";
 import { Sidebar } from "@/features/notebooks/components/Sidebar";
 import { useActionHotkey } from "@/features/shortcuts/hooks/useActionHotkey";
+import { Tour } from "@/features/tour/components/Tour";
 import { useHashRoute } from "@/app/router/useHashRoute";
 import { useMediaQuery } from "@/shared/hooks/useMediaQuery";
 import { DESKTOP_QUERY, trashRetentionMs } from "@/shared/lib/constants";
@@ -34,6 +35,7 @@ const App = () => {
   const purgeExpiredTrash = useNoteStore((state) => state.purgeExpiredTrash);
 
   const retentionDays = useSettingsStore((state) => state.trash.retentionDays);
+  const presentation = useSettingsStore((state) => state.editor.presentation);
 
   const startAddingNotebook = useUIStore((state) => state.startAddingNotebook);
   const isSettingsOpen = useUIStore((state) => state.isSettingsOpen);
@@ -48,6 +50,7 @@ const App = () => {
   const editorNoteId = useUIStore((state) => state.editorNoteId);
   const isCreatingNote = useUIStore((state) => state.isCreatingNote);
   const openNoteModal = useUIStore((state) => state.openNoteModal);
+  const openCreateNoteModal = useUIStore((state) => state.openCreateNoteModal);
   const closeNoteModal = useUIStore((state) => state.closeNoteModal);
   const activeTags = useUIStore((state) => state.activeTags);
   const toggleTag = useUIStore((state) => state.toggleTag);
@@ -55,8 +58,12 @@ const App = () => {
   const isShortcutHelpOpen = useUIStore((state) => state.isShortcutHelpOpen);
   const openShortcutHelp = useUIStore((state) => state.openShortcutHelp);
   const closeShortcutHelp = useUIStore((state) => state.closeShortcutHelp);
+  const isTourOpen = useUIStore((state) => state.isTourOpen);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const openSidebar = useCallback(() => setSidebarOpen(true), []);
+  const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
   useDocumentAppearance();
   useLanguage();
@@ -98,6 +105,20 @@ const App = () => {
   const isWide = useMediaQuery(DESKTOP_QUERY);
   useHashRoute(isWide);
 
+  // Stable callbacks so the tour's memoized steps don't rebuild each render.
+  const openTourEditor = useCallback(() => {
+    if (visibleNotebooks.length === 0) return;
+    if (presentation === "split" && isWide) selectNote(null);
+    openCreateNoteModal();
+  }, [
+    visibleNotebooks.length,
+    presentation,
+    isWide,
+    selectNote,
+    openCreateNoteModal,
+  ]);
+  const closeTourEditor = useCallback(() => closeNoteModal(), [closeNoteModal]);
+
   const session = useEditorSession({
     notebooks,
     visibleNotebookCount: visibleNotebooks.length,
@@ -117,7 +138,7 @@ const App = () => {
   } = session;
 
   const actions = useNoteActions({
-    closeSidebar: () => setSidebarOpen(false),
+    closeSidebar,
     selectNone: session.selectNone,
   });
 
@@ -187,7 +208,8 @@ const App = () => {
     hasModalNote ||
     Boolean(actions.confirm) ||
     Boolean(actions.moveNoteTarget) ||
-    isShortcutHelpOpen;
+    isShortcutHelpOpen ||
+    isTourOpen;
 
   useActionHotkey("newNote", openCreateNote, { enabled: !anyModalOpen });
   useActionHotkey(
@@ -203,7 +225,8 @@ const App = () => {
         !hasModalNote &&
         !actions.confirm &&
         !actions.moveNoteTarget &&
-        !isShortcutHelpOpen,
+        !isShortcutHelpOpen &&
+        !isTourOpen,
     },
   );
   useActionHotkey("toggleTheme", toggleTheme, { enabled: !anyModalOpen });
@@ -213,7 +236,7 @@ const App = () => {
     <>
       <Sidebar
         open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
+        onClose={closeSidebar}
         onNewNote={openCreateNote}
         onTogglePin={actions.toggleNotebookPin}
         onRequestDeleteNotebook={actions.requestDeleteNotebook}
@@ -221,7 +244,7 @@ const App = () => {
 
       <div
         className={`overlay${sidebarOpen ? " active" : ""}`}
-        onClick={() => setSidebarOpen(false)}
+        onClick={closeSidebar}
       />
 
       <div className="app-content">
@@ -305,6 +328,13 @@ const App = () => {
         moveNoteTarget={actions.moveNoteTarget}
         onMoveNoteToNotebook={actions.moveNoteToNotebook}
         onCloseMoveNote={actions.closeMoveNote}
+      />
+
+      <Tour
+        onOpenSidebar={openSidebar}
+        onCloseSidebar={closeSidebar}
+        onOpenEditor={openTourEditor}
+        onCloseEditor={closeTourEditor}
       />
 
       <ToastRegion />

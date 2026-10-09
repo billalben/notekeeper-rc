@@ -31,6 +31,9 @@ interface UIStore {
   isShortcutHelpOpen: boolean;
   openShortcutHelp: () => void;
   closeShortcutHelp: () => void;
+  isTourOpen: boolean;
+  openTour: () => void;
+  closeTour: () => void;
   isRecordingShortcut: boolean;
   setRecordingShortcut: (recording: boolean) => void;
   selectedNoteId: string | null;
@@ -84,6 +87,9 @@ export const useUIStore = create<UIStore>((set) => ({
   isShortcutHelpOpen: false,
   openShortcutHelp: () => set({ isShortcutHelpOpen: true }),
   closeShortcutHelp: () => set({ isShortcutHelpOpen: false }),
+  isTourOpen: false,
+  openTour: () => set({ isTourOpen: true }),
+  closeTour: () => set({ isTourOpen: false }),
   isRecordingShortcut: false,
   setRecordingShortcut: (recording) => set({ isRecordingShortcut: recording }),
   selectedNoteId: null,

@@ -186,6 +186,7 @@ export const MainPanel = ({
       <Fab
         label={t("notes.newNote")}
         disabled={!hasVisibleNotebooks}
+        dataTour="new-note"
         onClick={onNewNote}
       />
     </>

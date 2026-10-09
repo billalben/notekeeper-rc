@@ -1,0 +1,11 @@
+/* Onboarding tour (react-joyride). Colors, typography, and button contrast
+   come from the component's `options`/`styles`; these rules only cover
+   responsive bounds and RTL. */
+
+.react-joyride__tooltip {
+  max-width: calc(100vw - var(--spacing-8));
+}
+
+html[dir="rtl"] .react-joyride__tooltip {
+  direction: rtl;
+}

@@ -76,6 +76,7 @@ export const Header = ({ onOpenSidebar }: HeaderProps) => {
           })}
           label={t("header.searchNotes")}
           className="search-btn"
+          data-tour="search"
           onClick={openSearch}
         />
       )}
@@ -88,6 +89,7 @@ export const Header = ({ onOpenSidebar }: HeaderProps) => {
           })}
           label={t("header.keyboardShortcuts")}
           className="shortcut-help-btn"
+          data-tour="shortcuts"
           onClick={openShortcutHelp}
         />
       )}
@@ -98,6 +100,7 @@ export const Header = ({ onOpenSidebar }: HeaderProps) => {
           tooltip={themeLabel}
           label={themeLabel}
           className={`theme-btn${isDark ? " is-rotated" : ""}`}
+          data-tour="theme"
           onClick={toggleTheme}
         />
       )}
@@ -107,6 +110,7 @@ export const Header = ({ onOpenSidebar }: HeaderProps) => {
         tooltip={t("header.openSettings")}
         label={t("header.openSettings")}
         className={`settings-btn${isSettingsOpen ? " is-rotated" : ""}`}
+        data-tour="settings"
         onClick={() => openSettings()}
       />
 

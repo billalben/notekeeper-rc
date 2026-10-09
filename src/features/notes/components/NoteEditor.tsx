@@ -85,6 +85,7 @@ export const NoteEditor = ({
   const saveChord = useSettingsStore((state) => state.shortcuts.saveNote);
   const isSettingsOpen = useUIStore((state) => state.isSettingsOpen);
   const isSearchOpen = useUIStore((state) => state.isSearchOpen);
+  const isTourOpen = useUIStore((state) => state.isTourOpen);
 
   const isFullscreen = isModal && presentation === "full";
 
@@ -141,13 +142,13 @@ export const NoteEditor = ({
     schedule(draft);
   }, [autosave, dirty, draft, schedule]);
 
-  useFocusTrap(dialogRef, isModal && !isConfirmingClose);
+  useFocusTrap(dialogRef, isModal && !isConfirmingClose && !isTourOpen);
 
   useEffect(() => {
-    if (!isModal) return;
+    if (!isModal || isTourOpen) return;
     if (initialIsNewRef.current) titleRef.current?.focus();
     else bodyRef.current?.focus();
-  }, [isModal, bodyRef]);
+  }, [isModal, isTourOpen, bodyRef]);
 
   useEffect(
     () => () => {
@@ -231,7 +232,8 @@ export const NoteEditor = ({
   };
 
   useActionHotkey("closeModal", requestClose, {
-    enabled: !isConfirmingClose && !isSettingsOpen && !isSearchOpen,
+    enabled:
+      !isConfirmingClose && !isSettingsOpen && !isSearchOpen && !isTourOpen,
     enableOnFormTags: true,
   });
   useActionHotkey(
