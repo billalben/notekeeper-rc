@@ -144,7 +144,6 @@ export const Tour = ({
       overlayColor: palette.overlay,
       zIndex: Z_INDEX,
       width: 360,
-      continuous: true,
       skipBeacon: true,
       showProgress: true,
       buttons: ["back", "skip", "primary"],
@@ -205,6 +204,7 @@ export const Tour = ({
 
   const { Tour: TourElement, controls } = useJoyride({
     run: isTourOpen,
+    continuous: true,
     steps,
     options,
     styles,
