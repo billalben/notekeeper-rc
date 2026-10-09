@@ -396,9 +396,13 @@
   flex: 1 1 auto;
 }
 
+/* Keep the body's flex sizing stable while it collapses. Switching it to
+   `flex: 0 0 auto` here lets the grid size itself to the full, unscrolled
+   content for one frame, so the list balloons over the section below before
+   the row transition kicks in. Animating `grid-template-rows` alone, inside
+   the same flex context, collapses cleanly. */
 .sidebar-section.is-collapsed .sidebar-section-body {
   grid-template-rows: 0fr;
-  flex: 0 0 auto;
 }
 
 .sidebar-section-inner {
