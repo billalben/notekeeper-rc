@@ -31,6 +31,12 @@ describe("simple setters", () => {
     get().setLanguage("de" as never);
     expect(get().language).toBe(DEFAULT_LANGUAGE);
   });
+
+  it("tracks whether the onboarding tour was completed", () => {
+    expect(get().tourCompleted).toBe(false);
+    get().setTourCompleted(true);
+    expect(get().tourCompleted).toBe(true);
+  });
 });
 
 describe("appearance", () => {

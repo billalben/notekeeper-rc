@@ -28,6 +28,7 @@ import {
   normalizePersistedSettings,
   normalizeSidebarSettings,
   normalizeToastSettings,
+  normalizeTourCompleted,
   normalizeTrashSettings,
   type PersistedSettings,
 } from "./settings/normalizers";
@@ -73,11 +74,13 @@ interface SettingsStore {
   header: HeaderSettings;
   motion: MotionPreference;
   language: Language;
+  tourCompleted: boolean;
   appearance: AppearanceSettings;
   export: ExportSettings;
   shortcuts: ShortcutBindings;
   setMotion: (motion: MotionPreference) => void;
   setLanguage: (language: Language) => void;
+  setTourCompleted: (completed: boolean) => void;
   setAppearanceSettings: (partial: Partial<AppearanceSettings>) => void;
   resetAppearanceSettings: () => void;
   setToastSettings: (partial: Partial<ToastSettings>) => void;
@@ -94,7 +97,7 @@ interface SettingsStore {
 }
 
 const STORAGE_KEY = SETTINGS_STORAGE_KEY;
-const STORAGE_VERSION = 18;
+const STORAGE_VERSION = 19;
 
 export const useSettingsStore = create<SettingsStore>()(
   persist(
@@ -106,6 +109,7 @@ export const useSettingsStore = create<SettingsStore>()(
       header: DEFAULT_HEADER_SETTINGS,
       motion: DEFAULT_MOTION,
       language: DEFAULT_LANGUAGE,
+      tourCompleted: false,
       appearance: DEFAULT_APPEARANCE_SETTINGS,
       export: DEFAULT_EXPORT_SETTINGS,
       shortcuts: DEFAULT_SHORTCUTS,
@@ -113,6 +117,9 @@ export const useSettingsStore = create<SettingsStore>()(
       setMotion: (motion) => set({ motion: normalizeMotion(motion) }),
 
       setLanguage: (language) => set({ language: normalizeLanguage(language) }),
+
+      setTourCompleted: (completed) =>
+        set({ tourCompleted: normalizeTourCompleted(completed) }),
 
       setAppearanceSettings: (partial) =>
         set((state) => ({
@@ -185,6 +192,7 @@ export const useSettingsStore = create<SettingsStore>()(
         header: state.header,
         motion: state.motion,
         language: state.language,
+        tourCompleted: state.tourCompleted,
         appearance: state.appearance,
         export: state.export,
         shortcuts: state.shortcuts,
