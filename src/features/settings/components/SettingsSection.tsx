@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { useTranslation } from "react-i18next";
 
 interface SettingsGroupProps {
   title: string;
@@ -36,13 +35,3 @@ export const SettingsRow = ({
     {children && <div className="settings-row-control">{children}</div>}
   </div>
 );
-
-export const ComingSoon = () => {
-  const { t } = useTranslation();
-
-  return (
-    <span className="settings-badge text-label-small">
-      {t("common.comingSoon")}
-    </span>
-  );
-};

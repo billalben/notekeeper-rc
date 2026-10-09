@@ -210,7 +210,8 @@ export const settings = {
     notebookToExportLabel: "الدفتر المطلوب تصديره",
     export: "تصدير",
     importTitle: "استيراد الملاحظات",
-    importDesc: "استعادة الملاحظات من ملف مُصدَّر سابقًا.",
+    importDesc: "استعادة الملاحظات من ملف نسخة احتياطية مُصدَّر سابقًا.",
+    importAction: "اختيار ملف",
     storageGroup: "التخزين",
     storageNote:
       "تقديري بالبايت UTF-8. حصة 5 ميغابايت قيمة افتراضية شائعة للمتصفحات، لذا النسبة تقريبية.",

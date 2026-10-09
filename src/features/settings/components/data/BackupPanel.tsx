@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { downloadBackupFile, downloadNotebookFile } from "@/shared/lib/export";
+import { parseBackupFile } from "@/shared/lib/import";
 import { useNoteStore } from "@/shared/stores/useNoteStore";
 import {
   useSettingsStore,
@@ -8,7 +9,7 @@ import {
 } from "@/shared/stores/useSettingsStore";
 import { toast } from "@/shared/stores/useToastStore";
 import { Select } from "@/shared/ui/Select";
-import { ComingSoon, SettingsGroup, SettingsRow } from "../SettingsSection";
+import { SettingsGroup, SettingsRow } from "../SettingsSection";
 
 export const BackupPanel = () => {
   const { t } = useTranslation();
@@ -18,8 +19,11 @@ export const BackupPanel = () => {
   const setExportSettings = useSettingsStore(
     (state) => state.setExportSettings,
   );
+  const importData = useNoteStore((state) => state.importData);
 
   const [exportNotebookId, setExportNotebookId] = useState("");
+  const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const visibleNotebooks = notebooks.filter(
     (notebook) => notebook.deletedAt === null,
@@ -50,6 +54,35 @@ export const BackupPanel = () => {
       downloadNotebookFile(notebook, exportFormat);
     } catch {
       toast.error(t("toasts.exportNotebookFailed"));
+    }
+  };
+
+  const importBackup = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    setIsImporting(true);
+    try {
+      const payload = parseBackupFile(await file.text());
+
+      if (payload.notebooks.length === 0) {
+        toast.info(t("toasts.importEmpty"), {
+          description: t("toasts.importEmptyDesc"),
+        });
+        return;
+      }
+
+      const counts = importData(payload);
+      toast.success(t("toasts.importSuccess", { count: counts.notes }), {
+        description: t("toasts.importSuccessDesc"),
+      });
+    } catch {
+      toast.error(t("toasts.importFailed"), {
+        description: t("toasts.importFailedDesc"),
+      });
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -121,7 +154,24 @@ export const BackupPanel = () => {
         title={t("settings.data.importTitle")}
         description={t("settings.data.importDesc")}
       >
-        <ComingSoon />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/json,.json"
+          hidden
+          onChange={importBackup}
+        />
+        <button
+          className="btn fill"
+          type="button"
+          disabled={isImporting}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <span className="text-label-large">
+            {t("settings.data.importAction")}
+          </span>
+          <div className="state-layer" />
+        </button>
       </SettingsRow>
     </SettingsGroup>
   );

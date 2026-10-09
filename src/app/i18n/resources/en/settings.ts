@@ -213,7 +213,8 @@ export const settings = {
     notebookToExportLabel: "Notebook to export",
     export: "Export",
     importTitle: "Import notes",
-    importDesc: "Restore notes from a previously exported file.",
+    importDesc: "Restore notes from a previously exported backup file.",
+    importAction: "Choose file",
     storageGroup: "Storage",
     storageNote:
       "Estimated in UTF-8 bytes. The 5 MB quota is a common browser default, so the percentage is approximate.",

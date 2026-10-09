@@ -1,7 +1,7 @@
 import type { Notebook } from "@/shared/types";
 import { generateID } from "@/shared/lib/id";
 
-const EXPORT_APP = "notekeeper";
+export const EXPORT_APP = "notekeeper";
 const EXPORT_SCHEMA_VERSION = 1;
 
 const MIME_JSON = "application/json";
@@ -30,7 +30,7 @@ interface ExportNotebook {
   notes: ExportNote[];
 }
 
-interface ExportFile {
+export interface ExportFile {
   app: typeof EXPORT_APP;
   schemaVersion: number;
   exportedAt: string;

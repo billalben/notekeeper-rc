@@ -220,7 +220,8 @@ export const settings = {
     export: "Exporter",
     importTitle: "Importer des notes",
     importDesc:
-      "Restaurer des notes à partir d'un fichier exporté précédemment.",
+      "Restaurer des notes à partir d'un fichier de sauvegarde exporté précédemment.",
+    importAction: "Choisir un fichier",
     storageGroup: "Stockage",
     storageNote:
       "Estimé en octets UTF-8. Le quota de 5 Mo est une valeur par défaut courante des navigateurs, le pourcentage est donc approximatif.",

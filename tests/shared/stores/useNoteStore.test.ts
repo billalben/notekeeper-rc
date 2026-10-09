@@ -319,3 +319,40 @@ describe("bulk deletion", () => {
     expect(get().activeNotebookId).toBeNull();
   });
 });
+
+describe("importData", () => {
+  it("appends imported notebooks, merges tags, and keeps the active notebook", () => {
+    get().addNotebook("Existing");
+    get().createTag("home");
+    const existingId = get().activeNotebookId;
+
+    const counts = get().importData({
+      notebooks: [
+        makeNotebook({
+          id: "imported",
+          name: "Imported",
+          notes: [makeNote({ id: "a" }), makeNote({ id: "b" })],
+        }),
+      ],
+      tags: ["work", "home"],
+    });
+
+    expect(counts).toEqual({ notebooks: 1, notes: 2 });
+    expect(get().notebooks.map((notebook) => notebook.name)).toEqual([
+      "Existing",
+      "Imported",
+    ]);
+    expect(get().activeNotebookId).toBe(existingId);
+    expect(get().tags).toEqual(["home", "work"]);
+  });
+
+  it("activates the first imported notebook when none is active", () => {
+    const counts = get().importData({
+      notebooks: [makeNotebook({ id: "b1" }), makeNotebook({ id: "b2" })],
+      tags: [],
+    });
+
+    expect(counts).toEqual({ notebooks: 2, notes: 0 });
+    expect(get().activeNotebookId).toBe(get().notebooks[0].id);
+  });
+});

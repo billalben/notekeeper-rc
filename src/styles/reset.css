@@ -19,6 +19,10 @@ textarea {
   display: block;
 }
 
+[hidden] {
+  display: none;
+}
+
 a {
   color: inherit;
   text-decoration: none;

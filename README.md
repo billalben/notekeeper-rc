@@ -28,8 +28,9 @@ modern React + TypeScript + Vite PWA.
   available as options.
 - **Search palette** — fuzzy full-text search across every notebook.
 - **Statistics** — per-notebook and tag-level insights into your notes.
-- **Export** — download everything, a single notebook, or one note as JSON
-  or Markdown. (Importing a backup is on the roadmap.)
+- **Export & import** — download everything, a single notebook, or one note as
+  JSON or Markdown. Restore a full JSON backup from Settings → Data; imported
+  notebooks are added alongside your existing ones.
 
 ### Making it yours
 

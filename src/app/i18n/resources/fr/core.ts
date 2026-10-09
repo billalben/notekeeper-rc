@@ -11,7 +11,6 @@ export const common = {
   untitledNote: "Note sans titre",
   justNow: "À l'instant",
   undo: "Annuler",
-  comingSoon: "Bientôt disponible",
   created: "Créé",
   edited: "Modifié",
   dismissNotification: "Ignorer la notification",
@@ -93,6 +92,15 @@ export const toasts = {
   allNotebooksDeleted: "Tous les carnets supprimés",
   allDataDeleted: "Toutes les données supprimées",
   exportDataFailed: "Impossible d'exporter vos données",
+  importSuccess_one: "{{count}} note importée",
+  importSuccess_other: "{{count}} notes importées",
+  importSuccessDesc:
+    "Les carnets importés ont été ajoutés à votre bibliothèque.",
+  importFailed: "Impossible d'importer les notes",
+  importFailedDesc:
+    "Le fichier sélectionné n'est pas une sauvegarde Notekeeper valide.",
+  importEmpty: "Rien à importer",
+  importEmptyDesc: "Cette sauvegarde ne contient aucun carnet.",
   appearanceReset: "Apparence réinitialisée",
   shortcutsReset: "Raccourcis réinitialisés",
   shortcutNotSaved: "Raccourci non enregistré",

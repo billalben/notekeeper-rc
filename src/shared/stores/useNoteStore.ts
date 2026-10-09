@@ -12,6 +12,7 @@ import {
 import { generateID } from "@/shared/lib/id";
 import { MAX_NOTEBOOK_NAME_LENGTH } from "@/shared/lib/constants";
 import { moveWithinGroup, type MoveDirection } from "@/shared/lib/notes";
+import type { ImportedBackup } from "@/shared/lib/import";
 import {
   STORAGE_KEY,
   STORAGE_VERSION,
@@ -86,6 +87,7 @@ interface NoteStore {
   deleteAllNotes: () => void;
   deleteAllNotebooks: () => void;
   deleteAllData: () => void;
+  importData: (payload: ImportedBackup) => { notebooks: number; notes: number };
 }
 
 migrateLegacyStorage();
@@ -426,6 +428,23 @@ export const useNoteStore = create<NoteStore>()(
       deleteAllNotebooks: () => set({ notebooks: [], activeNotebookId: null }),
       deleteAllData: () =>
         set({ notebooks: [], tags: [], activeNotebookId: null }),
+
+      importData: (payload) => {
+        const imported = payload.notebooks;
+        set((state) => ({
+          notebooks: [...state.notebooks, ...imported],
+          tags: sortTags(mergeTags(state.tags, payload.tags)),
+          activeNotebookId: state.activeNotebookId ?? imported[0]?.id ?? null,
+        }));
+
+        return {
+          notebooks: imported.length,
+          notes: imported.reduce(
+            (total, notebook) => total + notebook.notes.length,
+            0,
+          ),
+        };
+      },
     }),
     {
       name: STORAGE_KEY,

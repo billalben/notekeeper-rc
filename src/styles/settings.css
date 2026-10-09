@@ -173,15 +173,6 @@
   overflow: hidden;
 }
 
-.settings-badge {
-  display: inline-block;
-  padding: var(--spacing-1) var(--spacing-3);
-  background-color: var(--surface-container-highest);
-  color: var(--on-surface-variant);
-  border-radius: var(--radius-full);
-  white-space: nowrap;
-}
-
 .settings-switch {
   position: relative;
   width: 52px;
