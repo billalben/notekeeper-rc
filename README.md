@@ -40,6 +40,10 @@ modern React + TypeScript + Vite PWA.
 - **Languages** — English, French, and Arabic, including full RTL support.
 - **Keyboard shortcuts** — fully customizable bindings with an in-app cheat
   sheet.
+- **Onboarding tour** — a guided walkthrough that covers the smart views,
+  notebooks, note cards, tags, the Markdown editor, search, theme, shortcuts,
+  and settings. It runs once on first launch, skips steps that need data you
+  don't have yet, and can be replayed from Settings → About.
 - **Notifications** — configure toast position, duration, and stacking.
 - **Responsive** — a collapsible sidebar for small screens and a static,
   resizable one for larger displays.
@@ -64,6 +68,7 @@ modern React + TypeScript + Vite PWA.
 | Search           | [Fuse.js](https://www.fusejs.io)                                                                      |
 | i18n             | [i18next](https://www.i18next.com) + react-i18next                                                    |
 | Shortcuts        | [react-hotkeys-hook](https://github.com/JohannesKlauss/react-hotkeys-hook)                            |
+| Onboarding       | [react-joyride](https://react-joyride.com)                                                            |
 | PWA              | [vite-plugin-pwa](https://vite-pwa-org.netlify.app) (Workbox)                                         |
 | Testing          | [Vitest](https://vitest.dev) + jsdom                                                                  |
 | Linting          | [oxlint](https://oxc.rs)                                                                              |
@@ -169,7 +174,7 @@ Everything is stored locally in the browser — there is no backend. Three
 | Key            | Contents                                                                | Version |
 | -------------- | ----------------------------------------------------------------------- | ------- |
 | `noteKeeperDB` | Notebooks, notes, the tag registry, and the active notebook (`persist`) | 7       |
-| `settings`     | Editor, appearance, trash, toast, sidebar, and shortcut preferences     | 18      |
+| `settings`     | Editor, appearance, trash, toast, sidebar, and shortcut preferences     | 19      |
 | `theme`        | The last chosen theme (`"light"` or `"dark"`)                           | —       |
 
 The legacy vanilla app stored `{ notebooks: [...] }` directly under
