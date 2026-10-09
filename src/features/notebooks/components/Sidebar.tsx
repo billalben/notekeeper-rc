@@ -198,6 +198,15 @@ export const Sidebar = ({
           ))}
 
           {isAdding && <AddNotebookRow />}
+
+          {visibleNotebooks.length === 0 && !isAdding && (
+            <div className="sidebar-empty">
+              <span className="material-symbols-rounded" aria-hidden="true">
+                folder_off
+              </span>
+              <span className="text-body-small">{t("notes.noNotebooks")}</span>
+            </div>
+          )}
         </SidebarSection>
 
         <MoreSection

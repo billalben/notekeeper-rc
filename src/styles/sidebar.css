@@ -427,6 +427,34 @@
   flex-shrink: 0;
 }
 
+/* Placeholder shown when the notebook list is empty. Overrides the
+   flex-shrink above so it can fill and center in the available space. */
+.sidebar-empty {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-6) var(--spacing-4);
+  color: var(--on-surface-variant);
+  text-align: center;
+  opacity: 0.7;
+}
+
+.sidebar-empty .material-symbols-rounded {
+  font-size: 3.2rem;
+  opacity: 0.5;
+}
+
+/* The section body animates its height to zero when collapsing; keep the
+   placeholder's icon and label from being squished during that transition. */
+.sidebar-empty > * {
+  flex-shrink: 0;
+}
+
 .sidebar-more .sidebar-section-scroll {
   height: auto;
   overflow: visible;
