@@ -4,6 +4,7 @@ import { makeNote, makeNotebook } from "@tests/factories";
 import {
   STORAGE_KEY,
   STORAGE_VERSION,
+  hasExpiredItems,
   migrateLegacyStorage,
   removeExpired,
   withDefaults,
@@ -109,6 +110,37 @@ describe("removeExpired", () => {
       notebooks: [],
       activeNotebookId: null,
     });
+  });
+});
+
+describe("hasExpiredItems", () => {
+  it("detects expired notebooks and notes, ignoring newer trash", () => {
+    const state = {
+      notebooks: [
+        makeNotebook({
+          id: "nb",
+          notes: [
+            makeNote({ id: "old", deletedAt: 100 }),
+            makeNote({ id: "fresh", deletedAt: 500 }),
+          ],
+        }),
+        makeNotebook({ id: "gone", deletedAt: 100 }),
+      ],
+      activeNotebookId: "nb",
+    };
+
+    expect(hasExpiredItems(state, 200)).toBe(true);
+    expect(hasExpiredItems(state, 50)).toBe(false);
+    expect(hasExpiredItems(state, null)).toBe(true);
+  });
+
+  it("is false when the library has no trashed items", () => {
+    const state = {
+      notebooks: [makeNotebook({ id: "nb", notes: [makeNote()] })],
+      activeNotebookId: "nb",
+    };
+
+    expect(hasExpiredItems(state, 100)).toBe(false);
   });
 });
 

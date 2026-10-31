@@ -4,6 +4,8 @@ import { useDocumentAppearance } from "@/app/hooks/useDocumentAppearance";
 import { useEditorSession } from "@/app/hooks/useEditorSession";
 import { useLanguage } from "@/app/hooks/useLanguage";
 import { useNoteActions } from "@/app/hooks/useNoteActions";
+import { useStorageWarning } from "@/app/hooks/useStorageWarning";
+import { useTrashPurge } from "@/app/hooks/useTrashPurge";
 import { MainPanel } from "@/app/MainPanel";
 import { SplitEditorPane } from "@/app/SplitEditorPane";
 import { WorkspaceModals } from "@/app/WorkspaceModals";
@@ -33,7 +35,6 @@ const App = () => {
   const createTag = useNoteStore((state) => state.createTag);
   const activeNotebookId = useNoteStore((state) => state.activeNotebookId);
   const setActiveNotebook = useNoteStore((state) => state.setActiveNotebook);
-  const purgeExpiredTrash = useNoteStore((state) => state.purgeExpiredTrash);
 
   const retentionDays = useSettingsStore((state) => state.trash.retentionDays);
   const presentation = useSettingsStore((state) => state.editor.presentation);
@@ -68,10 +69,8 @@ const App = () => {
 
   useDocumentAppearance();
   useLanguage();
-
-  useEffect(() => {
-    purgeExpiredTrash(trashRetentionMs(retentionDays));
-  }, [retentionDays, purgeExpiredTrash]);
+  useTrashPurge(trashRetentionMs(retentionDays));
+  useStorageWarning();
 
   useEffect(() => subscribeToNoteStoreSync(), []);
 

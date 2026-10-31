@@ -3,6 +3,7 @@ import {
   estimateBytes,
   formatBytes,
   isLocalStorageAvailable,
+  isStorageUsageWarning,
 } from "@/shared/lib/storage";
 
 describe("estimateBytes", () => {
@@ -21,6 +22,14 @@ describe("formatBytes", () => {
     expect(formatBytes(1536)).toBe("1.5 KB");
     expect(formatBytes(1024 * 1024)).toBe("1.00 MB");
     expect(formatBytes(1.5 * 1024 * 1024)).toBe("1.50 MB");
+  });
+});
+
+describe("isStorageUsageWarning", () => {
+  it("warns at or above the warning ratio", () => {
+    expect(isStorageUsageWarning(79.9)).toBe(false);
+    expect(isStorageUsageWarning(80)).toBe(true);
+    expect(isStorageUsageWarning(100)).toBe(true);
   });
 });
 

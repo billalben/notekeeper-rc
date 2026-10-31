@@ -116,6 +116,7 @@ export const toasts = {
   storageAlmostFull: "Stockage presque plein",
   storageAlmostFullDesc:
     "Libérez de l'espace ou exportez une sauvegarde bientôt.",
+  storageAlmostFullAction: "Gérer le stockage",
   previewNoteSaved: "Note enregistrée",
   previewNoteSavedDesc: "Vos modifications ont été enregistrées.",
   previewImportError: "Impossible d'importer les notes",
@@ -134,4 +135,14 @@ export const pwa = {
   reload: "Recharger",
   offlineReady: "Prêt à fonctionner hors ligne",
   offlineReadyDesc: "Notekeeper fonctionne désormais sans connexion internet.",
+} as const;
+
+export const errors = {
+  title: "Un problème est survenu",
+  description:
+    "Notekeeper a rencontré une erreur inattendue. Rechargez l'application ou exportez d'abord une sauvegarde de vos notes.",
+  reload: "Recharger l'application",
+  exportBackup: "Exporter une sauvegarde",
+  exportSuccess: "Sauvegarde téléchargée",
+  exportFailed: "Impossible d'exporter votre sauvegarde",
 } as const;

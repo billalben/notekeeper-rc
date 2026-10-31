@@ -113,6 +113,7 @@ export const toasts = {
   shortcutConflict: 'Already used by "{{action}}".',
   storageAlmostFull: "Storage almost full",
   storageAlmostFullDesc: "Free up space or export a backup soon.",
+  storageAlmostFullAction: "Manage storage",
   previewNoteSaved: "Note saved",
   previewNoteSavedDesc: "Your changes were saved.",
   previewImportError: "Couldn't import notes",
@@ -130,4 +131,14 @@ export const pwa = {
   reload: "Reload",
   offlineReady: "Ready to work offline",
   offlineReadyDesc: "Notekeeper now works without an internet connection.",
+} as const;
+
+export const errors = {
+  title: "Something went wrong",
+  description:
+    "Notekeeper hit an unexpected error. Reload the app, or export a backup of your notes first.",
+  reload: "Reload app",
+  exportBackup: "Export backup",
+  exportSuccess: "Backup downloaded",
+  exportFailed: "Couldn't export your backup",
 } as const;

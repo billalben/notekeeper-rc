@@ -1,29 +1,12 @@
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useStorageUsage } from "@/features/statistics/hooks/useStorageUsage";
-import { toast } from "@/shared/stores/useToastStore";
-import { formatBytes, STORAGE_WARNING_RATIO } from "@/shared/lib/storage";
-
-let hasWarnedStorageFull = false;
+import { formatBytes, isStorageUsageWarning } from "@/shared/lib/storage";
 
 export const StorageMeter = () => {
   const { t } = useTranslation();
   const { supported, bytes, quota, percent } = useStorageUsage();
 
-  const isWarning = percent >= STORAGE_WARNING_RATIO * 100;
-
-  useEffect(() => {
-    if (!supported) return;
-
-    if (isWarning && !hasWarnedStorageFull) {
-      hasWarnedStorageFull = true;
-      toast.error(t("toasts.storageAlmostFull"), {
-        description: t("toasts.storageAlmostFullDesc"),
-      });
-    } else if (!isWarning) {
-      hasWarnedStorageFull = false;
-    }
-  }, [supported, isWarning, t]);
+  const isWarning = isStorageUsageWarning(percent);
 
   if (!supported) {
     return (

@@ -20,6 +20,7 @@
 @import "./statistics.css";
 @import "./settings.css";
 @import "./storage-meter.css";
+@import "./error-fallback.css";
 @import "./toasts.css";
 @import "./responsive.css";
 @import "./shortcuts.css";

@@ -386,6 +386,17 @@ describe("trash", () => {
     expect(get().notebooks[0].notes).toHaveLength(1);
   });
 
+  it("leaves state untouched when nothing has expired", () => {
+    const notebook = get().addNotebook("N");
+    const note = addNote(notebook.id, { title: "T", text: "x" });
+    get().deleteNote(notebook.id, note.id);
+
+    const before = get().notebooks;
+    get().purgeExpiredTrash(50_000);
+
+    expect(get().notebooks).toBe(before);
+  });
+
   it("empties the trash across notebooks and notes", () => {
     useNoteStore.setState({
       notebooks: [

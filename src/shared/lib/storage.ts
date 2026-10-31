@@ -1,5 +1,9 @@
 export const STORAGE_QUOTA_BYTES = 5 * 1024 * 1024;
-export const STORAGE_WARNING_RATIO = 0.8;
+const STORAGE_WARNING_RATIO = 0.8;
+
+/** Whether usage has crossed the threshold where users should be warned. */
+export const isStorageUsageWarning = (percent: number): boolean =>
+  percent >= STORAGE_WARNING_RATIO * 100;
 
 const PROBE_KEY = "__notekeeper_storage_probe__";
 

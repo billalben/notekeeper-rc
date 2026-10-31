@@ -23,6 +23,7 @@ import {
 import {
   STORAGE_KEY,
   STORAGE_VERSION,
+  hasExpiredItems,
   migrateLegacyStorage,
   removeExpired,
   withDefaults,
@@ -512,8 +513,12 @@ export const useNoteStore = create<NoteStore>()(
 
       purgeExpiredTrash: (retentionMs) => {
         if (retentionMs === null) return;
+
+        const cutoff = Date.now() - retentionMs;
+        if (!hasExpiredItems(get(), cutoff)) return;
+
         set((state) => {
-          const next = removeExpired(state, Date.now() - retentionMs);
+          const next = removeExpired(state, cutoff);
           return {
             ...next,
             revisions: pruneRevisions(state.revisions, next.notebooks),

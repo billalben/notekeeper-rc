@@ -4,6 +4,7 @@ import "@/styles/index.css";
 import "./i18n";
 import i18n, { loadLanguage } from "@/app/i18n";
 import App from "./App.tsx";
+import { ErrorBoundary } from "./ErrorBoundary";
 import { setupPWA } from "./pwa";
 import { useSettingsStore } from "@/shared/stores/useSettingsStore";
 
@@ -14,7 +15,9 @@ void loadLanguage(initialLanguage).then(() => {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </StrictMode>,
 );
 

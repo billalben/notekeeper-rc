@@ -32,6 +32,20 @@ interface TrashState {
   activeNotebookId: string | null;
 }
 
+const isExpired = (deletedAt: number | null, cutoff: number | null): boolean =>
+  deletedAt !== null && (cutoff === null || deletedAt <= cutoff);
+
+/** Whether a purge would remove anything, so callers can skip a write. */
+export const hasExpiredItems = (
+  state: TrashState,
+  cutoff: number | null,
+): boolean =>
+  state.notebooks.some(
+    (notebook) =>
+      isExpired(notebook.deletedAt, cutoff) ||
+      notebook.notes.some((note) => isExpired(note.deletedAt, cutoff)),
+  );
+
 /**
  * Remove trashed items. With a `cutoff` timestamp, only items deleted at or
  * before it are removed; with `null`, everything in the trash is removed.
@@ -40,14 +54,13 @@ export const removeExpired = (
   state: TrashState,
   cutoff: number | null,
 ): TrashState => {
-  const isExpired = (deletedAt: number | null) =>
-    deletedAt !== null && (cutoff === null || deletedAt <= cutoff);
-
   const notebooks = state.notebooks
-    .filter((notebook) => !isExpired(notebook.deletedAt))
+    .filter((notebook) => !isExpired(notebook.deletedAt, cutoff))
     .map((notebook) => ({
       ...notebook,
-      notes: notebook.notes.filter((note) => !isExpired(note.deletedAt)),
+      notes: notebook.notes.filter(
+        (note) => !isExpired(note.deletedAt, cutoff),
+      ),
     }));
 
   const activeNotebookId = notebooks.some(

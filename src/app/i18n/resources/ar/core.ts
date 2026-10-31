@@ -128,6 +128,7 @@ export const toasts = {
   shortcutConflict: "مستخدم بالفعل بواسطة «{{action}}».",
   storageAlmostFull: "التخزين شبه ممتلئ",
   storageAlmostFullDesc: "أفرغ مساحة أو صدّر نسخة احتياطية قريبًا.",
+  storageAlmostFullAction: "إدارة التخزين",
   previewNoteSaved: "تم حفظ الملاحظة",
   previewNoteSavedDesc: "تم حفظ تغييراتك.",
   previewImportError: "تعذّر استيراد الملاحظات",
@@ -145,4 +146,14 @@ export const pwa = {
   reload: "إعادة التحميل",
   offlineReady: "جاهز للعمل دون اتصال",
   offlineReadyDesc: "أصبح Notekeeper يعمل بدون اتصال بالإنترنت.",
+} as const;
+
+export const errors = {
+  title: "حدث خطأ ما",
+  description:
+    "واجه Notekeeper خطأ غير متوقع. أعد تحميل التطبيق، أو صدّر نسخة احتياطية من ملاحظاتك أولًا.",
+  reload: "إعادة تحميل التطبيق",
+  exportBackup: "تصدير نسخة احتياطية",
+  exportSuccess: "تم تنزيل النسخة الاحتياطية",
+  exportFailed: "تعذّر تصدير نسختك الاحتياطية",
 } as const;

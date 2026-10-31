@@ -8,6 +8,9 @@ export const DESKTOP_QUERY = "(min-width: 992px)";
 
 export const TRASH_RETENTION_DAYS = 30;
 
+/** How often a long-lived tab re-checks the trash for expired items. */
+export const TRASH_PURGE_INTERVAL_MS = 60 * 60 * 1000;
+
 export type TrashRetentionDays = number | null;
 
 export const TRASH_RETENTION_OPTIONS: TrashRetentionDays[] = [
