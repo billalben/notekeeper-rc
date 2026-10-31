@@ -54,6 +54,11 @@ modern React + TypeScript + Vite PWA.
 - **Installable & offline** — a PWA you can install with its own icon; the app
   shell and fonts are cached so it loads and works without a connection, and
   new versions surface as an in-app notification.
+- **Share target & shortcuts** — share text or links from other apps into a
+  prefilled note (Android/ChromeOS), and long-press the installed icon for
+  **New note** or **Search**.
+- **Persistent storage** — ask the browser to protect local data from eviction,
+  from a one-time prompt or Settings → Data.
 - **Deep links** — hash-based routing keeps the current view, note, and open
   overlay in the URL.
 
@@ -94,6 +99,7 @@ modern React + TypeScript + Vite PWA.
 │   │   ├── SplitEditorPane.tsx # Split-view editor pane
 │   │   ├── Header.tsx          # Top bar (greeting, search, settings, theme)
 │   │   ├── main.tsx            # React entry point
+│   │   ├── launchIntent.ts     # Captures share/shortcut params before render
 │   │   ├── themeBootstrap.ts   # Pre-paint theme/appearance setup (inlined at build)
 │   │   └── pwa.ts              # Service-worker registration + update toasts
 │   ├── features/               # Feature slices (UI + feature-only logic)
@@ -175,8 +181,14 @@ Everything is stored locally in the browser — there is no backend. Three
 | Key            | Contents                                                                | Version |
 | -------------- | ----------------------------------------------------------------------- | ------- |
 | `noteKeeperDB` | Notebooks, notes, the tag registry, and the active notebook (`persist`) | 7       |
-| `settings`     | Editor, appearance, trash, toast, sidebar, and shortcut preferences     | 19      |
+| `settings`     | Editor, appearance, trash, toast, sidebar, and shortcut preferences     | 20      |
 | `theme`        | The last chosen theme (`"light"` or `"dark"`)                           | —       |
+
+The app can ask the browser to mark this origin's storage as persistent
+(`navigator.storage.persist()`), either from the one-time reminder or from
+Settings → Data. Browsers may grant or deny the request without prompting; an
+installed PWA is more likely to be approved. Persistent storage reduces the
+chance that the browser evicts notes under storage pressure.
 
 The legacy vanilla app stored `{ notebooks: [...] }` directly under
 `noteKeeperDB`; it is converted to Zustand's `{ state, version }` shape

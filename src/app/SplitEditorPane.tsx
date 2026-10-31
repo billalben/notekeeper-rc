@@ -12,6 +12,8 @@ interface SplitEditorPaneProps {
   tagSuggestions: string[];
   tagUsage: Record<string, number>;
   isResizing: boolean;
+  newNoteTitle?: string;
+  newNoteText?: string;
   onResizeStart: (event: PointerEvent<HTMLDivElement>) => void;
   onResizeKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
   onSave: (data: NoteSaveInput) => Note | undefined;
@@ -31,6 +33,8 @@ export const SplitEditorPane = ({
   tagSuggestions,
   tagUsage,
   isResizing,
+  newNoteTitle,
+  newNoteText,
   onResizeStart,
   onResizeKeyDown,
   onSave,
@@ -57,8 +61,8 @@ export const SplitEditorPane = ({
         key={isCreatingNote ? "new" : note?.id}
         variant="split"
         noteId={isCreatingNote ? undefined : note?.id}
-        title={isCreatingNote ? undefined : note?.title}
-        text={isCreatingNote ? undefined : note?.text}
+        title={isCreatingNote ? newNoteTitle : note?.title}
+        text={isCreatingNote ? newNoteText : note?.text}
         tags={isCreatingNote ? undefined : note?.tags}
         favorite={isCreatingNote ? undefined : note?.favorite}
         notebookId={

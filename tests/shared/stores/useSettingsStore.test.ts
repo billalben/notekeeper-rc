@@ -37,6 +37,14 @@ describe("simple setters", () => {
     get().setTourCompleted(true);
     expect(get().tourCompleted).toBe(true);
   });
+
+  it("tracks whether the persistent-storage prompt was shown", () => {
+    expect(get().persistencePromptSeen).toBe(false);
+    get().setPersistencePromptSeen(true);
+    expect(get().persistencePromptSeen).toBe(true);
+    get().setPersistencePromptSeen("yes" as never);
+    expect(get().persistencePromptSeen).toBe(false);
+  });
 });
 
 describe("appearance", () => {

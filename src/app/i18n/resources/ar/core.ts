@@ -146,6 +146,13 @@ export const pwa = {
   reload: "إعادة التحميل",
   offlineReady: "جاهز للعمل دون اتصال",
   offlineReadyDesc: "أصبح Notekeeper يعمل بدون اتصال بالإنترنت.",
+  inboxNotebook: "الوارد",
+  persistencePrompt: "احمِ ملاحظاتك",
+  persistencePromptDesc:
+    "اطلب من المتصفح الاحتفاظ ببيانات Notekeeper عند انخفاض المساحة.",
+  persistencePromptAction: "تفعيل",
+  persistenceEnabled: "تم تفعيل التخزين الدائم",
+  persistenceDenied: "لم يمنح المتصفح التخزين الدائم.",
 } as const;
 
 export const errors = {

@@ -215,6 +215,15 @@ export const settings = {
     storageGroup: "التخزين",
     storageNote:
       "تقديري بالبايت UTF-8. حصة 5 ميغابايت قيمة افتراضية شائعة للمتصفحات، لذا النسبة تقريبية.",
+    persistenceTitle: "التخزين الدائم",
+    persistenceEnable: "تفعيل",
+    persistenceOn: "مفعّل",
+    persistenceGranted: "تم تفعيل التخزين الدائم",
+    persistenceDenied: "لم يمنح المتصفح التخزين الدائم.",
+    persistenceEnabledDesc: "لن يحذف المتصفح بيانات Notekeeper تلقائيًا.",
+    persistenceDisabledDesc:
+      "قد يحذف المتصفح بيانات Notekeeper عند انخفاض المساحة.",
+    persistenceUnsupportedDesc: "هذا المتصفح لا يدعم طلبات التخزين الدائم.",
     trashGroup: "سلة المحذوفات",
     trashKeepTitle: "الاحتفاظ بالعناصر المحذوفة لمدة",
     trashKeepDesc_zero:

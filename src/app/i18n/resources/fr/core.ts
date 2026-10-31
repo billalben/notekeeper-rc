@@ -135,6 +135,13 @@ export const pwa = {
   reload: "Recharger",
   offlineReady: "Prêt à fonctionner hors ligne",
   offlineReadyDesc: "Notekeeper fonctionne désormais sans connexion internet.",
+  inboxNotebook: "Boîte de réception",
+  persistencePrompt: "Protégez vos notes",
+  persistencePromptDesc:
+    "Demandez au navigateur de conserver les données de Notekeeper lorsque l'espace manque.",
+  persistencePromptAction: "Activer",
+  persistenceEnabled: "Stockage persistant activé",
+  persistenceDenied: "Le navigateur n'a pas accordé le stockage persistant.",
 } as const;
 
 export const errors = {

@@ -3,7 +3,9 @@ import { Header } from "@/app/Header";
 import { useDocumentAppearance } from "@/app/hooks/useDocumentAppearance";
 import { useEditorSession } from "@/app/hooks/useEditorSession";
 import { useLanguage } from "@/app/hooks/useLanguage";
+import { useLaunchIntent } from "@/app/hooks/useLaunchIntent";
 import { useNoteActions } from "@/app/hooks/useNoteActions";
+import { usePersistentStoragePrompt } from "@/app/hooks/usePersistentStoragePrompt";
 import { useStorageWarning } from "@/app/hooks/useStorageWarning";
 import { useTrashPurge } from "@/app/hooks/useTrashPurge";
 import { MainPanel } from "@/app/MainPanel";
@@ -51,6 +53,7 @@ const App = () => {
   const selectNote = useUIStore((state) => state.selectNote);
   const editorNoteId = useUIStore((state) => state.editorNoteId);
   const isCreatingNote = useUIStore((state) => state.isCreatingNote);
+  const newNoteSeed = useUIStore((state) => state.newNoteSeed);
   const openNoteModal = useUIStore((state) => state.openNoteModal);
   const openCreateNoteModal = useUIStore((state) => state.openCreateNoteModal);
   const closeNoteModal = useUIStore((state) => state.closeNoteModal);
@@ -71,6 +74,7 @@ const App = () => {
   useLanguage();
   useTrashPurge(trashRetentionMs(retentionDays));
   useStorageWarning();
+  usePersistentStoragePrompt();
 
   useEffect(() => subscribeToNoteStoreSync(), []);
 
@@ -114,6 +118,7 @@ const App = () => {
 
   const isWide = useMediaQuery(DESKTOP_QUERY);
   useHashRoute(isWide);
+  useLaunchIntent();
 
   // Stable callbacks so the tour's memoized steps don't rebuild each render.
   const openTourEditor = useCallback(() => {
@@ -338,6 +343,8 @@ const App = () => {
             notebooks={visibleNotebooks}
             tagSuggestions={allTags}
             tagUsage={tagUsage}
+            newNoteTitle={newNoteSeed?.title}
+            newNoteText={newNoteSeed?.text}
             isResizing={isResizing}
             onResizeStart={startResize}
             onResizeKeyDown={onSplitResizeKeyDown}
@@ -366,6 +373,8 @@ const App = () => {
         allTags={allTags}
         tagUsage={tagUsage}
         isCreatingNote={isCreatingNote}
+        newNoteTitle={newNoteSeed?.title}
+        newNoteText={newNoteSeed?.text}
         onNoteSave={handleNoteSave}
         onCreateTag={createTag}
         onDeleteTag={actions.deleteTag}

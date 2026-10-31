@@ -41,6 +41,8 @@ interface WorkspaceModalsProps {
   allTags: string[];
   tagUsage: Record<string, number>;
   isCreatingNote: boolean;
+  newNoteTitle?: string;
+  newNoteText?: string;
   onNoteSave: (data: NoteSaveInput) => Note | undefined;
   onCreateTag: (tag: string) => void;
   onDeleteTag: (tag: string) => void;
@@ -71,6 +73,8 @@ export const WorkspaceModals = ({
   allTags,
   tagUsage,
   isCreatingNote,
+  newNoteTitle,
+  newNoteText,
   onNoteSave,
   onCreateTag,
   onDeleteTag,
@@ -91,8 +95,8 @@ export const WorkspaceModals = ({
       {showNoteModal && (
         <NoteModal
           noteId={editorNote?.id}
-          title={editorNote?.title}
-          text={editorNote?.text}
+          title={isCreatingNote ? newNoteTitle : editorNote?.title}
+          text={isCreatingNote ? newNoteText : editorNote?.text}
           tags={editorNote?.tags}
           favorite={editorNote?.favorite}
           notebookId={editorNote?.notebookId ?? activeNotebookId ?? ""}

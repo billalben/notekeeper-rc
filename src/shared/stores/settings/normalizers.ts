@@ -134,6 +134,9 @@ export const normalizeLanguage = (value: unknown): Language =>
 export const normalizeTourCompleted = (value: unknown): boolean =>
   typeof value === "boolean" ? value : false;
 
+export const normalizePersistencePromptSeen = (value: unknown): boolean =>
+  typeof value === "boolean" ? value : false;
+
 export const normalizeAppearance = (
   settings: Partial<AppearanceSettings> | undefined,
 ): AppearanceSettings => ({
@@ -182,6 +185,7 @@ export interface PersistedSettings {
   motion?: unknown;
   language?: unknown;
   tourCompleted?: unknown;
+  persistencePromptSeen?: unknown;
   appearance?: Partial<AppearanceSettings>;
   export?: Partial<ExportSettings>;
   shortcuts?: unknown;
@@ -196,6 +200,7 @@ export interface NormalizedSettings {
   motion: MotionPreference;
   language: Language;
   tourCompleted: boolean;
+  persistencePromptSeen: boolean;
   appearance: AppearanceSettings;
   export: ExportSettings;
   shortcuts: ShortcutBindings;
@@ -213,6 +218,9 @@ export const normalizePersistedSettings = (
   motion: normalizeMotion(state?.motion),
   language: normalizeLanguage(state?.language),
   tourCompleted: normalizeTourCompleted(state?.tourCompleted),
+  persistencePromptSeen: normalizePersistencePromptSeen(
+    state?.persistencePromptSeen,
+  ),
   appearance: normalizeAppearance(state?.appearance),
   export: normalizeExportSettings(state?.export),
   shortcuts: normalizeShortcuts(state?.shortcuts),

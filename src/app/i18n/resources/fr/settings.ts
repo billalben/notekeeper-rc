@@ -225,6 +225,17 @@ export const settings = {
     storageGroup: "Stockage",
     storageNote:
       "Estimé en octets UTF-8. Le quota de 5 Mo est une valeur par défaut courante des navigateurs, le pourcentage est donc approximatif.",
+    persistenceTitle: "Stockage persistant",
+    persistenceEnable: "Activer",
+    persistenceOn: "Activé",
+    persistenceGranted: "Stockage persistant activé",
+    persistenceDenied: "Le navigateur n'a pas accordé le stockage persistant.",
+    persistenceEnabledDesc:
+      "Le navigateur ne supprimera pas automatiquement les données de Notekeeper.",
+    persistenceDisabledDesc:
+      "Le navigateur peut supprimer les données de Notekeeper si l'espace manque.",
+    persistenceUnsupportedDesc:
+      "Ce navigateur ne prend pas en charge les demandes de stockage persistant.",
     trashGroup: "Corbeille",
     trashKeepTitle: "Conserver les éléments supprimés pendant",
     trashKeepDesc_one:

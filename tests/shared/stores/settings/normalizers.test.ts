@@ -26,6 +26,7 @@ import {
   normalizeHeaderSettings,
   normalizeLanguage,
   normalizeMotion,
+  normalizePersistencePromptSeen,
   normalizePersistedSettings,
   normalizeSidebarSettings,
   normalizeToastSettings,
@@ -161,6 +162,15 @@ describe("normalizeTourCompleted", () => {
   });
 });
 
+describe("normalizePersistencePromptSeen", () => {
+  it("keeps a boolean and defaults the rest to not seen", () => {
+    expect(normalizePersistencePromptSeen(true)).toBe(true);
+    expect(normalizePersistencePromptSeen(false)).toBe(false);
+    expect(normalizePersistencePromptSeen("yes")).toBe(false);
+    expect(normalizePersistencePromptSeen(undefined)).toBe(false);
+  });
+});
+
 describe("normalizePersistedSettings", () => {
   it("returns a complete, defaulted settings object for empty input", () => {
     expect(normalizePersistedSettings(undefined)).toEqual({
@@ -172,6 +182,7 @@ describe("normalizePersistedSettings", () => {
       motion: DEFAULT_MOTION,
       language: DEFAULT_LANGUAGE,
       tourCompleted: false,
+      persistencePromptSeen: false,
       appearance: DEFAULT_APPEARANCE_SETTINGS,
       export: DEFAULT_EXPORT_SETTINGS,
       shortcuts: normalizeShortcuts(undefined),
@@ -184,11 +195,13 @@ describe("normalizePersistedSettings", () => {
       appearance: { accent: "teal" },
       motion: "nonsense",
       tourCompleted: true,
+      persistencePromptSeen: true,
     });
     expect(result.toasts.duration).toBe(2000);
     expect(result.toasts.enabled).toBe(DEFAULT_TOAST_SETTINGS.enabled);
     expect(result.appearance.accent).toBe("teal");
     expect(result.motion).toBe(DEFAULT_MOTION);
     expect(result.tourCompleted).toBe(true);
+    expect(result.persistencePromptSeen).toBe(true);
   });
 });

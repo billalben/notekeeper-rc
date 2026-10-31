@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { NoteSeed } from "@/shared/lib/pwa";
 import type { SettingsSection } from "@/shared/types";
 
 export type MainView =
@@ -48,8 +49,10 @@ interface UIStore {
   selectNote: (noteId: string | null) => void;
   editorNoteId: string | null;
   isCreatingNote: boolean;
+  /** Initial title/body for a create-note draft (share target). */
+  newNoteSeed: NoteSeed | null;
   openNoteModal: (noteId: string) => void;
-  openCreateNoteModal: () => void;
+  openCreateNoteModal: (seed?: NoteSeed) => void;
   closeNoteModal: () => void;
 }
 
@@ -105,8 +108,23 @@ export const useUIStore = create<UIStore>((set) => ({
   selectNote: (noteId) => set({ selectedNoteId: noteId }),
   editorNoteId: null,
   isCreatingNote: false,
+  newNoteSeed: null,
   openNoteModal: (noteId) =>
-    set({ editorNoteId: noteId, isCreatingNote: false }),
-  openCreateNoteModal: () => set({ editorNoteId: null, isCreatingNote: true }),
-  closeNoteModal: () => set({ editorNoteId: null, isCreatingNote: false }),
+    set({
+      editorNoteId: noteId,
+      isCreatingNote: false,
+      newNoteSeed: null,
+    }),
+  openCreateNoteModal: (seed) =>
+    set({
+      editorNoteId: null,
+      isCreatingNote: true,
+      newNoteSeed: seed ?? null,
+    }),
+  closeNoteModal: () =>
+    set({
+      editorNoteId: null,
+      isCreatingNote: false,
+      newNoteSeed: null,
+    }),
 }));

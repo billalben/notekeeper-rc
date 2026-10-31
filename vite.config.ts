@@ -2,9 +2,8 @@ import react from "@vitejs/plugin-react";
 import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+import { pwaManifest } from "./vite/pwaManifest.ts";
 import { themeBootstrapPlugin } from "./vite/themeBootstrapPlugin.ts";
-
-const THEME_COLOR = "#FD7014";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -25,40 +24,7 @@ export default defineConfig({
       // Our globPatterns already precache every public icon, so skip the
       // plugin's automatic manifest-icon globs to avoid duplicate entries.
       includeManifestIcons: false,
-      manifest: {
-        name: "Notekeeper",
-        short_name: "Notekeeper",
-        description:
-          "Streamline your daily note-taking with Notekeeper. Organize, access, and enhance productivity with ease.",
-        theme_color: THEME_COLOR,
-        background_color: "#ffffff",
-        display: "standalone",
-        start_url: "/",
-        scope: "/",
-        icons: [
-          {
-            src: "pwa-64x64.png",
-            sizes: "64x64",
-            type: "image/png",
-          },
-          {
-            src: "pwa-192x192.png",
-            sizes: "192x192",
-            type: "image/png",
-          },
-          {
-            src: "pwa-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-          },
-          {
-            src: "maskable-icon-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "maskable",
-          },
-        ],
-      },
+      manifest: pwaManifest,
       workbox: {
         navigateFallback: "index.html",
         globPatterns: ["**/*.{js,css,html,svg,png,ico,woff,woff2}"],

@@ -25,6 +25,7 @@ import {
   normalizeHeaderSettings,
   normalizeLanguage,
   normalizeMotion,
+  normalizePersistencePromptSeen,
   normalizePersistedSettings,
   normalizeSidebarSettings,
   normalizeToastSettings,
@@ -75,12 +76,14 @@ interface SettingsStore {
   motion: MotionPreference;
   language: Language;
   tourCompleted: boolean;
+  persistencePromptSeen: boolean;
   appearance: AppearanceSettings;
   export: ExportSettings;
   shortcuts: ShortcutBindings;
   setMotion: (motion: MotionPreference) => void;
   setLanguage: (language: Language) => void;
   setTourCompleted: (completed: boolean) => void;
+  setPersistencePromptSeen: (seen: boolean) => void;
   setAppearanceSettings: (partial: Partial<AppearanceSettings>) => void;
   resetAppearanceSettings: () => void;
   setToastSettings: (partial: Partial<ToastSettings>) => void;
@@ -97,7 +100,7 @@ interface SettingsStore {
 }
 
 const STORAGE_KEY = SETTINGS_STORAGE_KEY;
-const STORAGE_VERSION = 19;
+const STORAGE_VERSION = 20;
 
 export const useSettingsStore = create<SettingsStore>()(
   persist(
@@ -110,6 +113,7 @@ export const useSettingsStore = create<SettingsStore>()(
       motion: DEFAULT_MOTION,
       language: DEFAULT_LANGUAGE,
       tourCompleted: false,
+      persistencePromptSeen: false,
       appearance: DEFAULT_APPEARANCE_SETTINGS,
       export: DEFAULT_EXPORT_SETTINGS,
       shortcuts: DEFAULT_SHORTCUTS,
@@ -120,6 +124,9 @@ export const useSettingsStore = create<SettingsStore>()(
 
       setTourCompleted: (completed) =>
         set({ tourCompleted: normalizeTourCompleted(completed) }),
+
+      setPersistencePromptSeen: (seen) =>
+        set({ persistencePromptSeen: normalizePersistencePromptSeen(seen) }),
 
       setAppearanceSettings: (partial) =>
         set((state) => ({
@@ -193,6 +200,7 @@ export const useSettingsStore = create<SettingsStore>()(
         motion: state.motion,
         language: state.language,
         tourCompleted: state.tourCompleted,
+        persistencePromptSeen: state.persistencePromptSeen,
         appearance: state.appearance,
         export: state.export,
         shortcuts: state.shortcuts,

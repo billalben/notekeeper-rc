@@ -6,6 +6,7 @@ import {
   type EventData,
   type Options,
 } from "react-joyride";
+import { wasLaunchedWithIntent } from "@/app/launchIntent";
 import { buildTourSteps } from "@/features/tour/lib/steps";
 import type { AppearanceSettings } from "@/shared/stores/settings/types";
 import { useNoteStore } from "@/shared/stores/useNoteStore";
@@ -101,6 +102,9 @@ export const Tour = ({
 
   useEffect(() => {
     if (tourCompleted) return;
+    // A share/shortcut launch already opened the editor; starting the tour
+    // would close that draft. Defer it to the next normal launch.
+    if (wasLaunchedWithIntent()) return;
     const timer = window.setTimeout(() => openTour(), AUTO_START_DELAY_MS);
     return () => window.clearTimeout(timer);
   }, [tourCompleted, openTour]);

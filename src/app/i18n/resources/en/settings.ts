@@ -218,6 +218,17 @@ export const settings = {
     storageGroup: "Storage",
     storageNote:
       "Estimated in UTF-8 bytes. The 5 MB quota is a common browser default, so the percentage is approximate.",
+    persistenceTitle: "Persistent storage",
+    persistenceEnable: "Enable",
+    persistenceOn: "On",
+    persistenceGranted: "Persistent storage enabled",
+    persistenceDenied: "The browser didn't grant persistent storage.",
+    persistenceEnabledDesc:
+      "The browser won't clear Notekeeper's data automatically.",
+    persistenceDisabledDesc:
+      "The browser may clear Notekeeper's data when space runs low.",
+    persistenceUnsupportedDesc:
+      "This browser doesn't support persistent storage requests.",
     trashGroup: "Trash",
     trashKeepTitle: "Keep deleted items for",
     trashKeepDesc_one:

@@ -131,6 +131,13 @@ export const pwa = {
   reload: "Reload",
   offlineReady: "Ready to work offline",
   offlineReadyDesc: "Notekeeper now works without an internet connection.",
+  inboxNotebook: "Inbox",
+  persistencePrompt: "Protect your notes",
+  persistencePromptDesc:
+    "Ask the browser to keep Notekeeper's data when storage runs low.",
+  persistencePromptAction: "Enable",
+  persistenceEnabled: "Persistent storage enabled",
+  persistenceDenied: "The browser didn't grant persistent storage.",
 } as const;
 
 export const errors = {
