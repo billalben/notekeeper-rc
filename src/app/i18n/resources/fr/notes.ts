@@ -66,6 +66,15 @@ export const editor = {
   unsavedDescription: "Fermer l'éditeur sans enregistrer ?",
   unsavedSwitchDescription:
     "Changer de note et abandonner vos modifications non enregistrées ?",
+  conflictTitle: "Cette note a changé dans un autre onglet",
+  conflictDescription:
+    "Choisissez la version à conserver. Vos modifications actuelles ne sont pas encore enregistrées.",
+  conflictKeepMine: "Conserver les miennes",
+  conflictReload: "Charger les leurs",
+  conflictReloadTitle: "Charger la version de l'autre onglet ?",
+  conflictReloadDescription:
+    "Cela remplacera vos modifications non enregistrées par la version enregistrée dans l'autre onglet.",
+  conflictReloadConfirm: "Charger les leurs",
   toolbar: {
     heading: "Titre",
     bold: "Gras",
@@ -97,4 +106,19 @@ export const move = {
   title: "Déplacer <strong>« {{title}} »</strong> vers",
   noDestinations: "Aucun autre carnet de destination.",
   label: "Déplacer la note",
+} as const;
+
+export const history = {
+  title: "Historique de la note",
+  description:
+    "Versions enregistrées avant chaque modification. Restaurer en crée une nouvelle.",
+  versionCount_one: "{{count}} version",
+  versionCount_other: "{{count}} versions",
+  versions: "Versions",
+  close: "Fermer l'historique",
+  empty: "Aucune version pour l'instant",
+  emptyDescription:
+    "Les versions apparaissent après la modification et l'enregistrement de la note.",
+  restore: "Restaurer",
+  emptyBody: "Cette version n'avait pas de texte.",
 } as const;

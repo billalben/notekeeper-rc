@@ -16,6 +16,7 @@ interface UseAutoSaveResult<T> {
   savedAt: number | null;
   schedule: (value: T) => void;
   flush: () => void;
+  cancel: () => void;
 }
 
 /**
@@ -61,5 +62,5 @@ export const useAutoSave = <T>({
     [run, cancel],
   );
 
-  return { status, savedAt, schedule, flush };
+  return { status, savedAt, schedule, flush, cancel };
 };

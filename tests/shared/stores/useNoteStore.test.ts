@@ -431,6 +431,124 @@ describe("bulk deletion", () => {
   });
 });
 
+describe("note history", () => {
+  it("captures the previous content before an edit", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1000);
+    const notebook = get().addNotebook("N");
+    const note = addNote(notebook.id, { title: "First", text: "one" });
+
+    vi.setSystemTime(2000);
+    get().updateNote(note.id, { title: "Second", text: "two" });
+
+    const history = get().revisions[note.id];
+    expect(history).toHaveLength(1);
+    expect(history[0]).toMatchObject({
+      title: "First",
+      text: "one",
+      createdAt: 2000,
+    });
+  });
+
+  it("skips unchanged saves so updatedOn and history stay accurate", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1000);
+    const notebook = get().addNotebook("N");
+    const note = addNote(notebook.id, { title: "T", text: "x" });
+
+    vi.setSystemTime(5000);
+    get().updateNote(note.id, { title: "T", text: "x" });
+
+    expect(get().notebooks[0].notes[0].updatedOn).toBe(1000);
+    expect(get().revisions[note.id]).toBeUndefined();
+  });
+
+  it("removes history when a note is permanently deleted", () => {
+    const notebook = get().addNotebook("N");
+    const note = addNote(notebook.id, { title: "T", text: "x" });
+    useNoteStore.setState({
+      revisions: {
+        [note.id]: [
+          {
+            id: "rev",
+            noteId: note.id,
+            title: "T",
+            text: "x",
+            tags: [],
+            createdAt: 1,
+          },
+        ],
+      },
+    });
+
+    get().permanentlyDeleteNote(notebook.id, note.id);
+
+    expect(get().revisions[note.id]).toBeUndefined();
+  });
+
+  it("prunes history for notes removed with the trash", () => {
+    const notebook = get().addNotebook("N");
+    const note = addNote(notebook.id, { title: "T", text: "x" });
+    get().deleteNote(notebook.id, note.id);
+    useNoteStore.setState({
+      revisions: {
+        [note.id]: [
+          {
+            id: "rev",
+            noteId: note.id,
+            title: "T",
+            text: "x",
+            tags: [],
+            createdAt: 1,
+          },
+        ],
+      },
+    });
+
+    get().purgeExpiredTrash(0);
+
+    expect(get().notebooks[0].notes).toEqual([]);
+    expect(get().revisions).toEqual({});
+  });
+
+  it("clears all history with bulk deletions", () => {
+    useNoteStore.setState({
+      revisions: {
+        a: [
+          {
+            id: "rev",
+            noteId: "a",
+            title: "T",
+            text: "x",
+            tags: [],
+            createdAt: 1,
+          },
+        ],
+      },
+    });
+
+    get().deleteAllNotes();
+    expect(get().revisions).toEqual({});
+
+    useNoteStore.setState({
+      revisions: {
+        a: [
+          {
+            id: "rev",
+            noteId: "a",
+            title: "T",
+            text: "x",
+            tags: [],
+            createdAt: 1,
+          },
+        ],
+      },
+    });
+    get().deleteAllData();
+    expect(get().revisions).toEqual({});
+  });
+});
+
 describe("importData", () => {
   it("appends imported notebooks, merges tags, and keeps the active notebook", () => {
     get().addNotebook("Existing");

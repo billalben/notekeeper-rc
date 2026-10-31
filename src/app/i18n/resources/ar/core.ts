@@ -135,6 +135,8 @@ export const toasts = {
   previewTip: "نصيحة",
   previewTipDesc: "يمكنك تخصيص موضع ظهور الإشعارات.",
   actionClicked: "تم النقر على الإجراء",
+  noteUpdatedElsewhere: "تم تحديث هذه الملاحظة في علامة تبويب أخرى",
+  historyRestored: "تمت استعادة النسخة",
 } as const;
 
 export const pwa = {

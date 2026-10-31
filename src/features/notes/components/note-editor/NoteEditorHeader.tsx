@@ -15,6 +15,8 @@ interface NoteEditorHeaderProps {
   copied: boolean;
   onCopy: () => void;
   onDownload: () => void;
+  historyAvailable: boolean;
+  onOpenHistory: () => void;
   onClose: () => void;
 }
 
@@ -32,6 +34,8 @@ export const NoteEditorHeader = ({
   copied,
   onCopy,
   onDownload,
+  historyAvailable,
+  onOpenHistory,
   onClose,
 }: NoteEditorHeaderProps) => {
   const { t } = useTranslation();
@@ -104,6 +108,17 @@ export const NoteEditorHeader = ({
         >
           <MaterialIcon name="download" />
         </button>
+        {historyAvailable && (
+          <button
+            type="button"
+            className="note-icon-btn"
+            aria-label={t("history.title")}
+            title={t("history.title")}
+            onClick={onOpenHistory}
+          >
+            <MaterialIcon name="history" />
+          </button>
+        )}
         <span className="note-sep" aria-hidden="true" />
         <button
           type="button"

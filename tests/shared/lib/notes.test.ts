@@ -12,6 +12,7 @@ import {
   moveWithinGroup,
   sortByPinned,
   withMoveFlags,
+  withoutMoveFlags,
 } from "@/shared/lib/notes";
 
 describe("sortByPinned", () => {
@@ -250,6 +251,17 @@ describe("withMoveFlags", () => {
       movable("archived", false, null, 1),
     ]);
     expect(archivedNext[0].canMoveDown).toBe(false);
+  });
+
+  it("reuses wrapper objects so unchanged cards can skip re-rendering", () => {
+    const items = [movable("a", false), movable("b", false)];
+
+    const first = withMoveFlags(items);
+    const second = withMoveFlags(items);
+
+    expect(second[0]).toBe(first[0]);
+    expect(second[1]).toBe(first[1]);
+    expect(withoutMoveFlags(items)[0]).toBe(withoutMoveFlags(items)[0]);
   });
 });
 

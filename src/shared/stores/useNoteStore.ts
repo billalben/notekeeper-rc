@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import type { Note, Notebook } from "@/shared/types";
+import type { Note, NoteRevision, Notebook } from "@/shared/types";
 import {
   hasTag,
   mergeTags,
@@ -13,6 +13,13 @@ import { generateID } from "@/shared/lib/id";
 import { MAX_NOTEBOOK_NAME_LENGTH } from "@/shared/lib/constants";
 import { moveWithinGroup, type MoveDirection } from "@/shared/lib/notes";
 import type { ImportedBackup } from "@/shared/lib/import";
+import {
+  appendRevision,
+  normalizeRevisions,
+  pruneRevisions,
+  removeRevisions,
+  type RevisionMap,
+} from "./notes/history";
 import {
   STORAGE_KEY,
   STORAGE_VERSION,
@@ -53,6 +60,7 @@ interface NoteStore {
   notebooks: Notebook[];
   tags: string[];
   activeNotebookId: string | null;
+  revisions: RevisionMap;
   createTag: (tag: string) => void;
   deleteTag: (tag: string) => void;
   addNotebook: (name: string) => Notebook;
@@ -102,6 +110,7 @@ export const useNoteStore = create<NoteStore>()(
       notebooks: [],
       tags: [],
       activeNotebookId: null,
+      revisions: {},
 
       createTag: (raw) => {
         const tag = normalizeTag(raw);
@@ -217,7 +226,11 @@ export const useNoteStore = create<NoteStore>()(
             state.activeNotebookId === notebookId
               ? (notebooks[0]?.id ?? null)
               : state.activeNotebookId;
-          return { notebooks, activeNotebookId };
+          return {
+            notebooks,
+            activeNotebookId,
+            revisions: pruneRevisions(state.revisions, notebooks),
+          };
         });
       },
 
@@ -257,16 +270,29 @@ export const useNoteStore = create<NoteStore>()(
           .find((note) => note.id === noteId);
         if (!target || target.archivedAt !== null) return;
 
+        const nextTags = data.tags ?? target.tags;
+        const isUnchanged =
+          target.title === data.title &&
+          target.text === data.text &&
+          target.tags.length === nextTags.length &&
+          target.tags.every((tag, index) => tag === nextTags[index]);
+
+        // Autosave can fire for a draft whose content is already persisted
+        // (for example after moving a note or changing favorite). Skipping the
+        // write keeps `updatedOn` and the edit statistics accurate.
+        if (isUnchanged) return;
+
+        const now = Date.now();
+
         set((state) => ({
+          revisions: appendRevision(state.revisions, target, now),
           tags: data.tags
             ? sortTags(mergeTags(state.tags, data.tags))
             : state.tags,
           notebooks: state.notebooks.map((notebook) => ({
             ...notebook,
             notes: notebook.notes.map((note) =>
-              note.id === noteId
-                ? { ...note, ...data, updatedOn: new Date().getTime() }
-                : note,
+              note.id === noteId ? { ...note, ...data, updatedOn: now } : note,
             ),
           })),
         }));
@@ -470,16 +496,29 @@ export const useNoteStore = create<NoteStore>()(
                 }
               : notebook,
           ),
+          revisions: removeRevisions(state.revisions, [noteId]),
         }));
       },
 
       emptyTrash: () => {
-        set((state) => removeExpired(state, null));
+        set((state) => {
+          const next = removeExpired(state, null);
+          return {
+            ...next,
+            revisions: pruneRevisions(state.revisions, next.notebooks),
+          };
+        });
       },
 
       purgeExpiredTrash: (retentionMs) => {
         if (retentionMs === null) return;
-        set((state) => removeExpired(state, Date.now() - retentionMs));
+        set((state) => {
+          const next = removeExpired(state, Date.now() - retentionMs);
+          return {
+            ...next,
+            revisions: pruneRevisions(state.revisions, next.notebooks),
+          };
+        });
       },
 
       deleteAllNotes: () => {
@@ -488,12 +527,14 @@ export const useNoteStore = create<NoteStore>()(
             ...notebook,
             notes: [],
           })),
+          revisions: {},
         }));
       },
 
-      deleteAllNotebooks: () => set({ notebooks: [], activeNotebookId: null }),
+      deleteAllNotebooks: () =>
+        set({ notebooks: [], activeNotebookId: null, revisions: {} }),
       deleteAllData: () =>
-        set({ notebooks: [], tags: [], activeNotebookId: null }),
+        set({ notebooks: [], tags: [], activeNotebookId: null, revisions: {} }),
 
       importData: (payload) => {
         const imported = payload.notebooks;
@@ -521,6 +562,7 @@ export const useNoteStore = create<NoteStore>()(
           notebooks?: Notebook[];
           tags?: string[];
           activeNotebookId?: string | null;
+          revisions?: unknown;
         };
         const notebooks = withDefaults(state.notebooks ?? []);
 
@@ -530,12 +572,44 @@ export const useNoteStore = create<NoteStore>()(
             ? sortTags(state.tags)
             : collectTags(notebooks),
           activeNotebookId: state.activeNotebookId ?? null,
+          revisions: normalizeRevisions(state.revisions),
         };
+      },
+      merge: (persistedState, currentState) => {
+        const persisted = persistedState as
+          | {
+              notebooks?: Notebook[];
+              tags?: string[];
+              activeNotebookId?: string | null;
+              revisions?: Record<string, NoteRevision[]>;
+            }
+          | undefined;
+        const merged = { ...currentState, ...persisted };
+        const mergedNotebooks = Array.isArray(merged.notebooks)
+          ? merged.notebooks
+          : currentState.notebooks;
+        merged.notebooks = mergedNotebooks;
+
+        // External rehydration should not pull the user into another tab's
+        // notebook. Keep the local selection while it is still valid.
+        const localActive = currentState.activeNotebookId;
+        if (
+          localActive &&
+          mergedNotebooks.some(
+            (notebook) =>
+              notebook.id === localActive && notebook.deletedAt === null,
+          )
+        ) {
+          merged.activeNotebookId = localActive;
+        }
+
+        return merged;
       },
       partialize: (state) => ({
         notebooks: state.notebooks,
         tags: state.tags,
         activeNotebookId: state.activeNotebookId,
+        revisions: state.revisions,
       }),
     },
   ),

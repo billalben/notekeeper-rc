@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { Note, Notebook } from "@/shared/types";
+import type { Notebook } from "@/shared/types";
 import {
   collectAllNotes,
   collectFavoriteNotes,
@@ -9,43 +9,71 @@ import {
   isActiveNote,
   sortByPinned,
   withMoveFlags,
+  withoutMoveFlags,
 } from "@/shared/lib/notes";
+import type { MainView } from "@/shared/stores/useUIStore";
 import type { NoteWithMoveFlags } from "../types";
-
-const withoutMoveFlags = (notes: Note[]): NoteWithMoveFlags[] =>
-  notes.map((note) => ({ ...note, canMoveUp: false, canMoveDown: false }));
 
 interface UseNoteCollectionsInput {
   notebooks: Notebook[];
   activeNotebook: Notebook | null;
   activeTags: string[];
+  view: MainView;
 }
+
+const EMPTY: NoteWithMoveFlags[] = [];
 
 /**
  * The note lists backing every main view (active notebook or tag filter, plus
  * Favorites/Pinned/All/Recent), each sorted and annotated with move flags.
+ * Only the collection behind the visible view is computed, so editing a note
+ * in the sidebar does not re-sort every other view.
  */
 export const useNoteCollections = ({
   notebooks,
   activeNotebook,
   activeTags,
+  view,
 }: UseNoteCollectionsInput) => {
   const isFiltering = activeTags.length > 0;
 
   return useMemo(() => {
-    const activeNotes = isFiltering
-      ? withoutMoveFlags(sortByPinned(filterNotesByTags(notebooks, activeTags)))
-      : withMoveFlags(
-          sortByPinned(activeNotebook?.notes.filter(isActiveNote) ?? []),
-        );
+    const isNotebookView =
+      view !== "all" &&
+      view !== "recent" &&
+      view !== "pinned" &&
+      view !== "favorites" &&
+      view !== "trash" &&
+      view !== "archive" &&
+      view !== "stats";
+
+    const activeNotes = isNotebookView
+      ? isFiltering
+        ? withoutMoveFlags(
+            sortByPinned(filterNotesByTags(notebooks, activeTags)),
+          )
+        : withMoveFlags(
+            sortByPinned(activeNotebook?.notes.filter(isActiveNote) ?? []),
+          )
+      : EMPTY;
 
     return {
       isFiltering,
       activeNotes,
-      favoriteNotes: withoutMoveFlags(collectFavoriteNotes(notebooks)),
-      pinnedNotes: withoutMoveFlags(collectPinnedNotes(notebooks)),
-      allNotes: withoutMoveFlags(collectAllNotes(notebooks)),
-      recentNotes: withoutMoveFlags(collectRecentNotes(notebooks)),
+      favoriteNotes:
+        view === "favorites"
+          ? withoutMoveFlags(collectFavoriteNotes(notebooks))
+          : EMPTY,
+      pinnedNotes:
+        view === "pinned"
+          ? withoutMoveFlags(collectPinnedNotes(notebooks))
+          : EMPTY,
+      allNotes:
+        view === "all" ? withoutMoveFlags(collectAllNotes(notebooks)) : EMPTY,
+      recentNotes:
+        view === "recent"
+          ? withoutMoveFlags(collectRecentNotes(notebooks))
+          : EMPTY,
     };
-  }, [notebooks, activeNotebook, activeTags, isFiltering]);
+  }, [notebooks, activeNotebook, activeTags, isFiltering, view]);
 };

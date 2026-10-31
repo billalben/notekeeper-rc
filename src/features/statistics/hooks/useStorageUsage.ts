@@ -25,6 +25,7 @@ const EMPTY: StorageUsage = {
 export const useStorageUsage = (): StorageUsage => {
   const notebooks = useNoteStore((state) => state.notebooks);
   const activeNotebookId = useNoteStore((state) => state.activeNotebookId);
+  const revisions = useNoteStore((state) => state.revisions);
   const toasts = useSettingsStore((state) => state.toasts);
   const editor = useSettingsStore((state) => state.editor);
   const theme = useThemeStore((state) => state.theme);
@@ -33,7 +34,9 @@ export const useStorageUsage = (): StorageUsage => {
     if (!isLocalStorageAvailable()) return EMPTY;
 
     const bytes =
-      estimateBytes(JSON.stringify({ notebooks, activeNotebookId })) +
+      estimateBytes(
+        JSON.stringify({ notebooks, activeNotebookId, revisions }),
+      ) +
       estimateBytes(theme) +
       estimateBytes(JSON.stringify({ toasts, editor }));
 
@@ -43,5 +46,5 @@ export const useStorageUsage = (): StorageUsage => {
       quota: STORAGE_QUOTA_BYTES,
       percent: (bytes / STORAGE_QUOTA_BYTES) * 100,
     };
-  }, [notebooks, activeNotebookId, toasts, editor, theme]);
+  }, [notebooks, activeNotebookId, revisions, toasts, editor, theme]);
 };

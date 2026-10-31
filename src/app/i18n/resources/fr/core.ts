@@ -124,6 +124,8 @@ export const toasts = {
   previewTip: "Astuce",
   previewTipDesc: "Vous pouvez personnaliser l'emplacement des notifications.",
   actionClicked: "Action cliquée",
+  noteUpdatedElsewhere: "Cette note a été modifiée dans un autre onglet",
+  historyRestored: "Version restaurée",
 } as const;
 
 export const pwa = {

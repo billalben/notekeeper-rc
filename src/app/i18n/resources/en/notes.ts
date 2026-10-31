@@ -65,6 +65,15 @@ export const editor = {
   unsavedTitle: "You have unsaved changes",
   unsavedDescription: "Close the editor without saving?",
   unsavedSwitchDescription: "Switch notes and discard your unsaved changes?",
+  conflictTitle: "This note changed in another tab",
+  conflictDescription:
+    "Choose which version to keep. Your current edits are not saved yet.",
+  conflictKeepMine: "Keep mine",
+  conflictReload: "Load theirs",
+  conflictReloadTitle: "Load the other tab's version?",
+  conflictReloadDescription:
+    "This replaces your unsaved edits with the version saved in the other tab.",
+  conflictReloadConfirm: "Load theirs",
   toolbar: {
     heading: "Heading",
     bold: "Bold",
@@ -96,4 +105,17 @@ export const move = {
   title: 'Move <strong>"{{title}}"</strong> to',
   noDestinations: "No other notebooks to move to.",
   label: "Move note",
+} as const;
+
+export const history = {
+  title: "Note history",
+  description: "Versions saved before each edit. Restoring creates a new one.",
+  versionCount_one: "{{count}} version",
+  versionCount_other: "{{count}} versions",
+  versions: "Versions",
+  close: "Close history",
+  empty: "No versions yet",
+  emptyDescription: "Versions appear after the note is edited and saved.",
+  restore: "Restore",
+  emptyBody: "This version had no body text.",
 } as const;

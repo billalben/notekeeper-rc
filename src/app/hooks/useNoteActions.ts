@@ -80,7 +80,16 @@ export const useNoteActions = ({
         setNoteFavorite(noteId, noteData.favorite);
       }
 
-      return current ?? undefined;
+      // Return the freshly stored note so the editor can track its own
+      // `updatedOn` and distinguish local saves from cross-tab updates.
+      return (
+        useNoteStore
+          .getState()
+          .notebooks.flatMap((notebook) => notebook.notes)
+          .find((note) => note.id === noteId) ??
+        current ??
+        undefined
+      );
     },
     [addNote, updateNote, moveNoteToNotebookAction, setNoteFavorite],
   );

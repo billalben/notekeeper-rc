@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "@/shared/stores/useToastStore";
 import { useSettingsStore } from "@/shared/stores/useSettingsStore";
@@ -27,7 +28,7 @@ interface NoteCardProps {
   onRequestDelete: (note: Note) => void;
 }
 
-export const NoteCard = ({
+export const NoteCard = memo(function NoteCard({
   note,
   canMoveUp,
   canMoveDown,
@@ -44,7 +45,7 @@ export const NoteCard = ({
   onMove,
   onRequestMove,
   onRequestDelete,
-}: NoteCardProps) => {
+}: NoteCardProps) {
   const { t } = useTranslation();
   const relativeTime = useRelativeTime();
   const exportFormat = useSettingsStore((state) => state.export.defaultFormat);
@@ -243,4 +244,4 @@ export const NoteCard = ({
       <div className="state-layer" />
     </div>
   );
-};
+});

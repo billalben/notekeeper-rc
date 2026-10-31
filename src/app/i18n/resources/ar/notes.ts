@@ -70,6 +70,15 @@ export const editor = {
   unsavedDescription: "إغلاق المحرر دون حفظ؟",
   unsavedSwitchDescription:
     "التبديل إلى ملاحظة أخرى وتجاهل تغييراتك غير المحفوظة؟",
+  conflictTitle: "تغيّرت هذه الملاحظة في علامة تبويب أخرى",
+  conflictDescription:
+    "اختر النسخة التي تريد الاحتفاظ بها. تغييراتك الحالية لم تُحفظ بعد.",
+  conflictKeepMine: "الاحتفاظ بنسختي",
+  conflictReload: "تحميل نسختهم",
+  conflictReloadTitle: "تحميل نسخة علامة التبويب الأخرى؟",
+  conflictReloadDescription:
+    "سيؤدي هذا إلى استبدال تغييراتك غير المحفوظة بالنسخة المحفوظة في علامة التبويب الأخرى.",
+  conflictReloadConfirm: "تحميل نسختهم",
   toolbar: {
     heading: "عنوان",
     bold: "غامق",
@@ -105,4 +114,21 @@ export const move = {
   title: "نقل <strong>«{{title}}»</strong> إلى",
   noDestinations: "لا توجد دفاتر أخرى للنقل إليها.",
   label: "نقل الملاحظة",
+} as const;
+
+export const history = {
+  title: "سجل الملاحظة",
+  description: "نسخ محفوظة قبل كل تعديل. استعادة نسخة تنشئ نسخة جديدة.",
+  versionCount_zero: "لا نسخ",
+  versionCount_one: "نسخة واحدة",
+  versionCount_two: "نسختان",
+  versionCount_few: "{{count}} نسخ",
+  versionCount_many: "{{count}} نسخة",
+  versionCount_other: "{{count}} نسخة",
+  versions: "النسخ",
+  close: "إغلاق السجل",
+  empty: "لا نسخ بعد",
+  emptyDescription: "تظهر النسخ بعد تعديل الملاحظة وحفظها.",
+  restore: "استعادة",
+  emptyBody: "لم يكن لهذه النسخة نص.",
 } as const;

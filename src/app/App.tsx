@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Header } from "@/app/Header";
 import { useDocumentAppearance } from "@/app/hooks/useDocumentAppearance";
 import { useEditorSession } from "@/app/hooks/useEditorSession";
@@ -18,6 +18,7 @@ import { useMediaQuery } from "@/shared/hooks/useMediaQuery";
 import { DESKTOP_QUERY, trashRetentionMs } from "@/shared/lib/constants";
 import { countTagUsageMap } from "@/shared/lib/notes";
 import { useNoteStore } from "@/shared/stores/useNoteStore";
+import { subscribeToNoteStoreSync } from "@/shared/stores/crossTabSync";
 import { useSettingsStore } from "@/shared/stores/useSettingsStore";
 import { useThemeStore } from "@/shared/stores/useThemeStore";
 import { useUIStore } from "@/shared/stores/useUIStore";
@@ -72,6 +73,8 @@ const App = () => {
     purgeExpiredTrash(trashRetentionMs(retentionDays));
   }, [retentionDays, purgeExpiredTrash]);
 
+  useEffect(() => subscribeToNoteStoreSync(), []);
+
   useEffect(() => {
     const visible = notebooks.filter((notebook) => notebook.deletedAt === null);
     if (visible.length === 0) {
@@ -86,21 +89,29 @@ const App = () => {
     }
   }, [notebooks, activeNotebookId, setActiveNotebook]);
 
-  const visibleNotebooks = notebooks.filter(
-    (notebook) => notebook.deletedAt === null,
+  const visibleNotebooks = useMemo(
+    () => notebooks.filter((notebook) => notebook.deletedAt === null),
+    [notebooks],
   );
-  const activeNotebook =
-    visibleNotebooks.find((notebook) => notebook.id === activeNotebookId) ??
-    null;
+  const activeNotebook = useMemo(
+    () =>
+      visibleNotebooks.find((notebook) => notebook.id === activeNotebookId) ??
+      null,
+    [visibleNotebooks, activeNotebookId],
+  );
 
-  const notebookNames = Object.fromEntries(
-    visibleNotebooks.map((notebook) => [notebook.id, notebook.name]),
+  const notebookNames = useMemo(
+    () =>
+      Object.fromEntries(
+        visibleNotebooks.map((notebook) => [notebook.id, notebook.name]),
+      ),
+    [visibleNotebooks],
   );
 
   const isFiltering = activeTags.length > 0;
   const tagFilterLabel = activeTags.map((tag) => `#${tag}`).join(", ");
   const { activeNotes, favoriteNotes, pinnedNotes, allNotes, recentNotes } =
-    useNoteCollections({ notebooks, activeNotebook, activeTags });
+    useNoteCollections({ notebooks, activeNotebook, activeTags, view });
 
   const isWide = useMediaQuery(DESKTOP_QUERY);
   useHashRoute(isWide);
@@ -141,6 +152,17 @@ const App = () => {
     closeSidebar,
     selectNone: session.selectNone,
   });
+  const {
+    persistNote,
+    toggleNotePin,
+    toggleNoteFavorite,
+    toggleNoteArchive,
+    moveNote,
+    requestMoveNote,
+    deleteNote,
+  } = actions;
+
+  const handleSelectNote = session.handleSelectNote;
 
   const {
     isResizing,
@@ -153,53 +175,81 @@ const App = () => {
     return () => document.body.classList.remove("split-open");
   }, [showSplitPane]);
 
-  const openNoteInNotebook = (note: Note) => {
-    setActiveNotebook(note.notebookId);
-    showNotes();
-    clearTagFilter();
-    openEditNote(note);
-  };
+  const openNoteInNotebook = useCallback(
+    (note: Note) => {
+      setActiveNotebook(note.notebookId);
+      showNotes();
+      clearTagFilter();
+      openEditNote(note);
+    },
+    [setActiveNotebook, showNotes, clearTagFilter, openEditNote],
+  );
 
-  const openSearchNote = (note: Note) => {
-    if (isSplitEnabled) {
-      session.handleSelectNote(note);
+  const openSearchNote = useCallback(
+    (note: Note) => {
+      if (isSplitEnabled) {
+        handleSelectNote(note);
+        closeSearch();
+        return;
+      }
+      openNoteInNotebook(note);
       closeSearch();
-      return;
-    }
-    openNoteInNotebook(note);
-    closeSearch();
-  };
+    },
+    [isSplitEnabled, handleSelectNote, closeSearch, openNoteInNotebook],
+  );
 
-  const handleNoteSave = (noteData: NoteSaveInput): Note | undefined => {
-    const targetId = isCreatingNote ? null : editorNoteId;
-    const result = actions.persistNote(targetId, noteData);
-    if (isCreatingNote && result) {
-      openNoteModal(result.id);
-    }
-    return result;
-  };
+  const handleNoteSave = useCallback(
+    (noteData: NoteSaveInput): Note | undefined => {
+      const targetId = isCreatingNote ? null : editorNoteId;
+      const result = persistNote(targetId, noteData);
+      if (isCreatingNote && result) {
+        openNoteModal(result.id);
+      }
+      return result;
+    },
+    [isCreatingNote, editorNoteId, persistNote, openNoteModal],
+  );
 
-  const handleSplitSave = (noteData: NoteSaveInput): Note | undefined => {
-    const targetId = isCreatingNote ? null : selectedNoteId;
-    const result = actions.persistNote(targetId, noteData);
-    if (isCreatingNote && result) {
-      closeNoteModal();
-      selectNote(result.id);
-    }
-    return result;
-  };
+  const handleSplitSave = useCallback(
+    (noteData: NoteSaveInput): Note | undefined => {
+      const targetId = isCreatingNote ? null : selectedNoteId;
+      const result = persistNote(targetId, noteData);
+      if (isCreatingNote && result) {
+        closeNoteModal();
+        selectNote(result.id);
+      }
+      return result;
+    },
+    [isCreatingNote, selectedNoteId, persistNote, closeNoteModal, selectNote],
+  );
 
-  const tagUsage = countTagUsageMap(notebooks);
+  const tagUsage = useMemo(() => countTagUsageMap(notebooks), [notebooks]);
 
-  const handlers: NoteListHandlers = {
-    onOpen: handleListOpen,
-    onTogglePin: actions.toggleNotePin,
-    onToggleFavorite: actions.toggleNoteFavorite,
-    onToggleArchive: actions.toggleNoteArchive,
-    onMove: actions.moveNote,
-    onRequestMove: actions.requestMoveNote,
-    onRequestDelete: actions.deleteNote,
-  };
+  const handlers: NoteListHandlers = useMemo(
+    () => ({
+      onOpen: handleListOpen,
+      onTogglePin: toggleNotePin,
+      onToggleFavorite: toggleNoteFavorite,
+      onToggleArchive: toggleNoteArchive,
+      onMove: moveNote,
+      onRequestMove: requestMoveNote,
+      onRequestDelete: deleteNote,
+    }),
+    [
+      handleListOpen,
+      toggleNotePin,
+      toggleNoteFavorite,
+      toggleNoteArchive,
+      moveNote,
+      requestMoveNote,
+      deleteNote,
+    ],
+  );
+
+  const handleCreateNotebook = useCallback(() => {
+    startAddingNotebook();
+    setSidebarOpen(true);
+  }, [startAddingNotebook]);
 
   const hasModalNote =
     !isSplitEnabled && (isCreatingNote || editorNote !== null);
@@ -250,7 +300,7 @@ const App = () => {
 
       <div className="app-content">
         <main className="main">
-          <Header onOpenSidebar={() => setSidebarOpen(true)} />
+          <Header onOpenSidebar={openSidebar} />
 
           <MainPanel
             view={view}
@@ -277,10 +327,7 @@ const App = () => {
             onOpenRecent={openNoteInNotebook}
             onOpenStatsNote={openNoteInNotebook}
             onNewNote={openCreateNote}
-            onCreateNotebook={() => {
-              startAddingNotebook();
-              setSidebarOpen(true);
-            }}
+            onCreateNotebook={handleCreateNotebook}
           />
         </main>
 

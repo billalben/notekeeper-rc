@@ -12,10 +12,12 @@ import { copyText } from "@/shared/lib/clipboard";
 import { downloadFile, MIME_MARKDOWN, slugify } from "@/shared/lib/export";
 import { useFocusTrap } from "@/shared/hooks/useFocusTrap";
 import { toast } from "@/shared/stores/useToastStore";
+import { useNoteStore } from "@/shared/stores/useNoteStore";
 import { useSettingsStore } from "@/shared/stores/useSettingsStore";
 import { useUIStore } from "@/shared/stores/useUIStore";
-import type { Note, Notebook } from "@/shared/types";
+import type { Note, NoteRevision, Notebook } from "@/shared/types";
 import { ConfirmModal } from "@/shared/ui/ConfirmModal";
+import { MaterialIcon } from "@/shared/ui/MaterialIcon";
 import { useAutoSave } from "../hooks/useAutoSave";
 import { useMarkdownEditing } from "../hooks/useMarkdownEditing";
 import { useNoteDraft } from "../hooks/useNoteDraft";
@@ -23,8 +25,11 @@ import type { NoteSaveInput } from "../types";
 import { NoteEditorBody } from "./note-editor/NoteEditorBody";
 import { NoteEditorFooter } from "./note-editor/NoteEditorFooter";
 import { NoteEditorHeader } from "./note-editor/NoteEditorHeader";
+import { NoteHistoryPanel } from "./note-editor/NoteHistoryPanel";
 import { NoteEditorTitle } from "./note-editor/NoteEditorTitle";
 import { NoteToolbar, type EditorMode } from "./NoteToolbar";
+
+const EMPTY_REVISIONS: NoteRevision[] = [];
 
 type NoteEditorVariant = "modal" | "split";
 
@@ -77,6 +82,8 @@ export const NoteEditor = ({
   const [mode, setMode] = useState<EditorMode>("edit");
   const [isExpanded, setIsExpanded] = useState(false);
   const [isConfirmingClose, setIsConfirmingClose] = useState(false);
+  const [isConfirmingReload, setIsConfirmingReload] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const autosave = useSettingsStore((state) => state.editor.autosave);
@@ -116,6 +123,10 @@ export const NoteEditor = ({
     persist,
     shouldSave,
     discard,
+    hasExternalConflict,
+    adoptedExternalAt,
+    reloadExternal,
+    keepLocalChanges,
   } = useNoteDraft({
     noteId,
     title: initialTitle,
@@ -132,15 +143,30 @@ export const NoteEditor = ({
 
   const { bodyRef, handleFormat } = useMarkdownEditing({ text, setText });
 
-  const { status, schedule, flush } = useAutoSave({
+  const revisions = useNoteStore(
+    (state) => state.revisions[draftNoteId ?? ""] ?? EMPTY_REVISIONS,
+  );
+
+  const { status, schedule, flush, cancel } = useAutoSave({
     onSave: persist,
     shouldSave,
   });
 
   useEffect(() => {
-    if (!autosave || !dirty) return;
+    if (!autosave || !dirty || hasExternalConflict) return;
     schedule(draft);
-  }, [autosave, dirty, draft, schedule]);
+  }, [autosave, dirty, draft, schedule, hasExternalConflict]);
+
+  // A pending autosave must not overwrite the version another tab just saved
+  // while the user decides how to resolve the conflict.
+  useEffect(() => {
+    if (hasExternalConflict) cancel();
+  }, [hasExternalConflict, cancel]);
+
+  useEffect(() => {
+    if (adoptedExternalAt === null) return;
+    toast.info(t("toasts.noteUpdatedElsewhere"));
+  }, [adoptedExternalAt, t]);
 
   useFocusTrap(dialogRef, isModal && !isConfirmingClose && !isTourOpen);
 
@@ -167,12 +193,38 @@ export const NoteEditor = ({
   };
 
   const handleSave = () => {
-    if (!dirty || !isSavable) return;
+    if (!dirty || !isSavable || hasExternalConflict) return;
     persist(draft);
   };
 
+  const keepLocalVersion = () => {
+    keepLocalChanges();
+    if (isSavable) persist(draft);
+  };
+
+  const loadExternalVersion = () => {
+    setIsConfirmingReload(false);
+    reloadExternal();
+    requestAnimationFrame(() => bodyRef.current?.focus());
+  };
+
+  const openHistory = () => {
+    if (!draftNoteId) return;
+    if (autosave && dirty && !hasExternalConflict) flush();
+    setIsHistoryOpen(true);
+  };
+
+  const restoreRevision = (revision: NoteRevision) => {
+    setTitle(revision.title);
+    setText(revision.text);
+    setTags([...revision.tags]);
+    setIsHistoryOpen(false);
+    toast.info(t("toasts.historyRestored"));
+    requestAnimationFrame(() => bodyRef.current?.focus());
+  };
+
   const requestClose = () => {
-    if (autosave) {
+    if (autosave && !hasExternalConflict) {
       flush();
       onClose();
       return;
@@ -231,14 +283,29 @@ export const NoteEditor = ({
     }
   };
 
-  useActionHotkey("closeModal", requestClose, {
-    enabled:
-      !isConfirmingClose && !isSettingsOpen && !isSearchOpen && !isTourOpen,
-    enableOnFormTags: true,
-  });
+  useActionHotkey(
+    "closeModal",
+    () => {
+      if (isHistoryOpen) {
+        setIsHistoryOpen(false);
+        return;
+      }
+      requestClose();
+    },
+    {
+      enabled:
+        !isConfirmingClose &&
+        !isConfirmingReload &&
+        !isSettingsOpen &&
+        !isSearchOpen &&
+        !isTourOpen,
+      enableOnFormTags: true,
+    },
+  );
   useActionHotkey(
     "saveNote",
     () => {
+      if (hasExternalConflict) return;
       if (autosave) flush();
       else handleSave();
     },
@@ -289,6 +356,8 @@ export const NoteEditor = ({
         copied={copied}
         onCopy={handleCopy}
         onDownload={handleDownload}
+        historyAvailable={Boolean(draftNoteId)}
+        onOpenHistory={openHistory}
         onClose={requestClose}
       />
 
@@ -307,24 +376,64 @@ export const NoteEditor = ({
         onDeleteTag={onDeleteTag}
       />
 
-      <NoteToolbar
-        mode={mode}
-        onModeChange={handleModeChange}
-        onFormat={handleFormat}
-      />
+      {hasExternalConflict && (
+        <div className="note-conflict" role="alert">
+          <MaterialIcon name="sync_problem" />
+          <div className="note-conflict-text">
+            <span className="text-label-large">
+              {t("editor.conflictTitle")}
+            </span>
+            <span className="text-body-small">
+              {t("editor.conflictDescription")}
+            </span>
+          </div>
+          <div className="note-conflict-actions">
+            <button
+              type="button"
+              className="note-btn is-ghost"
+              onClick={() => setIsConfirmingReload(true)}
+            >
+              {t("editor.conflictReload")}
+            </button>
+            <button
+              type="button"
+              className="note-btn is-primary"
+              onClick={keepLocalVersion}
+            >
+              {t("editor.conflictKeepMine")}
+            </button>
+          </div>
+        </div>
+      )}
 
-      <NoteEditorBody
-        bodyRef={bodyRef}
-        text={text}
-        onTextChange={setText}
-        mode={mode}
-      />
+      {isHistoryOpen ? (
+        <NoteHistoryPanel
+          revisions={revisions}
+          onRestore={restoreRevision}
+          onClose={() => setIsHistoryOpen(false)}
+        />
+      ) : (
+        <>
+          <NoteToolbar
+            mode={mode}
+            onModeChange={handleModeChange}
+            onFormat={handleFormat}
+          />
+
+          <NoteEditorBody
+            bodyRef={bodyRef}
+            text={text}
+            onTextChange={setText}
+            mode={mode}
+          />
+        </>
+      )}
 
       <NoteEditorFooter
         dirty={dirty}
         status={status}
         autosave={autosave}
-        isSavable={isSavable}
+        isSavable={isSavable && !hasExternalConflict}
         wordCount={words}
         showWordCount={showWordCount}
         postedOn={postedOn}
@@ -361,6 +470,19 @@ export const NoteEditor = ({
           onConfirm={(confirm) => {
             setIsConfirmingClose(false);
             if (confirm) onClose();
+          }}
+        />
+      )}
+
+      {isConfirmingReload && (
+        <ConfirmModal
+          heading={t("editor.conflictReloadTitle")}
+          description={t("editor.conflictReloadDescription")}
+          confirmLabel={t("editor.conflictReloadConfirm")}
+          stacked
+          onConfirm={(confirm) => {
+            if (confirm) loadExternalVersion();
+            else setIsConfirmingReload(false);
           }}
         />
       )}

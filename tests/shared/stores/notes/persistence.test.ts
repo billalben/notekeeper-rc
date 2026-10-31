@@ -137,6 +137,7 @@ describe("migrateLegacyStorage", () => {
     });
     expect(stored.state.tags).toEqual(["Work"]);
     expect(stored.state.activeNotebookId).toBe("nb1");
+    expect(stored.state.revisions).toEqual({});
   });
 
   it("leaves an already-migrated payload untouched", () => {

@@ -70,6 +70,9 @@
   border: 1px solid var(--outline-variant);
   border-radius: var(--radius-large);
   transition: border-color var(--tr-duration-short) var(--tr-easing-linear);
+  /* Skip style/layout/paint for cards that are scrolled out of view. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 220px;
 }
 
 .card:where(:hover, :focus-visible) {

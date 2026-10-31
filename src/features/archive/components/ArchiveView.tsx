@@ -5,7 +5,7 @@ import { NoteList } from "@/features/notes/components/NoteList";
 import { NoteSelectionBar } from "@/features/notes/components/NoteSelectionBar";
 import type { NoteListHandlers } from "@/features/notes/types";
 import { downloadNoteFile } from "@/shared/lib/export";
-import { collectArchivedNotes } from "@/shared/lib/notes";
+import { collectArchivedNotes, withoutMoveFlags } from "@/shared/lib/notes";
 import { useNoteStore } from "@/shared/stores/useNoteStore";
 import { useSettingsStore } from "@/shared/stores/useSettingsStore";
 import { toast } from "@/shared/stores/useToastStore";
@@ -18,9 +18,6 @@ interface ArchiveViewProps {
   handlers: NoteListHandlers;
   onUnarchiveSelected: (notes: Note[]) => void;
 }
-
-const withoutMoveFlags = (notes: Note[]) =>
-  notes.map((note) => ({ ...note, canMoveUp: false, canMoveDown: false }));
 
 /** Read-only list of archived notes plus bulk unarchive. */
 export const ArchiveView = ({

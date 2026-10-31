@@ -178,6 +178,34 @@ export interface MoveFlags {
 }
 
 /**
+ * Wrapper objects are cached per source item and flag pair. Note objects are
+ * immutable, so an unchanged note keeps the exact same wrapper between
+ * renders, which lets `React.memo` skip its card instead of seeing a new
+ * object on every store update.
+ */
+const moveFlagCache = new WeakMap<object, Map<string, MoveFlags>>();
+
+const withFlags = <T extends Movable>(
+  item: T,
+  canMoveUp: boolean,
+  canMoveDown: boolean,
+): T & MoveFlags => {
+  let byFlags = moveFlagCache.get(item);
+  if (!byFlags) {
+    byFlags = new Map();
+    moveFlagCache.set(item, byFlags);
+  }
+
+  const key = `${canMoveUp}:${canMoveDown}`;
+  const cached = byFlags.get(key) as (T & MoveFlags) | undefined;
+  if (cached) return cached;
+
+  const wrapped = { ...item, canMoveUp, canMoveDown };
+  byFlags.set(key, wrapped);
+  return wrapped;
+};
+
+/**
  * Compute per-item move availability from a list already ordered for display
  * (pinned first). Only same-pinned-state, visible neighbours count.
  */
@@ -193,9 +221,10 @@ export const withMoveFlags = <T extends Movable>(
       (other.archivedAt ?? null) === null &&
       other.pinned === item.pinned;
 
-    return {
-      ...item,
-      canMoveUp: sameGroup(prev),
-      canMoveDown: sameGroup(next),
-    };
+    return withFlags(item, sameGroup(prev), sameGroup(next));
   });
+
+/** Annotate notes with `false` flags for lists where reordering is unavailable. */
+export const withoutMoveFlags = <T extends Movable>(
+  items: T[],
+): (T & MoveFlags)[] => items.map((item) => withFlags(item, false, false));

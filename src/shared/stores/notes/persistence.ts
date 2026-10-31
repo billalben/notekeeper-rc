@@ -2,13 +2,14 @@ import type { Notebook } from "@/shared/types";
 import { collectTags } from "@/shared/lib/tags";
 
 export const STORAGE_KEY = "noteKeeperDB";
-export const STORAGE_VERSION = 8;
+export const STORAGE_VERSION = 9;
 
 /**
  * Backfill fields added after a note/notebook was first created:
  * `updatedOn` (v2), `deletedAt` (v3), `pinned` (v4), `tags` (v5),
  * `favorite` (v7), and `archivedAt` (v8). The store-level tag registry added
- * in v6 is seeded separately in `migrate`.
+ * in v6 is seeded separately in `migrate`, and revision history was added in
+ * v9.
  */
 export const withDefaults = (notebooks: Notebook[]): Notebook[] =>
   notebooks.map((notebook) => ({
@@ -78,6 +79,7 @@ export const migrateLegacyStorage = (): void => {
             notebooks,
             tags: collectTags(notebooks),
             activeNotebookId: notebooks[0]?.id ?? null,
+            revisions: {},
           },
           version: STORAGE_VERSION,
         }),

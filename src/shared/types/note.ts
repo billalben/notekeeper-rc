@@ -19,3 +19,13 @@ export interface Notebook {
   deletedAt: number | null;
   pinned: boolean;
 }
+
+/** A bounded snapshot of a note's content taken before an edit was saved. */
+export interface NoteRevision {
+  id: string;
+  noteId: string;
+  title: string;
+  text: string;
+  tags: string[];
+  createdAt: number;
+}

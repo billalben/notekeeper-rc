@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSettingsStore } from "@/shared/stores/useSettingsStore";
 import { useUIStore, type MainView } from "@/shared/stores/useUIStore";
 import type { Note, Notebook } from "@/shared/types";
@@ -86,53 +86,68 @@ export const useEditorSession = ({
     }
   }, [editorNoteId, editorNote, closeNoteModal]);
 
-  const selectNone = () => {
+  const selectNone = useCallback(() => {
     closeNoteModal();
     selectNote(null);
-  };
+  }, [closeNoteModal, selectNote]);
 
-  const applySelectNote = (noteId: string | null) => {
-    closeNoteModal();
-    selectNote(noteId);
-  };
+  const applySelectNote = useCallback(
+    (noteId: string | null) => {
+      closeNoteModal();
+      selectNote(noteId);
+    },
+    [closeNoteModal, selectNote],
+  );
 
-  const openCreateNote = () => {
+  const openCreateNote = useCallback(() => {
     if (visibleNotebookCount === 0) return;
     if (isSplitEnabled) selectNote(null);
     openCreateNoteModal();
-  };
+  }, [visibleNotebookCount, isSplitEnabled, selectNote, openCreateNoteModal]);
 
-  const openEditNote = (note: Note) => {
-    openNoteModal(note.id);
-  };
+  const openEditNote = useCallback(
+    (note: Note) => {
+      openNoteModal(note.id);
+    },
+    [openNoteModal],
+  );
 
-  const handleEditorDirtyChange = (dirty: boolean) => {
+  const handleEditorDirtyChange = useCallback((dirty: boolean) => {
     editorDirtyRef.current = dirty;
-  };
+  }, []);
 
-  const handleSelectNote = (note: Note) => {
-    if (!isCreatingNote && note.id === selectedNoteId) return;
-    if (!autosave && editorDirtyRef.current) {
-      setPendingSelectNoteId(note.id);
-      return;
-    }
-    applySelectNote(note.id);
-  };
+  const handleSelectNote = useCallback(
+    (note: Note) => {
+      if (!isCreatingNote && note.id === selectedNoteId) return;
+      if (!autosave && editorDirtyRef.current) {
+        setPendingSelectNoteId(note.id);
+        return;
+      }
+      applySelectNote(note.id);
+    },
+    [isCreatingNote, selectedNoteId, autosave, applySelectNote],
+  );
 
-  const handleListOpen = (note: Note) => {
-    if (isSplitEnabled) {
-      handleSelectNote(note);
-      return;
-    }
-    openEditNote(note);
-  };
+  const handleListOpen = useCallback(
+    (note: Note) => {
+      if (isSplitEnabled) {
+        handleSelectNote(note);
+        return;
+      }
+      openEditNote(note);
+    },
+    [isSplitEnabled, handleSelectNote, openEditNote],
+  );
 
-  const handlePendingSelect = (isConfirm: boolean) => {
-    if (isConfirm && pendingSelectNoteId) {
-      applySelectNote(pendingSelectNoteId);
-    }
-    setPendingSelectNoteId(null);
-  };
+  const handlePendingSelect = useCallback(
+    (isConfirm: boolean) => {
+      if (isConfirm && pendingSelectNoteId) {
+        applySelectNote(pendingSelectNoteId);
+      }
+      setPendingSelectNoteId(null);
+    },
+    [pendingSelectNoteId, applySelectNote],
+  );
 
   return {
     selectedNote,

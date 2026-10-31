@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { countWords } from "@/shared/lib/text";
 import type { Note, Notebook } from "@/shared/types";
 import type { NoteDraft, NoteSaveInput } from "../types";
@@ -57,6 +57,16 @@ export const useNoteDraft = ({
     favorite: initialFavorite,
   });
 
+  // Cross-tab protection: remember the `updatedOn` this tab last wrote and the
+  // latest one seen from the store. A different value means another tab saved
+  // the note while this editor was open.
+  const lastSavedUpdatedOnRef = useRef<number | undefined>(updatedOn);
+  const seenUpdatedOnRef = useRef<number | undefined>(updatedOn);
+  const [hasExternalConflict, setHasExternalConflict] = useState(false);
+  const [adoptedExternalAt, setAdoptedExternalAt] = useState<number | null>(
+    null,
+  );
+
   const hasNote = Boolean(noteId);
   const hasNoteRef = useRef(hasNote);
   useEffect(() => {
@@ -92,9 +102,82 @@ export const useNoteDraft = ({
   const showEdited =
     postedOn !== undefined && savedAt !== null && savedAt - postedOn > 1000;
 
+  const adoptExternal = useCallback(
+    (next: {
+      title: string;
+      text: string;
+      tags: string[];
+      notebookId: string;
+      favorite: boolean;
+      updatedOn: number;
+    }) => {
+      seenUpdatedOnRef.current = next.updatedOn;
+      lastSavedUpdatedOnRef.current = next.updatedOn;
+      setTitle(next.title);
+      setText(next.text);
+      setTags(next.tags);
+      setSelectedNotebookId(next.notebookId);
+      setFavorite(next.favorite);
+      setSavedSnapshot({
+        title: next.title,
+        text: next.text,
+        tags: next.tags,
+        notebookId: next.notebookId,
+        favorite: next.favorite,
+      });
+      setSavedAt(next.updatedOn);
+      setHasExternalConflict(false);
+      setAdoptedExternalAt(Date.now());
+    },
+    [],
+  );
+
   useEffect(() => {
     dirtyChangeRef.current?.(dirty);
   }, [dirty]);
+
+  useEffect(() => {
+    if (updatedOn === undefined) return;
+
+    if (seenUpdatedOnRef.current === undefined) {
+      seenUpdatedOnRef.current = updatedOn;
+      lastSavedUpdatedOnRef.current = updatedOn;
+      return;
+    }
+
+    if (updatedOn === seenUpdatedOnRef.current) return;
+    seenUpdatedOnRef.current = updatedOn;
+
+    // Our own save already updated the ref before React re-rendered.
+    if (updatedOn === lastSavedUpdatedOnRef.current) return;
+
+    if (isSameDraft(draft, savedSnapshot)) {
+      // oxlint-disable-next-line react/set-state-in-effect
+      adoptExternal({
+        title: initialTitle,
+        text: initialText,
+        tags: initialTags,
+        notebookId,
+        favorite: initialFavorite,
+        updatedOn,
+      });
+      return;
+    }
+
+    // The `updatedOn` change comes from another tab, so surface the conflict
+    // on the next tick rather than synchronously inside this effect.
+    queueMicrotask(() => setHasExternalConflict(true));
+  }, [
+    adoptExternal,
+    draft,
+    initialFavorite,
+    initialTags,
+    initialText,
+    initialTitle,
+    notebookId,
+    savedSnapshot,
+    updatedOn,
+  ]);
 
   const persist = (data: NoteDraft) => {
     const result = onSave(data);
@@ -104,13 +187,44 @@ export const useNoteDraft = ({
       setSelectedNotebookId(result.notebookId);
       setFavorite(result.favorite);
     }
-    setSavedAt(Date.now());
+
+    if (result?.updatedOn !== undefined) {
+      lastSavedUpdatedOnRef.current = result.updatedOn;
+      seenUpdatedOnRef.current = result.updatedOn;
+      setSavedAt(result.updatedOn);
+    } else {
+      setSavedAt(Date.now());
+    }
     setSavedSnapshot(data);
   };
 
   const shouldSave = (data: NoteDraft) =>
     hasNoteRef.current ||
     Boolean(data.title.trim() || data.text.trim() || data.tags.length);
+
+  const reloadExternal = useCallback(() => {
+    if (updatedOn === undefined) return;
+    adoptExternal({
+      title: initialTitle,
+      text: initialText,
+      tags: initialTags,
+      notebookId,
+      favorite: initialFavorite,
+      updatedOn,
+    });
+  }, [
+    adoptExternal,
+    initialFavorite,
+    initialTags,
+    initialText,
+    initialTitle,
+    notebookId,
+    updatedOn,
+  ]);
+
+  const keepLocalChanges = useCallback(() => {
+    setHasExternalConflict(false);
+  }, []);
 
   const discard = () => {
     setTitle(savedSnapshot.title);
@@ -143,5 +257,9 @@ export const useNoteDraft = ({
     persist,
     shouldSave,
     discard,
+    hasExternalConflict,
+    adoptedExternalAt,
+    reloadExternal,
+    keepLocalChanges,
   };
 };

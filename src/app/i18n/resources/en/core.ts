@@ -120,6 +120,8 @@ export const toasts = {
   previewTip: "Tip",
   previewTipDesc: "You can customize where notifications appear.",
   actionClicked: "Action clicked",
+  noteUpdatedElsewhere: "This note was updated in another tab",
+  historyRestored: "Version restored",
 } as const;
 
 export const pwa = {

@@ -1,4 +1,4 @@
-import { useRef, type KeyboardEvent } from "react";
+import { useMemo, useRef, type KeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
 import logoLight from "@/assets/logo-light.svg";
 import logoDark from "@/assets/logo-dark.svg";
@@ -63,7 +63,7 @@ export const Sidebar = ({
     pinnedCount,
     recentCount,
     archivedCount,
-  } = computeSidebarCounts(notebooks);
+  } = useMemo(() => computeSidebarCounts(notebooks), [notebooks]);
 
   const selectNotebook = (notebookId: string) => {
     setActiveNotebook(notebookId);
