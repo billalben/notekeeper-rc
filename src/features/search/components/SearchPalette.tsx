@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useDeferredValue,
   useEffect,
   useMemo,
@@ -15,10 +16,15 @@ import { useRestoreFocus } from "@/shared/hooks/useRestoreFocus";
 import type { Note } from "@/shared/types";
 import {
   collectSearchEntries,
-  createNoteSearchIndex,
-  runSearch,
   type SearchResult,
 } from "@/features/search/lib/search";
+import { useNoteSearch } from "@/features/search/hooks/useNoteSearch";
+import {
+  addSearchHistoryEntry,
+  readSearchHistory,
+  removeSearchHistoryEntry,
+  writeSearchHistory,
+} from "@/features/search/lib/searchHistory";
 
 interface SearchPaletteProps {
   onOpenNote: (note: Note) => void;
@@ -58,20 +64,52 @@ export const SearchPalette = ({ onOpenNote, onClose }: SearchPaletteProps) => {
 
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [recentSearches, setRecentSearches] = useState(readSearchHistory);
   const deferredQuery = useDeferredValue(query);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const optionRefs = useRef<(HTMLLIElement | null)[]>([]);
 
   const entries = useMemo(() => collectSearchEntries(notebooks), [notebooks]);
-  const fuse = useMemo(() => createNoteSearchIndex(entries), [entries]);
-  const results = useMemo(
-    () => runSearch(fuse, deferredQuery),
-    [fuse, deferredQuery],
+  const { results, isIndexing, isPending } = useNoteSearch(
+    entries,
+    deferredQuery,
   );
 
   const trimmedQuery = query.trim();
   const isSearching = trimmedQuery.length > 0;
+  const isAwaitingResults =
+    isSearching && (isIndexing || isPending || deferredQuery !== query);
+
+  const updateHistory = useCallback((next: string[]) => {
+    setRecentSearches(next);
+    writeSearchHistory(next);
+  }, []);
+
+  const rememberSearch = useCallback(
+    (value: string) => {
+      updateHistory(addSearchHistoryEntry(recentSearches, value));
+    },
+    [recentSearches, updateHistory],
+  );
+
+  const removeRecent = (value: string) => {
+    updateHistory(removeSearchHistoryEntry(recentSearches, value));
+  };
+
+  const applyRecentSearch = (value: string) => {
+    setQuery(value);
+    setActiveIndex(0);
+    inputRef.current?.focus();
+  };
+
+  const openResult = useCallback(
+    (result: SearchResult) => {
+      rememberSearch(trimmedQuery);
+      onOpenNote(result.note);
+    },
+    [onOpenNote, rememberSearch, trimmedQuery],
+  );
 
   useBodyScrollLock();
   useRestoreFocus();
@@ -106,14 +144,14 @@ export const SearchPalette = ({ onOpenNote, onClose }: SearchPaletteProps) => {
         const result = results[activeIndex];
         if (result) {
           event.preventDefault();
-          onOpenNote(result.note);
+          openResult(result);
         }
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [results, activeIndex, onOpenNote]);
+  }, [results, activeIndex, openResult]);
 
   useActionHotkey("closeModal", onClose, { enableOnFormTags: true });
   useActionHotkey("openSearch", onClose, { enableOnFormTags: true });
@@ -179,7 +217,7 @@ export const SearchPalette = ({ onOpenNote, onClose }: SearchPaletteProps) => {
                         index === activeIndex ? " active" : ""
                       }`}
                       onMouseMove={() => setActiveIndex(index)}
-                      onClick={() => onOpenNote(result.note)}
+                      onClick={() => openResult(result)}
                     >
                       <div className="search-result-title text-body-large">
                         {highlight(
@@ -195,7 +233,47 @@ export const SearchPalette = ({ onOpenNote, onClose }: SearchPaletteProps) => {
                           folder
                         </span>
                         {result.notebookName}
+                        {result.note.pinned && (
+                          <span
+                            className="material-symbols-rounded"
+                            aria-label={t("card.pinned")}
+                            title={t("card.pinned")}
+                          >
+                            push_pin
+                          </span>
+                        )}
+                        {result.note.favorite && (
+                          <span
+                            className="material-symbols-rounded"
+                            aria-label={t("card.favorite")}
+                            title={t("card.favorite")}
+                          >
+                            star
+                          </span>
+                        )}
                       </div>
+                      {result.note.tags.length > 0 && (
+                        <div className="search-result-tags">
+                          {result.note.tags.map((tag) => {
+                            const match = result.tagMatches.find(
+                              (item) =>
+                                item.tag.toLowerCase() === tag.toLowerCase(),
+                            );
+                            return (
+                              <span
+                                key={tag}
+                                className={`tag-chip search-tag-chip${
+                                  match ? " active" : ""
+                                }`}
+                              >
+                                <span className="text-label-large">
+                                  #{match ? highlight(tag, match.ranges) : tag}
+                                </span>
+                              </span>
+                            );
+                          })}
+                        </div>
+                      )}
                       {result.snippet && (
                         <div className="search-result-snippet text-body-small">
                           {result.snippet}
@@ -205,9 +283,20 @@ export const SearchPalette = ({ onOpenNote, onClose }: SearchPaletteProps) => {
                   ))}
                 </ul>
                 <div className="search-footer text-label-large">
-                  {t("search.resultCount", { count: results.length })}
+                  {isAwaitingResults
+                    ? t("search.searching")
+                    : t("search.resultCount", { count: results.length })}
                 </div>
               </>
+            ) : isAwaitingResults ? (
+              <div className="search-empty">
+                <span className="material-symbols-rounded" aria-hidden="true">
+                  search
+                </span>
+                <div className="text-body-large">
+                  {isIndexing ? t("search.indexing") : t("search.searching")}
+                </div>
+              </div>
             ) : (
               <div className="search-empty">
                 <span className="material-symbols-rounded" aria-hidden="true">
@@ -219,11 +308,65 @@ export const SearchPalette = ({ onOpenNote, onClose }: SearchPaletteProps) => {
               </div>
             )
           ) : (
-            <div className="search-empty">
-              <span className="material-symbols-rounded" aria-hidden="true">
-                search
-              </span>
-              <div className="text-body-large">{t("search.hint")}</div>
+            <div className="search-idle custom-scrollbar">
+              {recentSearches.length > 0 && (
+                <div className="search-recent">
+                  <div className="search-recent-header text-label-large">
+                    <span>{t("search.recent")}</span>
+                    <button
+                      type="button"
+                      className="search-recent-clear"
+                      onClick={() => updateHistory([])}
+                    >
+                      {t("search.clearRecent")}
+                    </button>
+                  </div>
+                  <ul className="search-recent-list">
+                    {recentSearches.map((recent) => (
+                      <li key={recent} className="search-recent-item">
+                        <button
+                          type="button"
+                          className="search-recent-query"
+                          onClick={() => applyRecentSearch(recent)}
+                        >
+                          <span
+                            className="material-symbols-rounded"
+                            aria-hidden="true"
+                          >
+                            history
+                          </span>
+                          <span>{recent}</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="search-recent-remove"
+                          aria-label={t("search.removeRecent", {
+                            query: recent,
+                          })}
+                          title={t("search.removeRecent", { query: recent })}
+                          onClick={() => removeRecent(recent)}
+                        >
+                          <span
+                            className="material-symbols-rounded"
+                            aria-hidden="true"
+                          >
+                            close
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <div className="search-empty">
+                <span className="material-symbols-rounded" aria-hidden="true">
+                  search
+                </span>
+                <div className="text-body-large">{t("search.hint")}</div>
+                <div className="search-operators text-label-large">
+                  {t("search.operatorsHint")}
+                </div>
+              </div>
             </div>
           )}
         </div>

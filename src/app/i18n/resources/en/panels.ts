@@ -6,6 +6,13 @@ export const search = {
   hint: "Search across every notebook by title or content",
   resultCount_one: "{{count}} result",
   resultCount_other: "{{count}} results",
+  recent: "Recent searches",
+  clearRecent: "Clear",
+  removeRecent: "Remove “{{query}}” from recent searches",
+  operatorsHint:
+    "Use tag:, notebook:, is:pinned, is:favorite, before:YYYY-MM-DD",
+  indexing: "Preparing search…",
+  searching: "Searching…",
 } as const;
 
 export const trash = {

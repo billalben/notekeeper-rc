@@ -153,3 +153,124 @@
   font-size: 4.8rem;
   opacity: 0.25;
 }
+
+.search-idle {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.search-recent {
+  padding: var(--spacing-3) var(--spacing-4) 0;
+}
+
+.search-recent-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  margin-block-end: var(--spacing-1);
+  color: var(--on-surface-variant);
+}
+
+.search-recent-clear,
+.search-recent-query,
+.search-recent-remove {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-family: var(--font-primary);
+  cursor: pointer;
+}
+
+.search-recent-clear {
+  padding: var(--spacing-05) var(--spacing-1);
+  border-radius: var(--radius-extra-small);
+  color: var(--primary);
+}
+
+.search-recent-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.search-recent-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.search-recent-query {
+  flex-grow: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-medium);
+  text-align: start;
+  color: var(--on-surface);
+}
+
+.search-recent-query:hover {
+  background-color: var(--surface-container-low);
+}
+
+.search-recent-query .material-symbols-rounded {
+  flex-shrink: 0;
+  color: var(--on-surface-variant);
+  font-size: 1.8rem;
+}
+
+.search-recent-query > span:last-child {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.search-recent-remove {
+  flex-shrink: 0;
+  display: inline-flex;
+  padding: var(--spacing-05);
+  border-radius: var(--radius-full);
+  color: var(--on-surface-variant);
+}
+
+.search-recent-remove:hover {
+  background-color: var(--surface-container-low);
+}
+
+.search-recent-remove .material-symbols-rounded {
+  font-size: 1.8rem;
+}
+
+.search-recent-clear:focus-visible,
+.search-recent-query:focus-visible,
+.search-recent-remove:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.search-operators {
+  max-width: 42ch;
+  color: var(--on-surface-variant);
+  opacity: 0.8;
+}
+
+.search-result-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-05);
+  margin-block-start: 2px;
+}
+
+.search-result-tags .tag-chip {
+  padding-inline: var(--spacing-1);
+}
+
+.search-result.active .search-tag-chip {
+  border-color: transparent;
+  background-color: var(--surface-container-low);
+  color: var(--on-surface);
+}

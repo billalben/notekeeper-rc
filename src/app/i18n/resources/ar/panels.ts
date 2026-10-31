@@ -10,6 +10,13 @@ export const search = {
   resultCount_few: "{{count}} نتائج",
   resultCount_many: "{{count}} نتيجة",
   resultCount_other: "{{count}} نتيجة",
+  recent: "عمليات البحث الأخيرة",
+  clearRecent: "مسح",
+  removeRecent: "إزالة «{{query}}» من عمليات البحث الأخيرة",
+  operatorsHint:
+    "استخدم tag: وnotebook: وis:pinned وis:favorite وbefore:YYYY-MM-DD",
+  indexing: "جارٍ تحضير البحث…",
+  searching: "جارٍ البحث…",
 } as const;
 
 export const trash = {

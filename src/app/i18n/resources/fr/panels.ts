@@ -6,6 +6,13 @@ export const search = {
   hint: "Recherchez dans tous les carnets par titre ou contenu",
   resultCount_one: "{{count}} résultat",
   resultCount_other: "{{count}} résultats",
+  recent: "Recherches récentes",
+  clearRecent: "Effacer",
+  removeRecent: "Retirer « {{query}} » des recherches récentes",
+  operatorsHint:
+    "Utilisez tag:, notebook:, is:pinned, is:favorite, before:AAAA-MM-JJ",
+  indexing: "Préparation de la recherche…",
+  searching: "Recherche…",
 } as const;
 
 export const trash = {
