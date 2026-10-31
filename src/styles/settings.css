@@ -277,6 +277,66 @@
   font-size: 1.6rem;
 }
 
+.accent-swatch-custom {
+  border-style: dashed;
+}
+
+.accent-swatch-custom[aria-pressed="true"] {
+  border-style: solid;
+}
+
+.accent-custom-control {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.accent-color-input {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background-color: var(--surface-container-highest);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-small);
+  cursor: pointer;
+}
+
+.accent-color-input::-webkit-color-swatch-wrapper {
+  padding: 2px;
+}
+
+.accent-color-input::-webkit-color-swatch,
+.accent-color-input::-moz-color-swatch {
+  border: none;
+  border-radius: calc(var(--radius-small) - 2px);
+}
+
+.accent-color-input:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.accent-hex-input {
+  width: 11ch;
+  height: 40px;
+  padding-inline: var(--spacing-3);
+  background-color: var(--surface-container-highest);
+  color: var(--on-surface);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-small);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: var(--ls-p-050);
+  text-transform: uppercase;
+}
+
+.accent-hex-input:focus {
+  border-color: var(--primary);
+}
+
+.accent-hex-input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
 .settings-range-control {
   display: flex;
   align-items: center;

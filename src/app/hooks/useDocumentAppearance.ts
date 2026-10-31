@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { applyAccentToRoot } from "@/shared/lib/accent";
 import { useSettingsStore } from "@/shared/stores/useSettingsStore";
 import { useThemeStore } from "@/shared/stores/useThemeStore";
 
@@ -23,7 +24,7 @@ export const useDocumentAppearance = (): void => {
 
   useEffect(() => {
     const root = document.documentElement;
-    root.setAttribute("data-accent", appearance.accent);
+    applyAccentToRoot(root, appearance.accent, appearance.accentCustom);
     root.setAttribute("data-font", appearance.fontScale);
     root.setAttribute("data-density", appearance.density);
     root.setAttribute("data-radius", appearance.radius);

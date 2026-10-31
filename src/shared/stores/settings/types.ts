@@ -34,8 +34,9 @@ export interface ExportSettings {
 
 export type MotionPreference = "system" | "reduce" | "full";
 
-export type AccentColor =
-  "orange" | "blue" | "green" | "teal" | "violet" | "rose";
+export type AccentPreset = "orange" | "blue" | "green";
+
+export type AccentColor = AccentPreset | "custom";
 
 export type FontScale = "small" | "default" | "large";
 
@@ -45,6 +46,7 @@ export type RadiusStyle = "default" | "square" | "rounded";
 
 export interface AppearanceSettings {
   accent: AccentColor;
+  accentCustom: string;
   fontScale: FontScale;
   density: Density;
   radius: RadiusStyle;

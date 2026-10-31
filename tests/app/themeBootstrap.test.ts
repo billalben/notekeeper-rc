@@ -17,6 +17,7 @@ const resetRoot = (): void => {
   for (const attribute of ROOT_ATTRIBUTES) {
     document.documentElement.removeAttribute(attribute);
   }
+  document.documentElement.style.cssText = "";
 };
 
 const storageWith = (entries: Record<string, string>) => ({
@@ -97,7 +98,7 @@ describe("applyThemeBootstrap", () => {
       storage: storageWith(
         settings({
           appearance: {
-            accent: "violet",
+            accent: "green",
             fontScale: "large",
             density: "compact",
             radius: "rounded",
@@ -108,7 +109,7 @@ describe("applyThemeBootstrap", () => {
       prefersDark: false,
     });
 
-    expect(document.documentElement.getAttribute("data-accent")).toBe("violet");
+    expect(document.documentElement.getAttribute("data-accent")).toBe("green");
     expect(document.documentElement.getAttribute("data-font")).toBe("large");
     expect(document.documentElement.getAttribute("data-density")).toBe(
       "compact",
@@ -117,6 +118,37 @@ describe("applyThemeBootstrap", () => {
       "rounded",
     );
     expect(document.documentElement.getAttribute("data-contrast")).toBe("high");
+  });
+
+  it("applies a custom accent before paint", () => {
+    applyThemeBootstrap({
+      storage: storageWith(
+        settings({
+          appearance: { accent: "custom", accentCustom: "#00FF00" },
+        }),
+      ),
+      prefersDark: false,
+    });
+
+    const root = document.documentElement;
+    expect(root.getAttribute("data-accent")).toBe("custom");
+    expect(root.style.getPropertyValue("--primary-light")).not.toBe("");
+    expect(root.style.getPropertyValue("--primary-dark")).not.toBe("");
+  });
+
+  it("ignores a custom accent with an invalid hex value", () => {
+    applyThemeBootstrap({
+      storage: storageWith(
+        settings({
+          appearance: { accent: "custom", accentCustom: "green" },
+        }),
+      ),
+      prefersDark: false,
+    });
+
+    const root = document.documentElement;
+    expect(root.hasAttribute("data-accent")).toBe(false);
+    expect(root.style.getPropertyValue("--primary-light")).toBe("");
   });
 
   it("ignores invalid appearance values", () => {

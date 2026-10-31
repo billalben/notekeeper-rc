@@ -45,7 +45,6 @@ import type {
 } from "./settings/types";
 
 export type {
-  AccentColor,
   Density,
   EditorMode,
   EditorPresentation,
@@ -56,6 +55,7 @@ export type {
 } from "./settings/types";
 
 export {
+  ACCENT_COLORS,
   DEFAULT_APPEARANCE_SETTINGS,
   SIDEBAR_WIDTH_MAX,
   SIDEBAR_WIDTH_MIN,

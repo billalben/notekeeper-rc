@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { normalizeHexColor } from "@/shared/lib/accent";
 import { useThemeStore } from "@/shared/stores/useThemeStore";
 import { toast } from "@/shared/stores/useToastStore";
 import {
+  ACCENT_COLORS,
   DEFAULT_APPEARANCE_SETTINGS,
-  type AccentColor,
   type Density,
   type FontScale,
   type MotionPreference,
@@ -16,15 +18,6 @@ import {
 } from "@/features/settings/components/SettingsSection";
 import { Select } from "@/shared/ui/Select";
 import { Switch } from "@/shared/ui/Switch";
-
-const ACCENTS: AccentColor[] = [
-  "orange",
-  "blue",
-  "green",
-  "teal",
-  "violet",
-  "rose",
-];
 
 export const SettingsAppearance = () => {
   const { t } = useTranslation();
@@ -45,6 +38,24 @@ export const SettingsAppearance = () => {
   const isDefaultAppearance = (
     Object.keys(DEFAULT_APPEARANCE_SETTINGS) as (keyof typeof appearance)[]
   ).every((key) => appearance[key] === DEFAULT_APPEARANCE_SETTINGS[key]);
+
+  const isCustomAccent = appearance.accent === "custom";
+  const [customHexDraft, setCustomHexDraft] = useState<{
+    value: string;
+    base: string;
+  } | null>(null);
+  const customHexValue =
+    customHexDraft?.base === appearance.accentCustom
+      ? customHexDraft.value
+      : appearance.accentCustom;
+
+  const commitCustomHex = (value: string): boolean => {
+    const normalized = normalizeHexColor(value);
+    if (!normalized) return false;
+    setAppearanceSettings({ accent: "custom", accentCustom: normalized });
+    setCustomHexDraft(null);
+    return true;
+  };
 
   return (
     <>
@@ -71,7 +82,7 @@ export const SettingsAppearance = () => {
             role="group"
             aria-label={t("settings.appearance.accentLabel")}
           >
-            {ACCENTS.map((accent) => {
+            {ACCENT_COLORS.map((accent) => {
               const isSelected = appearance.accent === accent;
               const label = t(`settings.appearance.accents.${accent}`);
               return (
@@ -96,8 +107,77 @@ export const SettingsAppearance = () => {
                 </button>
               );
             })}
+            <button
+              type="button"
+              className="accent-swatch accent-swatch-custom"
+              style={{ backgroundColor: appearance.accentCustom }}
+              aria-label={t("settings.appearance.accents.custom")}
+              title={t("settings.appearance.accents.custom")}
+              aria-pressed={isCustomAccent}
+              onClick={() => setAppearanceSettings({ accent: "custom" })}
+            >
+              {isCustomAccent && (
+                <span className="material-symbols-rounded" aria-hidden="true">
+                  check
+                </span>
+              )}
+            </button>
           </div>
         </SettingsRow>
+
+        {isCustomAccent && (
+          <SettingsRow
+            title={t("settings.appearance.customTitle")}
+            description={t("settings.appearance.customDesc")}
+          >
+            <div className="accent-custom-control">
+              <input
+                type="color"
+                className="accent-color-input"
+                value={appearance.accentCustom}
+                aria-label={t("settings.appearance.customLabel")}
+                onChange={(event) => {
+                  const normalized = normalizeHexColor(event.target.value);
+                  if (normalized) {
+                    setAppearanceSettings({
+                      accent: "custom",
+                      accentCustom: normalized,
+                    });
+                  }
+                }}
+              />
+              <input
+                type="text"
+                className="accent-hex-input"
+                value={customHexValue}
+                maxLength={7}
+                autoComplete="off"
+                spellCheck={false}
+                aria-label={t("settings.appearance.customHexLabel")}
+                aria-invalid={normalizeHexColor(customHexValue) === null}
+                onChange={(event) =>
+                  setCustomHexDraft({
+                    value: event.target.value,
+                    base: appearance.accentCustom,
+                  })
+                }
+                onBlur={() => {
+                  if (!commitCustomHex(customHexValue)) {
+                    setCustomHexDraft(null);
+                  }
+                }}
+                onKeyDown={(event) => {
+                  if (event.key !== "Enter") return;
+                  event.preventDefault();
+                  if (!commitCustomHex(customHexValue)) {
+                    setCustomHexDraft(null);
+                  }
+                  event.currentTarget.blur();
+                }}
+              />
+            </div>
+          </SettingsRow>
+        )}
 
         <SettingsRow
           title={t("settings.appearance.fontSizeTitle")}

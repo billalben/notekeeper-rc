@@ -122,11 +122,28 @@ describe("normalizeAppearance", () => {
     expect(normalizeAppearance({ accent: "pink" as never }).accent).toBe(
       DEFAULT_APPEARANCE_SETTINGS.accent,
     );
-    expect(normalizeAppearance({ accent: "violet" }).accent).toBe("violet");
+    expect(normalizeAppearance({ accent: "green" }).accent).toBe("green");
+    expect(normalizeAppearance({ accent: "teal" as never }).accent).toBe(
+      DEFAULT_APPEARANCE_SETTINGS.accent,
+    );
+    expect(normalizeAppearance({ accent: "custom" }).accent).toBe("custom");
     expect(normalizeAppearance({ highContrast: 1 as never }).highContrast).toBe(
       DEFAULT_APPEARANCE_SETTINGS.highContrast,
     );
     expect(normalizeAppearance({ highContrast: true }).highContrast).toBe(true);
+  });
+
+  it("normalizes the custom accent color and falls back when invalid", () => {
+    expect(
+      normalizeAppearance({ accent: "custom", accentCustom: "#ABCDEF" })
+        .accentCustom,
+    ).toBe("#abcdef");
+    expect(normalizeAppearance({ accentCustom: "#abc" }).accentCustom).toBe(
+      "#aabbcc",
+    );
+    expect(normalizeAppearance({ accentCustom: "pink" }).accentCustom).toBe(
+      DEFAULT_APPEARANCE_SETTINGS.accentCustom,
+    );
   });
 });
 
@@ -192,14 +209,14 @@ describe("normalizePersistedSettings", () => {
   it("merges partial, legacy input over the defaults", () => {
     const result = normalizePersistedSettings({
       toasts: { duration: 2000 },
-      appearance: { accent: "teal" },
+      appearance: { accent: "blue" },
       motion: "nonsense",
       tourCompleted: true,
       persistencePromptSeen: true,
     });
     expect(result.toasts.duration).toBe(2000);
     expect(result.toasts.enabled).toBe(DEFAULT_TOAST_SETTINGS.enabled);
-    expect(result.appearance.accent).toBe("teal");
+    expect(result.appearance.accent).toBe("blue");
     expect(result.motion).toBe(DEFAULT_MOTION);
     expect(result.tourCompleted).toBe(true);
     expect(result.persistencePromptSeen).toBe(true);

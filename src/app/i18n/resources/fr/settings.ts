@@ -61,13 +61,16 @@ export const settings = {
     accentTitle: "Couleur d'accent",
     accentDesc: "Recolore les boutons, les surbrillances et les états actifs.",
     accentLabel: "Couleur d'accent",
+    customTitle: "Couleur personnalisée",
+    customDesc:
+      "Choisissez une couleur ; l'application en déduit une palette claire et sombre assortie.",
+    customLabel: "Couleur d'accent personnalisée",
+    customHexLabel: "Valeur hexadécimale de la couleur d'accent",
     accents: {
       orange: "Orange",
       blue: "Bleu",
       green: "Vert",
-      teal: "Turquoise",
-      violet: "Violet",
-      rose: "Rose",
+      custom: "Personnalisé",
     },
     fontSizeTitle: "Taille du texte",
     fontSizeDesc:

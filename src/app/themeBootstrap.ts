@@ -1,6 +1,7 @@
 import { directionFor, isLanguage } from "@/app/i18n/languages";
+import { applyAccentToRoot } from "@/shared/lib/accent";
 import {
-  ACCENT_COLORS,
+  ACCENT_SELECTIONS,
   DENSITIES,
   FONT_SCALES,
   RADIUS_STYLES,
@@ -13,6 +14,7 @@ import {
 
 interface PersistedAppearance {
   accent?: unknown;
+  accentCustom?: unknown;
   fontScale?: unknown;
   density?: unknown;
   radius?: unknown;
@@ -97,8 +99,8 @@ export const applyThemeBootstrap = (env?: Partial<ThemeBootstrapEnv>): void => {
     const appearance = state.appearance;
     if (!appearance) return;
 
-    if (isOneOf(ACCENT_COLORS, appearance.accent)) {
-      root.setAttribute("data-accent", appearance.accent);
+    if (isOneOf(ACCENT_SELECTIONS, appearance.accent)) {
+      applyAccentToRoot(root, appearance.accent, appearance.accentCustom);
     }
 
     if (isOneOf(FONT_SCALES, appearance.fontScale)) {

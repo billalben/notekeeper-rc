@@ -49,9 +49,9 @@ describe("simple setters", () => {
 
 describe("appearance", () => {
   it("merges partial updates and normalizes invalid values", () => {
-    get().setAppearanceSettings({ accent: "teal", highContrast: true });
+    get().setAppearanceSettings({ accent: "blue", highContrast: true });
     expect(get().appearance).toMatchObject({
-      accent: "teal",
+      accent: "blue",
       highContrast: true,
     });
 

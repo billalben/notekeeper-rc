@@ -1,4 +1,5 @@
 import { DEFAULT_LANGUAGE, isLanguage, type Language } from "@/app/i18n";
+import { normalizeHexColor } from "@/shared/lib/accent";
 import {
   TRASH_RETENTION_OPTIONS,
   type TrashRetentionDays,
@@ -9,7 +10,7 @@ import {
   type ShortcutBindings,
 } from "@/shared/lib/shortcuts";
 import {
-  ACCENT_COLORS,
+  ACCENT_SELECTIONS,
   DENSITIES,
   DEFAULT_APPEARANCE_SETTINGS,
   DEFAULT_EDITOR_SETTINGS,
@@ -140,9 +141,12 @@ export const normalizePersistencePromptSeen = (value: unknown): boolean =>
 export const normalizeAppearance = (
   settings: Partial<AppearanceSettings> | undefined,
 ): AppearanceSettings => ({
-  accent: ACCENT_COLORS.includes(settings?.accent as AccentColor)
+  accent: ACCENT_SELECTIONS.includes(settings?.accent as AccentColor)
     ? (settings?.accent as AccentColor)
     : DEFAULT_APPEARANCE_SETTINGS.accent,
+  accentCustom:
+    normalizeHexColor(settings?.accentCustom) ??
+    DEFAULT_APPEARANCE_SETTINGS.accentCustom,
   fontScale: FONT_SCALES.includes(settings?.fontScale as FontScale)
     ? (settings?.fontScale as FontScale)
     : DEFAULT_APPEARANCE_SETTINGS.fontScale,

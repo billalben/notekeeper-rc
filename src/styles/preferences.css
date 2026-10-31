@@ -7,9 +7,6 @@
   --swatch-orange: #9d4300;
   --swatch-blue: #1565c0;
   --swatch-green: #2e6c3f;
-  --swatch-teal: #00696e;
-  --swatch-violet: #6a4fa3;
-  --swatch-rose: #b3265a;
 }
 
 [data-accent="blue"] {
@@ -40,51 +37,6 @@
   --on-primary-container-dark: #b4f0bf;
   --secondary-container-dark: #15522a;
   --on-secondary-container-dark: #b4f0bf;
-}
-
-[data-accent="teal"] {
-  --primary-light: #00696e;
-  --on-primary-light: #ffffff;
-  --primary-container-light: #9df0f6;
-  --on-primary-container-light: #002022;
-  --secondary-container-light: #9df0f6;
-  --on-secondary-container-light: #002022;
-  --primary-dark: #83d3d9;
-  --on-primary-dark: #003739;
-  --primary-container-dark: #004f53;
-  --on-primary-container-dark: #9df0f6;
-  --secondary-container-dark: #004f53;
-  --on-secondary-container-dark: #9df0f6;
-}
-
-[data-accent="violet"] {
-  --primary-light: #6a4fa3;
-  --on-primary-light: #ffffff;
-  --primary-container-light: #e9ddff;
-  --on-primary-container-light: #22005d;
-  --secondary-container-light: #e9ddff;
-  --on-secondary-container-light: #22005d;
-  --primary-dark: #cfbcff;
-  --on-primary-dark: #381e72;
-  --primary-container-dark: #4f378a;
-  --on-primary-container-dark: #e9ddff;
-  --secondary-container-dark: #4f378a;
-  --on-secondary-container-dark: #e9ddff;
-}
-
-[data-accent="rose"] {
-  --primary-light: #b3265a;
-  --on-primary-light: #ffffff;
-  --primary-container-light: #ffd9e1;
-  --on-primary-container-light: #3f001d;
-  --secondary-container-light: #ffd9e1;
-  --on-secondary-container-light: #3f001d;
-  --primary-dark: #ffb1c6;
-  --on-primary-dark: #65002f;
-  --primary-container-dark: #8c1d4b;
-  --on-primary-container-dark: #ffd9e1;
-  --secondary-container-dark: #8c1d4b;
-  --on-secondary-container-dark: #ffd9e1;
 }
 
 /* Font scale: --fs-base drives the root font size; line-heights are in rem so

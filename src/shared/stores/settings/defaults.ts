@@ -1,5 +1,7 @@
 import { TRASH_RETENTION_DAYS } from "@/shared/lib/constants";
 import type {
+  AccentColor,
+  AccentPreset,
   AppearanceSettings,
   EditorSettings,
   EditorMode,
@@ -69,6 +71,7 @@ export const DEFAULT_MOTION: MotionPreference = "system";
 
 export const DEFAULT_APPEARANCE_SETTINGS: AppearanceSettings = {
   accent: "orange",
+  accentCustom: "#7c4dff",
   fontScale: "default",
   density: "default",
   radius: "default",
@@ -82,14 +85,9 @@ export const EDITOR_PRESENTATIONS: EditorPresentation[] = [
   "split",
 ];
 
-export const ACCENT_COLORS: AppearanceSettings["accent"][] = [
-  "orange",
-  "blue",
-  "green",
-  "teal",
-  "violet",
-  "rose",
-];
+export const ACCENT_COLORS: AccentPreset[] = ["orange", "blue", "green"];
+
+export const ACCENT_SELECTIONS: AccentColor[] = [...ACCENT_COLORS, "custom"];
 
 export const FONT_SCALES: AppearanceSettings["fontScale"][] = [
   "small",
