@@ -26,6 +26,10 @@ export const useNoteActions = ({
   const notebooks = useNoteStore((state) => state.notebooks);
   const addNote = useNoteStore((state) => state.addNote);
   const updateNote = useNoteStore((state) => state.updateNote);
+  const archiveNoteAction = useNoteStore((state) => state.archiveNote);
+  const unarchiveNoteAction = useNoteStore((state) => state.unarchiveNote);
+  const archiveNotesAction = useNoteStore((state) => state.archiveNotes);
+  const unarchiveNotesAction = useNoteStore((state) => state.unarchiveNotes);
   const setNoteFavorite = useNoteStore((state) => state.setNoteFavorite);
   const toggleNotePin = useNoteStore((state) => state.toggleNotePin);
   const toggleNoteFavorite = useNoteStore((state) => state.toggleNoteFavorite);
@@ -89,6 +93,64 @@ export const useNoteActions = ({
   const handleToggleNoteFavorite = useCallback(
     (note: Note) => toggleNoteFavorite(note.notebookId, note.id),
     [toggleNoteFavorite],
+  );
+
+  const handleArchiveNotes = useCallback(
+    (notes: Note[]) => {
+      const ids = notes.map((note) => note.id);
+      if (ids.length === 0) return;
+      archiveNotesAction(ids);
+      toast.success(t("toasts.notesArchived", { count: ids.length }), {
+        action: {
+          label: t("common.undo"),
+          onClick: () => {
+            unarchiveNotesAction(ids);
+            toast.success(t("toasts.notesUnarchived", { count: ids.length }));
+          },
+        },
+      });
+    },
+    [archiveNotesAction, t, unarchiveNotesAction],
+  );
+
+  const handleUnarchiveNotes = useCallback(
+    (notes: Note[]) => {
+      const ids = notes.map((note) => note.id);
+      if (ids.length === 0) return;
+      unarchiveNotesAction(ids);
+      toast.success(t("toasts.notesUnarchived", { count: ids.length }), {
+        action: {
+          label: t("common.undo"),
+          onClick: () => {
+            archiveNotesAction(ids);
+            toast.success(t("toasts.notesArchived", { count: ids.length }));
+          },
+        },
+      });
+    },
+    [archiveNotesAction, t, unarchiveNotesAction],
+  );
+
+  const handleToggleNoteArchive = useCallback(
+    (note: Note) => {
+      if (note.archivedAt !== null) {
+        unarchiveNoteAction(note.id);
+        toast.success(t("toasts.noteUnarchived"));
+        return;
+      }
+
+      archiveNoteAction(note.id);
+      toast.success(t("toasts.noteArchived"), {
+        action: {
+          label: t("common.undo"),
+          onClick: () => {
+            unarchiveNoteAction(note.id);
+            toast.success(t("toasts.noteUnarchived"));
+          },
+        },
+      });
+    },
+    [archiveNoteAction, t, unarchiveNoteAction],
   );
 
   const handleMoveNote = useCallback(
@@ -226,6 +288,9 @@ export const useNoteActions = ({
     persistNote,
     toggleNotePin: handleToggleNotePin,
     toggleNoteFavorite: handleToggleNoteFavorite,
+    toggleNoteArchive: handleToggleNoteArchive,
+    archiveNotes: handleArchiveNotes,
+    unarchiveNotes: handleUnarchiveNotes,
     moveNote: handleMoveNote,
     moveNoteToNotebook: handleMoveNoteToNotebook,
     deleteNote: handleDeleteNote,

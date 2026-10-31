@@ -2,7 +2,7 @@ import type { Notebook } from "@/shared/types";
 import { generateID } from "@/shared/lib/id";
 
 export const EXPORT_APP = "notekeeper";
-const EXPORT_SCHEMA_VERSION = 1;
+const EXPORT_SCHEMA_VERSION = 2;
 
 const MIME_JSON = "application/json";
 export const MIME_MARKDOWN = "text/markdown";
@@ -21,6 +21,7 @@ interface ExportNote {
   updatedOn: number;
   pinned: boolean;
   favorite: boolean;
+  archivedAt: number | null;
 }
 
 interface ExportNotebook {
@@ -56,6 +57,7 @@ export interface NoteContent {
   updatedOn?: number;
   pinned?: boolean;
   favorite?: boolean;
+  archivedAt?: number | null;
 }
 
 const toExportNote = (note: NoteContent): ExportNote => ({
@@ -67,6 +69,7 @@ const toExportNote = (note: NoteContent): ExportNote => ({
   updatedOn: note.updatedOn ?? note.postedOn ?? 0,
   pinned: note.pinned ?? false,
   favorite: note.favorite ?? false,
+  archivedAt: note.archivedAt ?? null,
 });
 
 const toExportNotebook = (notebook: Notebook): ExportNotebook => ({
@@ -144,6 +147,7 @@ const noteToMarkdown = (
     `updatedOn: ${isoOrEmpty(note.updatedOn)}`,
     `pinned: ${note.pinned ?? false}`,
     `favorite: ${note.favorite ?? false}`,
+    `archived: ${note.archivedAt !== null && note.archivedAt !== undefined}`,
     "---",
     "",
     `# ${note.title || "Untitled"}`,

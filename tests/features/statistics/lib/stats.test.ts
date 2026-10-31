@@ -37,11 +37,18 @@ const buildLibrary = () => {
     updatedOn: DAY_START + 1000,
     deletedAt: DAY_START + 3000,
   });
+  const archivedNote = makeNote({
+    id: "n6",
+    text: "ignored archived",
+    postedOn: DAY_START + 1000,
+    updatedOn: DAY_START + 1000,
+    archivedAt: DAY_START + 4000,
+  });
 
   const work = makeNotebook({
     id: "work",
     name: "Work",
-    notes: [n1, n2, trashedNote],
+    notes: [n1, n2, trashedNote, archivedNote],
   });
   const home = makeNotebook({ id: "home", name: "Home", notes: [n3] });
   const empty = makeNotebook({ id: "empty", name: "Empty", notes: [] });

@@ -30,6 +30,10 @@ describe("parseHash", () => {
     });
     expect(parseHash("#/stats")).toEqual({ ...DEFAULT_ROUTE, base: "stats" });
     expect(parseHash("#/trash")).toEqual({ ...DEFAULT_ROUTE, base: "trash" });
+    expect(parseHash("#/archive")).toEqual({
+      ...DEFAULT_ROUTE,
+      base: "archive",
+    });
   });
 
   it("falls back to the default route for empty or unknown paths", () => {
@@ -87,6 +91,14 @@ describe("buildHash", () => {
     expect(buildHash(DEFAULT_ROUTE)).toBe("#/all");
     expect(
       buildHash({
+        base: "archive",
+        notebookId: null,
+        noteId: null,
+        overlay: null,
+      }),
+    ).toBe("#/archive");
+    expect(
+      buildHash({
         base: "notebook",
         notebookId: "x",
         noteId: null,
@@ -138,6 +150,7 @@ describe("parseHash / buildHash round-trip", () => {
   const routes: Route[] = [
     DEFAULT_ROUTE,
     { base: "recent", notebookId: null, noteId: null, overlay: null },
+    { base: "archive", notebookId: null, noteId: null, overlay: null },
     { base: "notebook", notebookId: "nb 1", noteId: "n/1", overlay: null },
     {
       base: "notebook",

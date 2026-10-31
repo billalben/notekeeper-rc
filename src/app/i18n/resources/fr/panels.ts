@@ -24,6 +24,31 @@ export const trash = {
   deleteTitle: "Supprimer {{title}} définitivement",
 } as const;
 
+export const archive = {
+  title: "Archives",
+  description:
+    "Les notes archivées restent hors de vos vues intelligentes jusqu'à leur désarchivage.",
+  empty: "Les archives sont vides",
+  archived: "Archivée {{time}}",
+  readOnlyHint:
+    "Les notes archivées sont en lecture seule. Désarchivez cette note pour la modifier.",
+  noContent: "Cette note n'a pas de contenu.",
+  unarchive: "Désarchiver la note",
+  download: "Télécharger la note",
+  delete: "Supprimer la note",
+} as const;
+
+export const selection = {
+  label: "Sélection de notes",
+  start: "Sélectionner des notes",
+  selected_one: "{{count}} sélectionnée",
+  selected_other: "{{count}} sélectionnées",
+  selectAll: "Tout sélectionner",
+  clearAll: "Tout désélectionner",
+  archive: "Archiver",
+  unarchive: "Désarchiver",
+} as const;
+
 export const stats = {
   title: "Statistiques",
   noNotesYet: "Aucune note pour l'instant",

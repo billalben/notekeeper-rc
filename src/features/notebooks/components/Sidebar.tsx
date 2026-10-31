@@ -4,6 +4,7 @@ import logoLight from "@/assets/logo-light.svg";
 import logoDark from "@/assets/logo-dark.svg";
 import { useSidebarResize } from "@/features/notebooks/hooks/useSidebarResize";
 import { computeSidebarCounts } from "@/features/notebooks/lib/sidebarCounts";
+import { isActiveNote } from "@/shared/lib/notes";
 import { formatChord } from "@/shared/lib/shortcuts";
 import { useNoteStore } from "@/shared/stores/useNoteStore";
 import { useSettingsStore } from "@/shared/stores/useSettingsStore";
@@ -61,6 +62,7 @@ export const Sidebar = ({
     favoriteCount,
     pinnedCount,
     recentCount,
+    archivedCount,
   } = computeSidebarCounts(notebooks);
 
   const selectNotebook = (notebookId: string) => {
@@ -184,9 +186,7 @@ export const Sidebar = ({
               key={notebook.id}
               notebook={notebook}
               isActive={notebook.id === activeNotebookId && view === "notes"}
-              noteCount={
-                notebook.notes.filter((note) => note.deletedAt === null).length
-              }
+              noteCount={notebook.notes.filter(isActiveNote).length}
               onSelect={selectNotebook}
               onRename={renameNotebook}
               onTogglePin={onTogglePin}
@@ -212,6 +212,7 @@ export const Sidebar = ({
         <MoreSection
           view={view}
           trashedCount={trashedCount}
+          archivedCount={archivedCount}
           onNavigate={onClose}
         />
       </nav>

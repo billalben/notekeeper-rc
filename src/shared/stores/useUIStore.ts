@@ -2,7 +2,14 @@ import { create } from "zustand";
 import type { SettingsSection } from "@/shared/types";
 
 export type MainView =
-  "all" | "recent" | "notes" | "pinned" | "favorites" | "trash" | "stats";
+  | "all"
+  | "recent"
+  | "notes"
+  | "pinned"
+  | "favorites"
+  | "trash"
+  | "stats"
+  | "archive";
 
 interface UIStore {
   isAddingNotebook: boolean;
@@ -23,6 +30,7 @@ interface UIStore {
   openFavorites: () => void;
   openPinned: () => void;
   openStats: () => void;
+  openArchive: () => void;
   showNotes: () => void;
   activeTags: string[];
   toggleTag: (tag: string) => void;
@@ -65,6 +73,7 @@ export const useUIStore = create<UIStore>((set) => ({
   openFavorites: () => set({ view: "favorites", activeTags: [] }),
   openPinned: () => set({ view: "pinned", activeTags: [] }),
   openStats: () => set({ view: "stats", activeTags: [] }),
+  openArchive: () => set({ view: "archive", activeTags: [] }),
   showNotes: () => set({ view: "notes" }),
   activeTags: [],
   toggleTag: (tag) =>

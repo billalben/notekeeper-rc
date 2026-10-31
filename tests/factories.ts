@@ -16,6 +16,7 @@ export const makeNote = (overrides: Partial<Note> = {}): Note => ({
   postedOn: 0,
   updatedOn: 0,
   deletedAt: null,
+  archivedAt: null,
   pinned: false,
   favorite: false,
   ...overrides,

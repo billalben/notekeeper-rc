@@ -65,6 +65,10 @@ interface NoteStore {
   setActiveNotebook: (notebookId: string | null) => void;
   addNote: (notebookId: string, data: NoteInput) => Note | undefined;
   updateNote: (noteId: string, data: NoteInput) => void;
+  archiveNote: (noteId: string) => void;
+  unarchiveNote: (noteId: string) => void;
+  archiveNotes: (noteIds: string[]) => void;
+  unarchiveNotes: (noteIds: string[]) => void;
   toggleNotePin: (notebookId: string, noteId: string) => void;
   toggleNoteFavorite: (notebookId: string, noteId: string) => void;
   setNoteFavorite: (noteId: string, favorite: boolean) => void;
@@ -94,7 +98,7 @@ migrateLegacyStorage();
 
 export const useNoteStore = create<NoteStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       notebooks: [],
       tags: [],
       activeNotebookId: null,
@@ -230,6 +234,7 @@ export const useNoteStore = create<NoteStore>()(
           postedOn: now,
           updatedOn: now,
           deletedAt: null,
+          archivedAt: null,
           pinned: false,
           favorite: data.favorite ?? false,
         };
@@ -247,6 +252,11 @@ export const useNoteStore = create<NoteStore>()(
       },
 
       updateNote: (noteId, data) => {
+        const target = get()
+          .notebooks.flatMap((notebook) => notebook.notes)
+          .find((note) => note.id === noteId);
+        if (!target || target.archivedAt !== null) return;
+
         set((state) => ({
           tags: data.tags
             ? sortTags(mergeTags(state.tags, data.tags))
@@ -262,6 +272,55 @@ export const useNoteStore = create<NoteStore>()(
         }));
       },
 
+      archiveNote: (noteId) => get().archiveNotes([noteId]),
+
+      unarchiveNote: (noteId) => get().unarchiveNotes([noteId]),
+
+      archiveNotes: (noteIds) => {
+        const ids = new Set(noteIds);
+        if (ids.size === 0) return;
+        const now = Date.now();
+
+        set((state) => ({
+          notebooks: state.notebooks.map((notebook) =>
+            notebook.deletedAt !== null
+              ? notebook
+              : {
+                  ...notebook,
+                  notes: notebook.notes.map((note) =>
+                    ids.has(note.id) &&
+                    note.deletedAt === null &&
+                    note.archivedAt === null
+                      ? { ...note, archivedAt: now }
+                      : note,
+                  ),
+                },
+          ),
+        }));
+      },
+
+      unarchiveNotes: (noteIds) => {
+        const ids = new Set(noteIds);
+        if (ids.size === 0) return;
+
+        set((state) => ({
+          notebooks: state.notebooks.map((notebook) =>
+            notebook.deletedAt !== null
+              ? notebook
+              : {
+                  ...notebook,
+                  notes: notebook.notes.map((note) =>
+                    ids.has(note.id) &&
+                    note.deletedAt === null &&
+                    note.archivedAt !== null
+                      ? { ...note, archivedAt: null }
+                      : note,
+                  ),
+                },
+          ),
+        }));
+      },
+
       toggleNotePin: (notebookId, noteId) => {
         set((state) => ({
           notebooks: state.notebooks.map((notebook) =>
@@ -269,7 +328,7 @@ export const useNoteStore = create<NoteStore>()(
               ? {
                   ...notebook,
                   notes: notebook.notes.map((note) =>
-                    note.id === noteId
+                    note.id === noteId && note.archivedAt === null
                       ? { ...note, pinned: !note.pinned }
                       : note,
                   ),
@@ -286,7 +345,7 @@ export const useNoteStore = create<NoteStore>()(
               ? {
                   ...notebook,
                   notes: notebook.notes.map((note) =>
-                    note.id === noteId
+                    note.id === noteId && note.archivedAt === null
                       ? { ...note, favorite: !note.favorite }
                       : note,
                   ),
@@ -301,13 +360,20 @@ export const useNoteStore = create<NoteStore>()(
           notebooks: state.notebooks.map((notebook) => ({
             ...notebook,
             notes: notebook.notes.map((note) =>
-              note.id === noteId ? { ...note, favorite } : note,
+              note.id === noteId && note.archivedAt === null
+                ? { ...note, favorite }
+                : note,
             ),
           })),
         }));
       },
 
       moveNote: (notebookId, noteId, direction) => {
+        const note = get()
+          .notebooks.find((notebook) => notebook.id === notebookId)
+          ?.notes.find((item) => item.id === noteId);
+        if (!note || note.archivedAt !== null) return;
+
         set((state) => ({
           notebooks: state.notebooks.map((notebook) =>
             notebook.id === notebookId
@@ -337,7 +403,7 @@ export const useNoteStore = create<NoteStore>()(
           if (!source || !target || target.deletedAt !== null) return state;
 
           const note = source.notes.find((item) => item.id === noteId);
-          if (!note) return state;
+          if (!note || note.archivedAt !== null) return state;
 
           const movedNote: Note = {
             ...note,

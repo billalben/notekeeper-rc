@@ -24,6 +24,8 @@ export const card = {
   unpin: "Unpin note",
   favoriteAdd: "Favorite note",
   favoriteRemove: "Unfavorite note",
+  archive: "Archive note",
+  unarchive: "Unarchive note",
   downloadAs: "Download as {{format}}",
   markdown: "Markdown",
   json: "JSON",

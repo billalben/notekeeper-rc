@@ -58,18 +58,30 @@ export const useEditorSession = ({
   );
 
   const activeSplitNote =
-    selectedNote && selectedNote.deletedAt === null ? selectedNote : null;
+    selectedNote &&
+    selectedNote.deletedAt === null &&
+    selectedNote.archivedAt === null
+      ? selectedNote
+      : null;
 
-  const isNoteView = view !== "stats" && view !== "trash";
+  const isNoteView = view !== "stats" && view !== "trash" && view !== "archive";
   const isSplitEnabled = presentation === "split" && isWide && isNoteView;
   const showSplitPane =
     isSplitEnabled && (isCreatingNote || activeSplitNote !== null);
   const showNoteModal =
     !isSplitEnabled &&
-    (isCreatingNote || (editorNote !== null && editorNote.deletedAt === null));
+    (isCreatingNote ||
+      (editorNote !== null &&
+        editorNote.deletedAt === null &&
+        editorNote.archivedAt === null));
 
   useEffect(() => {
-    if (editorNoteId && (!editorNote || editorNote.deletedAt !== null)) {
+    if (
+      editorNoteId &&
+      (!editorNote ||
+        editorNote.deletedAt !== null ||
+        editorNote.archivedAt !== null)
+    ) {
       closeNoteModal();
     }
   }, [editorNoteId, editorNote, closeNoteModal]);

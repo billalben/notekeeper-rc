@@ -30,6 +30,7 @@ describe("parseBackupFile", () => {
                   updatedOn: 2000,
                   pinned: true,
                   favorite: false,
+                  archivedAt: 3000,
                 },
               ],
             },
@@ -57,6 +58,7 @@ describe("parseBackupFile", () => {
       updatedOn: 2000,
       pinned: true,
       favorite: false,
+      archivedAt: 3000,
       deletedAt: null,
     });
     expect(tags).toEqual(["work"]);
@@ -112,6 +114,7 @@ describe("parseBackupFile", () => {
     expect(note.text).toBe("");
     expect(note.tags).toEqual(["Work", "home"]);
     expect(note.favorite).toBe(false);
+    expect(note.archivedAt).toBeNull();
     expect(note.updatedOn).toBe(note.postedOn);
     expect(tags).toEqual(["home", "Work", "Zeta"]);
   });

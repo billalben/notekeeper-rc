@@ -23,6 +23,30 @@ export const trash = {
   deleteTitle: "Delete {{title}} permanently",
 } as const;
 
+export const archive = {
+  title: "Archive",
+  description:
+    "Archived notes stay out of your smart views until you unarchive them.",
+  empty: "Archive is empty",
+  archived: "Archived {{time}}",
+  readOnlyHint: "Archived notes are read-only. Unarchive this note to edit it.",
+  noContent: "This note has no content.",
+  unarchive: "Unarchive note",
+  download: "Download note",
+  delete: "Delete note",
+} as const;
+
+export const selection = {
+  label: "Note selection",
+  start: "Select notes",
+  selected_one: "{{count}} selected",
+  selected_other: "{{count}} selected",
+  selectAll: "Select all",
+  clearAll: "Clear all",
+  archive: "Archive",
+  unarchive: "Unarchive",
+} as const;
+
 export const stats = {
   title: "Statistics",
   noNotesYet: "No notes yet",

@@ -6,6 +6,7 @@ export interface Note {
   postedOn: number;
   updatedOn: number;
   deletedAt: number | null;
+  archivedAt: number | null;
   pinned: boolean;
   favorite: boolean;
   tags: string[];

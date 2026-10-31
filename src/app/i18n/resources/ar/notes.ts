@@ -24,6 +24,8 @@ export const card = {
   unpin: "إلغاء تثبيت الملاحظة",
   favoriteAdd: "إضافة إلى المفضلة",
   favoriteRemove: "إزالة من المفضلة",
+  archive: "أرشفة الملاحظة",
+  unarchive: "إلغاء أرشفة الملاحظة",
   downloadAs: "تنزيل بصيغة {{format}}",
   markdown: "Markdown",
   json: "JSON",

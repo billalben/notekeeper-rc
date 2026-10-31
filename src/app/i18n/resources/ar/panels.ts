@@ -26,6 +26,34 @@ export const trash = {
   deleteTitle: "حذف {{title}} نهائيًا",
 } as const;
 
+export const archive = {
+  title: "الأرشيف",
+  description: "تبقى الملاحظات المؤرشفة خارج عروضك الذكية حتى تلغي أرشفتها.",
+  empty: "الأرشيف فارغ",
+  archived: "أُرشفت {{time}}",
+  readOnlyHint:
+    "الملاحظات المؤرشفة للقراءة فقط. ألغِ أرشفة هذه الملاحظة لتعديلها.",
+  noContent: "لا تحتوي هذه الملاحظة على محتوى.",
+  unarchive: "إلغاء أرشفة الملاحظة",
+  download: "تنزيل الملاحظة",
+  delete: "حذف الملاحظة",
+} as const;
+
+export const selection = {
+  label: "تحديد الملاحظات",
+  start: "تحديد الملاحظات",
+  selected_zero: "لم يتم تحديد ملاحظات",
+  selected_one: "تم تحديد ملاحظة واحدة",
+  selected_two: "تم تحديد ملاحظتان",
+  selected_few: "تم تحديد {{count}} ملاحظات",
+  selected_many: "تم تحديد {{count}} ملاحظة",
+  selected_other: "تم تحديد {{count}} ملاحظة",
+  selectAll: "تحديد الكل",
+  clearAll: "إلغاء تحديد الكل",
+  archive: "أرشفة",
+  unarchive: "إلغاء الأرشفة",
+} as const;
+
 export const stats = {
   title: "الإحصائيات",
   noNotesYet: "لا ملاحظات بعد",

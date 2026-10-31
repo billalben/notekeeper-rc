@@ -173,6 +173,117 @@ describe("note lifecycle", () => {
   });
 });
 
+describe("archive", () => {
+  it("archives and unarchives single notes and batches", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1000);
+    const notebook = get().addNotebook("N");
+    const first = addNote(notebook.id, { title: "A", text: "x" });
+    const second = addNote(notebook.id, { title: "B", text: "y" });
+
+    get().archiveNote(first.id);
+    expect(
+      get().notebooks[0].notes.find((n) => n.id === first.id)?.archivedAt,
+    ).toBe(1000);
+
+    get().unarchiveNote(first.id);
+    expect(
+      get().notebooks[0].notes.find((n) => n.id === first.id)?.archivedAt,
+    ).toBeNull();
+
+    get().archiveNotes([first.id, second.id]);
+    expect(
+      get()
+        .notebooks[0].notes.filter((n) => n.archivedAt !== null)
+        .map((n) => n.id),
+    ).toEqual([second.id, first.id]);
+
+    get().unarchiveNotes([first.id, second.id]);
+    expect(get().notebooks[0].notes.every((n) => n.archivedAt === null)).toBe(
+      true,
+    );
+  });
+
+  it("does not archive trashed notes or unarchive notes in trashed notebooks", () => {
+    useNoteStore.setState({
+      notebooks: [
+        makeNotebook({
+          id: "nb",
+          notes: [
+            makeNote({ id: "trashed", deletedAt: 1, archivedAt: 5 }),
+            makeNote({ id: "archived", archivedAt: 5 }),
+          ],
+        }),
+        makeNotebook({
+          id: "gone",
+          deletedAt: 1,
+          notes: [makeNote({ id: "hidden", archivedAt: 5 })],
+        }),
+      ],
+    });
+
+    get().archiveNotes(["trashed", "hidden"]);
+    get().unarchiveNotes(["trashed", "hidden"]);
+
+    const notes = get().notebooks.flatMap((notebook) => notebook.notes);
+    expect(notes.find((n) => n.id === "trashed")?.archivedAt).toBe(5);
+    expect(notes.find((n) => n.id === "hidden")?.archivedAt).toBe(5);
+  });
+
+  it("blocks edits and metadata changes on archived notes", () => {
+    useNoteStore.setState({
+      notebooks: [
+        makeNotebook({
+          id: "nb",
+          notes: [
+            makeNote({
+              id: "a",
+              title: "Original",
+              archivedAt: 1,
+              pinned: false,
+              favorite: false,
+            }),
+            makeNote({ id: "b" }),
+          ],
+        }),
+        makeNotebook({ id: "dst" }),
+      ],
+    });
+
+    get().updateNote("a", { title: "Changed", text: "changed", tags: ["x"] });
+    get().toggleNotePin("nb", "a");
+    get().toggleNoteFavorite("nb", "a");
+    get().setNoteFavorite("a", true);
+    get().moveNote("nb", "a", "down");
+    get().moveNoteToNotebook("nb", "a", "dst");
+
+    const note = get().notebooks[0].notes[0];
+    expect(note.title).toBe("Original");
+    expect(note.text).toBe("");
+    expect(note.pinned).toBe(false);
+    expect(note.favorite).toBe(false);
+    expect(get().notebooks[0].notes.map((item) => item.id)).toEqual(["a", "b"]);
+    expect(get().notebooks[1].notes).toEqual([]);
+    expect(get().tags).not.toContain("x");
+  });
+
+  it("keeps notes archived when they are trashed and restored", () => {
+    useNoteStore.setState({
+      notebooks: [
+        makeNotebook({
+          id: "nb",
+          notes: [makeNote({ id: "a", archivedAt: 5 })],
+        }),
+      ],
+    });
+
+    get().deleteNote("nb", "a");
+    get().restoreNote("a");
+
+    expect(get().notebooks[0].notes[0].archivedAt).toBe(5);
+  });
+});
+
 describe("moving notes between notebooks", () => {
   const seed = () =>
     useNoteStore.setState({

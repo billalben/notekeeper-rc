@@ -15,9 +15,13 @@ interface NoteListProps {
   emptyMessage?: string;
   emptyIcon?: string;
   selectedNoteId?: string | null;
+  isSelecting?: boolean;
+  selectedIds?: ReadonlySet<string>;
+  onToggleSelected?: (note: Note) => void;
   onOpen: (note: Note) => void;
   onTogglePin: (note: Note) => void;
   onToggleFavorite: (note: Note) => void;
+  onToggleArchive: (note: Note) => void;
   onMove: (note: Note, direction: MoveDirection) => void;
   onRequestMove: (note: Note) => void;
   onRequestDelete: (note: Note) => void;
@@ -30,9 +34,13 @@ export const NoteList = ({
   emptyMessage,
   emptyIcon = "note_stack",
   selectedNoteId,
+  isSelecting = false,
+  selectedIds,
+  onToggleSelected,
   onOpen,
   onTogglePin,
   onToggleFavorite,
+  onToggleArchive,
   onMove,
   onRequestMove,
   onRequestDelete,
@@ -40,7 +48,10 @@ export const NoteList = ({
   const { t } = useTranslation();
 
   return (
-    <div className="note-list" data-note-panel>
+    <div
+      className={`note-list${isSelecting ? " is-selecting" : ""}`}
+      data-note-panel
+    >
       {notes.length > 0 ? (
         notes.map((note) => (
           <NoteCard
@@ -51,9 +62,13 @@ export const NoteList = ({
             canMoveToNotebook={canMoveToNotebook}
             notebookName={notebookNames?.[note.notebookId]}
             isSelected={note.id === selectedNoteId}
+            isSelecting={isSelecting}
+            isChecked={selectedIds?.has(note.id) ?? false}
+            onToggleChecked={onToggleSelected}
             onOpen={onOpen}
             onTogglePin={onTogglePin}
             onToggleFavorite={onToggleFavorite}
+            onToggleArchive={onToggleArchive}
             onMove={onMove}
             onRequestMove={onRequestMove}
             onRequestDelete={onRequestDelete}

@@ -7,12 +7,14 @@ import { SidebarSection } from "./SidebarSection";
 interface MoreSectionProps {
   view: MainView;
   trashedCount: number;
+  archivedCount: number;
   onNavigate: () => void;
 }
 
 export const MoreSection = ({
   view,
   trashedCount,
+  archivedCount,
   onNavigate,
 }: MoreSectionProps) => {
   const { t } = useTranslation();
@@ -24,6 +26,7 @@ export const MoreSection = ({
   );
   const openStats = useUIStore((state) => state.openStats);
   const openTrash = useUIStore((state) => state.openTrash);
+  const openArchive = useUIStore((state) => state.openArchive);
 
   const indicators = (
     <>
@@ -35,6 +38,15 @@ export const MoreSection = ({
         aria-hidden="true"
       >
         insights
+      </span>
+      <span
+        className={`material-symbols-rounded sidebar-indicator${
+          view === "archive" ? " is-selected" : ""
+        }`}
+        title={t("sidebar.archive")}
+        aria-hidden="true"
+      >
+        archive
       </span>
       <span
         className={`material-symbols-rounded sidebar-indicator${
@@ -63,6 +75,16 @@ export const MoreSection = ({
         selected={view === "stats"}
         onClick={() => {
           openStats();
+          onNavigate();
+        }}
+      />
+      <SidebarRow
+        icon="archive"
+        label={t("sidebar.archive")}
+        count={archivedCount}
+        selected={view === "archive"}
+        onClick={() => {
+          openArchive();
           onNavigate();
         }}
       />

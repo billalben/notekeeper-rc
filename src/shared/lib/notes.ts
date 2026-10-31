@@ -4,6 +4,14 @@ import { hasTag } from "./tags";
 export const sortByPinned = <T extends { pinned: boolean }>(items: T[]): T[] =>
   [...items].sort((a, b) => Number(b.pinned) - Number(a.pinned));
 
+/** A live note: neither archived nor in the trash. */
+export const isActiveNote = (note: Note): boolean =>
+  note.deletedAt === null && note.archivedAt === null;
+
+/** An archived note that has not also been moved to the trash. */
+const isArchivedNote = (note: Note): boolean =>
+  note.deletedAt === null && note.archivedAt !== null;
+
 /**
  * Usage count per tag, keyed by lowercased tag name, across all notes
  * (including trashed ones).
@@ -42,7 +50,7 @@ export const filterNotesByTags = (
     .flatMap((notebook) =>
       notebook.notes.filter(
         (note) =>
-          note.deletedAt === null && tags.every((tag) => noteHasTag(note, tag)),
+          isActiveNote(note) && tags.every((tag) => noteHasTag(note, tag)),
       ),
     );
 };
@@ -55,7 +63,7 @@ export const collectFavoriteNotes = (notebooks: Notebook[]): Note[] =>
   notebooks
     .filter((notebook) => notebook.deletedAt === null)
     .flatMap((notebook) =>
-      notebook.notes.filter((note) => note.deletedAt === null && note.favorite),
+      notebook.notes.filter((note) => isActiveNote(note) && note.favorite),
     )
     .sort((a, b) => b.updatedOn - a.updatedOn);
 
@@ -67,7 +75,7 @@ export const collectPinnedNotes = (notebooks: Notebook[]): Note[] =>
   notebooks
     .filter((notebook) => notebook.deletedAt === null)
     .flatMap((notebook) =>
-      notebook.notes.filter((note) => note.deletedAt === null && note.pinned),
+      notebook.notes.filter((note) => isActiveNote(note) && note.pinned),
     )
     .sort((a, b) => b.updatedOn - a.updatedOn);
 
@@ -78,9 +86,7 @@ export const collectPinnedNotes = (notebooks: Notebook[]): Note[] =>
 export const collectAllNotes = (notebooks: Notebook[]): Note[] =>
   notebooks
     .filter((notebook) => notebook.deletedAt === null)
-    .flatMap((notebook) =>
-      notebook.notes.filter((note) => note.deletedAt === null),
-    )
+    .flatMap((notebook) => notebook.notes.filter(isActiveNote))
     .sort(
       (a, b) =>
         Number(b.pinned) - Number(a.pinned) || b.updatedOn - a.updatedOn,
@@ -99,11 +105,20 @@ export const collectRecentNotes = (
 ): Note[] =>
   notebooks
     .filter((notebook) => notebook.deletedAt === null)
-    .flatMap((notebook) =>
-      notebook.notes.filter((note) => note.deletedAt === null),
-    )
+    .flatMap((notebook) => notebook.notes.filter(isActiveNote))
     .sort((a, b) => b.updatedOn - a.updatedOn)
     .slice(0, limit);
+
+/**
+ * Archived notes that live in active notebooks, newest archive first. Notes
+ * whose notebook is in the trash are represented by the notebook in Trash and
+ * reappear here once that notebook is restored.
+ */
+export const collectArchivedNotes = (notebooks: Notebook[]): Note[] =>
+  notebooks
+    .filter((notebook) => notebook.deletedAt === null)
+    .flatMap((notebook) => notebook.notes.filter(isArchivedNote))
+    .sort((a, b) => (b.archivedAt ?? 0) - (a.archivedAt ?? 0));
 
 export type MoveDirection = "up" | "down";
 
@@ -111,13 +126,15 @@ interface Movable {
   id: string;
   pinned: boolean;
   deletedAt: number | null;
+  /** Notes can be archived; notebooks do not have this field. */
+  archivedAt?: number | null;
 }
 
 /**
- * Swap an item with its nearest visible (non-trashed) neighbour in the given
- * direction. Movement is confined to the item's own pinned group so pinned
- * items always stay above unpinned ones. Returns a new array, or the original
- * array unchanged when no valid move exists.
+ * Swap an item with its nearest visible (non-trashed, non-archived) neighbour
+ * in the given direction. Movement is confined to the item's own pinned group
+ * so pinned items always stay above unpinned ones. Returns a new array, or the
+ * original array unchanged when no valid move exists.
  */
 export const moveWithinGroup = <T extends Movable>(
   items: T[],
@@ -128,7 +145,12 @@ export const moveWithinGroup = <T extends Movable>(
   if (index === -1) return items;
 
   const target = items[index];
-  const isVisible = (item: Movable) => item.deletedAt === null;
+  if (target.deletedAt !== null || (target.archivedAt ?? null) !== null) {
+    return items;
+  }
+
+  const isVisible = (item: Movable) =>
+    item.deletedAt === null && (item.archivedAt ?? null) === null;
   const isSameGroup = (item: Movable) => item.pinned === target.pinned;
 
   const step = direction === "up" ? -1 : 1;
@@ -168,6 +190,7 @@ export const withMoveFlags = <T extends Movable>(
     const sameGroup = (other: Movable | undefined) =>
       other !== undefined &&
       other.deletedAt === null &&
+      (other.archivedAt ?? null) === null &&
       other.pinned === item.pinned;
 
     return {

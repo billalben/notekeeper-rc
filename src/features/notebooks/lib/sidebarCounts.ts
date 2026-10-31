@@ -1,6 +1,8 @@
 import type { Notebook } from "@/shared/types";
 import {
+  collectArchivedNotes,
   collectRecentNotes,
+  isActiveNote,
   sortByPinned,
   withMoveFlags,
 } from "@/shared/lib/notes";
@@ -12,8 +14,7 @@ export const computeSidebarCounts = (notebooks: Notebook[]) => {
   );
 
   const totalNotes = visibleNotebooks.reduce(
-    (total, notebook) =>
-      total + notebook.notes.filter((note) => note.deletedAt === null).length,
+    (total, notebook) => total + notebook.notes.filter(isActiveNote).length,
     0,
   );
   const trashedCount =
@@ -26,18 +27,18 @@ export const computeSidebarCounts = (notebooks: Notebook[]) => {
   const favoriteCount = visibleNotebooks.reduce(
     (total, notebook) =>
       total +
-      notebook.notes.filter((note) => note.deletedAt === null && note.favorite)
+      notebook.notes.filter((note) => isActiveNote(note) && note.favorite)
         .length,
     0,
   );
   const pinnedCount = visibleNotebooks.reduce(
     (total, notebook) =>
       total +
-      notebook.notes.filter((note) => note.deletedAt === null && note.pinned)
-        .length,
+      notebook.notes.filter((note) => isActiveNote(note) && note.pinned).length,
     0,
   );
   const recentCount = collectRecentNotes(notebooks).length;
+  const archivedCount = collectArchivedNotes(notebooks).length;
 
   return {
     visibleNotebooks,
@@ -46,5 +47,6 @@ export const computeSidebarCounts = (notebooks: Notebook[]) => {
     favoriteCount,
     pinnedCount,
     recentCount,
+    archivedCount,
   };
 };

@@ -195,6 +195,7 @@ const App = () => {
     onOpen: handleListOpen,
     onTogglePin: actions.toggleNotePin,
     onToggleFavorite: actions.toggleNoteFavorite,
+    onToggleArchive: actions.toggleNoteArchive,
     onMove: actions.moveNote,
     onRequestMove: actions.requestMoveNote,
     onRequestDelete: actions.deleteNote,
@@ -269,7 +270,10 @@ const App = () => {
             hasVisibleNotebooks={visibleNotebooks.length > 0}
             isSplitEnabled={isSplitEnabled}
             selectedNoteId={selectedNoteId}
+            selectionDisabled={isSplitEnabled && selectedNoteId !== null}
             handlers={handlers}
+            onArchiveSelected={actions.archiveNotes}
+            onUnarchiveSelected={actions.unarchiveNotes}
             onOpenRecent={openNoteInNotebook}
             onOpenStatsNote={openNoteInNotebook}
             onNewNote={openCreateNote}

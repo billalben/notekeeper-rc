@@ -18,6 +18,12 @@ const notebooks = [
         text: "quick",
         deletedAt: 1,
       }),
+      makeNote({
+        id: "archived",
+        title: "Alpha archived",
+        text: "quick",
+        archivedAt: 1,
+      }),
     ],
   }),
   makeNotebook({
@@ -56,9 +62,10 @@ describe("runSearch", () => {
     expect(results[0].snippet.length).toBeGreaterThan(0);
   });
 
-  it("never surfaces trashed notes or notes in trashed notebooks", () => {
+  it("never surfaces trashed or archived notes, or notes in trashed notebooks", () => {
     const ids = runSearch(fuse, "quick").map((result) => result.note.id);
     expect(ids).not.toContain("trashed");
+    expect(ids).not.toContain("archived");
     expect(ids).not.toContain("hidden");
   });
 

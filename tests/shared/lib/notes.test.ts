@@ -3,6 +3,7 @@ import { makeNote, makeNotebook } from "@tests/factories";
 import type { Note, Notebook } from "@/shared/types";
 import {
   collectAllNotes,
+  collectArchivedNotes,
   collectFavoriteNotes,
   collectPinnedNotes,
   collectRecentNotes,
@@ -47,6 +48,11 @@ describe("filterNotesByTags", () => {
         makeNote({ id: "a", tags: ["work", "urgent"] }),
         makeNote({ id: "b", tags: ["work"] }),
         makeNote({ id: "c", deletedAt: 1, tags: ["work", "urgent"] }),
+        makeNote({
+          id: "archived",
+          archivedAt: 1,
+          tags: ["work", "urgent"],
+        }),
       ],
     }),
     makeNotebook({
@@ -77,6 +83,13 @@ const notebooksForCollection = (): Notebook[] => [
       makeNote({ id: "pinned", pinned: true, updatedOn: 20 }),
       makeNote({ id: "plain", updatedOn: 40 }),
       makeNote({ id: "trashed", favorite: true, updatedOn: 99, deletedAt: 1 }),
+      makeNote({
+        id: "archived",
+        favorite: true,
+        pinned: true,
+        updatedOn: 100,
+        archivedAt: 50,
+      }),
     ],
   }),
   makeNotebook({
@@ -116,15 +129,41 @@ describe("collectRecentNotes", () => {
   });
 });
 
+describe("collectArchivedNotes", () => {
+  it("returns archived notes from active notebooks, newest archive first", () => {
+    const notebooks = [
+      makeNotebook({
+        notes: [
+          makeNote({ id: "old", archivedAt: 10 }),
+          makeNote({ id: "new", archivedAt: 30 }),
+          makeNote({ id: "active" }),
+          makeNote({ id: "trashed", archivedAt: 40, deletedAt: 1 }),
+        ],
+      }),
+      makeNotebook({
+        deletedAt: 1,
+        notes: [makeNote({ id: "trashed-notebook", archivedAt: 50 })],
+      }),
+    ];
+
+    expect(collectArchivedNotes(notebooks).map((note) => note.id)).toEqual([
+      "new",
+      "old",
+    ]);
+  });
+});
+
 const movable = (
   id: string,
   pinned: boolean,
   deletedAt: number | null = null,
+  archivedAt: number | null = null,
 ) =>
-  ({ id, pinned, deletedAt }) satisfies {
+  ({ id, pinned, deletedAt, archivedAt }) satisfies {
     id: string;
     pinned: boolean;
     deletedAt: number | null;
+    archivedAt: number | null;
   };
 
 describe("moveWithinGroup", () => {
@@ -155,17 +194,24 @@ describe("moveWithinGroup", () => {
     expect(moveWithinGroup(items, "u1", "up")).toBe(items);
   });
 
-  it("skips trashed neighbours", () => {
+  it("skips trashed and archived neighbours", () => {
     const items = [
       movable("a", false),
       movable("b", false, 5),
-      movable("c", false),
+      movable("c", false, null, 10),
+      movable("d", false),
     ];
     expect(moveWithinGroup(items, "a", "down").map((item) => item.id)).toEqual([
-      "c",
+      "d",
       "b",
+      "c",
       "a",
     ]);
+  });
+
+  it("never moves an archived item", () => {
+    const items = [movable("a", false), movable("b", false, null, 1)];
+    expect(moveWithinGroup(items, "b", "up")).toBe(items);
   });
 
   it("returns the original array when no move is possible", () => {
@@ -190,7 +236,7 @@ describe("withMoveFlags", () => {
     ]);
   });
 
-  it("does not count a different group or a trashed neighbour", () => {
+  it("does not count a different group, a trashed neighbour, or an archived one", () => {
     const pinned = movable("p", true);
     const unpinned = movable("u", false);
     const trashed = movable("t", false, 1);
@@ -198,6 +244,12 @@ describe("withMoveFlags", () => {
     expect(flags[0].canMoveDown).toBe(false);
     expect(flags[1].canMoveUp).toBe(false);
     expect(flags[1].canMoveDown).toBe(false);
+
+    const archivedNext = withMoveFlags([
+      movable("a", false),
+      movable("archived", false, null, 1),
+    ]);
+    expect(archivedNext[0].canMoveDown).toBe(false);
   });
 });
 
@@ -212,5 +264,6 @@ describe("collection helpers ignore trashed notebooks and notes", () => {
     ].map((note: Note) => note.id);
     expect(ids).not.toContain("hidden-fav");
     expect(ids).not.toContain("trashed");
+    expect(ids).not.toContain("archived");
   });
 });

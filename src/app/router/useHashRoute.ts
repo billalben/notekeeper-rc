@@ -22,8 +22,10 @@ import type { BaseView, Overlay, Route } from "./types";
 
 const findVisibleNote = (id: string): Note | null => {
   for (const notebook of useNoteStore.getState().notebooks) {
+    if (notebook.deletedAt !== null) continue;
     const note = notebook.notes.find((item) => item.id === id);
-    if (note && note.deletedAt === null) return note;
+    if (note && note.deletedAt === null && note.archivedAt === null)
+      return note;
   }
   return null;
 };
@@ -55,10 +57,13 @@ const routeFromState = (): Route => {
     overlay = { kind: "shortcuts" };
   }
 
+  const showsNotes =
+    ui.view !== "stats" && ui.view !== "trash" && ui.view !== "archive";
+
   return {
     base,
     notebookId,
-    noteId: ui.selectedNoteId ?? ui.editorNoteId,
+    noteId: showsNotes ? (ui.selectedNoteId ?? ui.editorNoteId) : null,
     overlay,
   };
 };
@@ -67,7 +72,11 @@ const isSplitMode = (isWide: boolean): boolean => {
   const { view } = useUIStore.getState();
   const { presentation } = useSettingsStore.getState().editor;
   return (
-    presentation === "split" && isWide && view !== "stats" && view !== "trash"
+    presentation === "split" &&
+    isWide &&
+    view !== "stats" &&
+    view !== "trash" &&
+    view !== "archive"
   );
 };
 
@@ -107,6 +116,9 @@ const applyRoute = (route: Route, isWide: boolean): void => {
         break;
       case "trash":
         ui.openTrash();
+        break;
+      case "archive":
+        ui.openArchive();
         break;
     }
   }

@@ -15,9 +15,13 @@ interface NoteCardProps {
   canMoveToNotebook: boolean;
   notebookName?: string;
   isSelected?: boolean;
+  isSelecting?: boolean;
+  isChecked?: boolean;
+  onToggleChecked?: (note: Note) => void;
   onOpen: (note: Note) => void;
   onTogglePin: (note: Note) => void;
   onToggleFavorite: (note: Note) => void;
+  onToggleArchive: (note: Note) => void;
   onMove: (note: Note, direction: MoveDirection) => void;
   onRequestMove: (note: Note) => void;
   onRequestDelete: (note: Note) => void;
@@ -30,9 +34,13 @@ export const NoteCard = ({
   canMoveToNotebook,
   notebookName,
   isSelected = false,
+  isSelecting = false,
+  isChecked = false,
+  onToggleChecked,
   onOpen,
   onTogglePin,
   onToggleFavorite,
+  onToggleArchive,
   onMove,
   onRequestMove,
   onRequestDelete,
@@ -53,19 +61,134 @@ export const NoteCard = ({
     }
   };
 
+  const isArchived = note.archivedAt !== null;
+
+  const menuItems = isArchived
+    ? [
+        {
+          key: "unarchive",
+          label: t("card.unarchive"),
+          icon: "unarchive",
+          onSelect: () => onToggleArchive(note),
+        },
+        {
+          key: "download",
+          label: t("card.downloadAs", {
+            format: exportFormat === "md" ? t("card.markdown") : t("card.json"),
+          }),
+          icon: "download",
+          separatorBefore: true,
+          onSelect: () => download(exportFormat),
+        },
+        {
+          key: "delete",
+          label: t("card.delete"),
+          icon: "delete",
+          danger: true,
+          separatorBefore: true,
+          onSelect: () => onRequestDelete(note),
+        },
+      ]
+    : [
+        {
+          key: "pin",
+          label: note.pinned ? t("card.unpin") : t("card.pin"),
+          icon: "push_pin",
+          onSelect: () => onTogglePin(note),
+        },
+        {
+          key: "favorite",
+          label: note.favorite
+            ? t("card.favoriteRemove")
+            : t("card.favoriteAdd"),
+          icon: note.favorite ? "star" : "star_border",
+          filled: note.favorite,
+          onSelect: () => onToggleFavorite(note),
+        },
+        {
+          key: "archive",
+          label: t("card.archive"),
+          icon: "archive",
+          disabled: isSelected,
+          onSelect: () => onToggleArchive(note),
+        },
+        {
+          key: "download",
+          label: t("card.downloadAs", {
+            format: exportFormat === "md" ? t("card.markdown") : t("card.json"),
+          }),
+          icon: "download",
+          separatorBefore: true,
+          onSelect: () => download(exportFormat),
+        },
+        {
+          key: "move",
+          label: t("card.moveToNotebook"),
+          icon: "drive_file_move",
+          disabled: !canMoveToNotebook,
+          separatorBefore: true,
+          onSelect: () => onRequestMove(note),
+        },
+        {
+          key: "up",
+          label: t("card.moveUp"),
+          icon: "keyboard_arrow_up",
+          disabled: !canMoveUp,
+          separatorBefore: true,
+          onSelect: () => onMove(note, "up"),
+        },
+        {
+          key: "down",
+          label: t("card.moveDown"),
+          icon: "keyboard_arrow_down",
+          disabled: !canMoveDown,
+          onSelect: () => onMove(note, "down"),
+        },
+        {
+          key: "delete",
+          label: t("card.delete"),
+          icon: "delete",
+          danger: true,
+          separatorBefore: true,
+          onSelect: () => onRequestDelete(note),
+        },
+      ];
+
+  const handleActivate = () => {
+    if (isSelecting) {
+      onToggleChecked?.(note);
+      return;
+    }
+    onOpen(note);
+  };
+
   return (
     <div
-      className={`card${isSelected ? " is-selected" : ""}`}
+      className={`card${isSelected ? " is-selected" : ""}${
+        isSelecting ? " is-selecting" : ""
+      }${isChecked ? " is-checked" : ""}`}
       role="button"
       tabIndex={0}
       aria-current={isSelected ? "true" : undefined}
-      onClick={() => onOpen(note)}
+      aria-pressed={isSelecting ? isChecked : undefined}
+      onClick={handleActivate}
       onKeyDown={(event) => {
-        if (event.key === "Enter") onOpen(note);
+        if (event.key === "Enter" || (isSelecting && event.key === " ")) {
+          event.preventDefault();
+          handleActivate();
+        }
       }}
       data-pinned={note.pinned ? "true" : undefined}
+      data-archived={isArchived ? "true" : undefined}
     >
       <div className="card-title-row">
+        {isSelecting && (
+          <span className="card-checkbox" aria-hidden="true">
+            <span className="material-symbols-rounded">
+              {isChecked ? "check_box" : "check_box_outline_blank"}
+            </span>
+          </span>
+        )}
         <h3 className="card-title text-title-medium">{note.title}</h3>
         {(note.pinned || note.favorite) && (
           <span className="card-badges">
@@ -113,67 +236,9 @@ export const NoteCard = ({
       )}
       <div className="wrapper">
         <span className="card-time text-label-large">{timeLabel}</span>
-        <ItemMenu
-          label={t("card.actions")}
-          items={[
-            {
-              key: "pin",
-              label: note.pinned ? t("card.unpin") : t("card.pin"),
-              icon: "push_pin",
-              onSelect: () => onTogglePin(note),
-            },
-            {
-              key: "favorite",
-              label: note.favorite
-                ? t("card.favoriteRemove")
-                : t("card.favoriteAdd"),
-              icon: note.favorite ? "star" : "star_border",
-              filled: note.favorite,
-              onSelect: () => onToggleFavorite(note),
-            },
-            {
-              key: "download",
-              label: t("card.downloadAs", {
-                format:
-                  exportFormat === "md" ? t("card.markdown") : t("card.json"),
-              }),
-              icon: "download",
-              separatorBefore: true,
-              onSelect: () => download(exportFormat),
-            },
-            {
-              key: "move",
-              label: t("card.moveToNotebook"),
-              icon: "drive_file_move",
-              disabled: !canMoveToNotebook,
-              separatorBefore: true,
-              onSelect: () => onRequestMove(note),
-            },
-            {
-              key: "up",
-              label: t("card.moveUp"),
-              icon: "keyboard_arrow_up",
-              disabled: !canMoveUp,
-              separatorBefore: true,
-              onSelect: () => onMove(note, "up"),
-            },
-            {
-              key: "down",
-              label: t("card.moveDown"),
-              icon: "keyboard_arrow_down",
-              disabled: !canMoveDown,
-              onSelect: () => onMove(note, "down"),
-            },
-            {
-              key: "delete",
-              label: t("card.delete"),
-              icon: "delete",
-              danger: true,
-              separatorBefore: true,
-              onSelect: () => onRequestDelete(note),
-            },
-          ]}
-        />
+        {!isSelecting && (
+          <ItemMenu label={t("card.actions")} items={menuItems} />
+        )}
       </div>
       <div className="state-layer" />
     </div>

@@ -1,5 +1,6 @@
 import type { Note, Notebook } from "@/shared/types";
 import { DAY_MS } from "@/shared/lib/constants";
+import { isActiveNote } from "@/shared/lib/notes";
 import { countWords } from "@/shared/lib/text";
 
 const WEEK_LENGTH = 7;
@@ -43,16 +44,14 @@ export interface ComputeStatsInput {
 }
 
 /**
- * Every note inside a visible (non-trashed) notebook, excluding trashed notes.
- * This is the pool all library statistics are derived from; trashed items are
- * intentionally omitted, matching Favorites, tag filtering, and search.
+ * Every active (non-archived, non-trashed) note inside a visible notebook.
+ * This is the pool all library statistics are derived from; archived and
+ * trashed items are intentionally omitted, matching search and smart views.
  */
 const collectVisibleNotes = (notebooks: Notebook[]): Note[] =>
   notebooks
     .filter((notebook) => notebook.deletedAt === null)
-    .flatMap((notebook) =>
-      notebook.notes.filter((note) => note.deletedAt === null),
-    );
+    .flatMap((notebook) => notebook.notes.filter(isActiveNote));
 
 const latestBy = (notes: Note[], key: (note: Note) => number): Note | null =>
   notes.reduce<Note | null>(
@@ -111,7 +110,7 @@ export const computeLibraryStats = ({
     (notebook) => notebook.id === activeNotebookId,
   );
   const activeNotebookNoteCount =
-    activeNotebook?.notes.filter((note) => note.deletedAt === null).length ?? 0;
+    activeNotebook?.notes.filter(isActiveNote).length ?? 0;
 
   const totalWords = notes.reduce(
     (total, note) => total + countWords(note.text),
@@ -122,15 +121,13 @@ export const computeLibraryStats = ({
     .map((notebook) => ({
       id: notebook.id,
       name: notebook.name,
-      count: notebook.notes.filter((note) => note.deletedAt === null).length,
+      count: notebook.notes.filter(isActiveNote).length,
     }))
     .filter((notebook) => notebook.count > 0)
     .sort((a, b) => b.count - a.count);
 
   const emptyNotebooks = visibleNotebooks
-    .filter((notebook) =>
-      notebook.notes.every((note) => note.deletedAt !== null),
-    )
+    .filter((notebook) => !notebook.notes.some(isActiveNote))
     .map((notebook) => notebook.name);
 
   const weekActivity = buildWeekActivity(notes, now);

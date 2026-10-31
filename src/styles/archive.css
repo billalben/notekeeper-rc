@@ -1,0 +1,276 @@
+/* * Archive view */
+.archive-view {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: var(--spacing-3);
+  padding-block-start: var(--spacing-3);
+}
+
+.archive-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+}
+
+.archive-description {
+  color: var(--on-surface-variant);
+  margin-block-start: var(--spacing-1);
+  max-width: 64ch;
+}
+
+.archive-view .empty-notes {
+  position: static;
+  transform: none;
+  margin-block-start: var(--spacing-8);
+}
+
+/* * Read-only archived note preview */
+.archive-preview-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background-color: rgba(8, 5, 4, 0.66);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: archive-preview-overlay-in 180ms ease forwards;
+}
+
+@keyframes archive-preview-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.archive-preview {
+  width: min(720px, 100%);
+  max-height: min(80vh, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  overflow: hidden;
+  background-color: var(--surface-container-highest);
+  color: var(--on-surface);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-extra-large);
+  box-shadow: var(--shadow-3);
+  animation: archive-preview-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes archive-preview-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.archive-preview-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+}
+
+.archive-preview-icon {
+  flex-shrink: 0;
+  color: var(--primary);
+}
+
+.archive-preview-heading {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.archive-preview-heading h2 {
+  overflow-wrap: anywhere;
+}
+
+.archive-preview-meta {
+  color: var(--on-surface-variant);
+  margin-block-start: var(--spacing-1);
+}
+
+.archive-preview-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-1);
+}
+
+.archive-preview-body {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding-inline-end: var(--spacing-1);
+}
+
+.archive-preview-empty {
+  color: var(--on-surface-variant);
+}
+
+.archive-preview-hint {
+  color: var(--on-surface-variant);
+  padding: var(--spacing-2) var(--spacing-3);
+  background-color: var(--surface-container-low);
+  border-radius: var(--radius-medium);
+}
+
+.archive-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--spacing-1);
+}
+
+/* * Note multi-select */
+.notes-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  margin-block: var(--spacing-3);
+}
+
+.notes-panel-header .title {
+  margin: 0;
+}
+
+.note-selection-bar {
+  position: fixed;
+  inset-inline: 0;
+  bottom: calc(var(--spacing-4) + env(safe-area-inset-bottom, 0px));
+  z-index: 2;
+  width: fit-content;
+  max-width: calc(100% - var(--spacing-8));
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-1);
+  padding-inline-start: var(--spacing-4);
+  background-color: var(--surface-container-highest);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-2);
+  animation: note-selection-bar-in var(--tr-duration-short)
+    var(--tr-easing-emphasized) forwards;
+}
+
+@keyframes note-selection-bar-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.note-selection-count {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--on-surface-variant);
+}
+
+.note-selection-bar .btn {
+  flex-shrink: 0;
+  height: 32px;
+  padding-inline: var(--spacing-3);
+}
+
+.note-selection-bar .btn.fill {
+  padding-inline: var(--spacing-4);
+}
+
+.note-selection-bar .btn .material-symbols-rounded {
+  font-size: 2rem;
+}
+
+.note-selection-bar .icon-btn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+}
+
+.note-selection-bar .icon-btn .material-symbols-rounded {
+  font-size: 2rem;
+}
+
+.note-selection-bar .btn:disabled {
+  opacity: 0.38;
+}
+
+.note-list.is-selecting {
+  padding-block-end: 88px;
+}
+
+/* The floating bar replaces the FAB while a selection is active. */
+.main:has(.note-selection-bar) .fab {
+  display: none;
+}
+
+/* Keep bottom toasts clear of the floating selection bar. */
+body:has(.note-selection-bar)
+  .toast-region:where(.bottom-left, .bottom-center, .bottom-right) {
+  bottom: calc(var(--spacing-4) + 50px);
+}
+
+@media (min-width: 992px) {
+  /* Center within the content area rather than the whole viewport. */
+  .note-selection-bar {
+    inset-inline-start: var(--sidebar-current);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .note-selection-bar {
+    animation: none;
+  }
+}
+
+.card .card-title-row .card-title {
+  flex-grow: 1;
+}
+
+.card.is-checked {
+  border-color: var(--primary);
+  background-color: color-mix(in srgb, var(--primary) 10%, var(--surface));
+}
+
+.card-checkbox {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--on-surface-variant);
+}
+
+.card-checkbox .material-symbols-rounded {
+  font-size: 2rem;
+}
+
+.card.is-checked .card-checkbox {
+  color: var(--primary);
+}
+
+@media (max-width: 767px) {
+  .archive-preview-overlay {
+    padding: 12px;
+  }
+
+  .archive-preview {
+    max-height: 100%;
+    padding: var(--spacing-3);
+  }
+}

@@ -28,6 +28,9 @@ const asString = (value: unknown, fallback = ""): string =>
 const asTimestamp = (value: unknown, fallback: number): number =>
   typeof value === "number" && Number.isFinite(value) ? value : fallback;
 
+const asNullableTimestamp = (value: unknown): number | null =>
+  typeof value === "number" && Number.isFinite(value) ? value : null;
+
 const asTags = (value: unknown): string[] => {
   if (!Array.isArray(value)) return [];
   const tags: string[] = [];
@@ -55,6 +58,7 @@ const importNote = (raw: unknown, notebookId: string): Note => {
     postedOn,
     updatedOn: asTimestamp(note.updatedOn, postedOn),
     deletedAt: null,
+    archivedAt: asNullableTimestamp(note.archivedAt),
     pinned: note.pinned === true,
     favorite: note.favorite === true,
   };

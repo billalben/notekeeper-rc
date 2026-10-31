@@ -12,6 +12,8 @@ describe("computeSidebarCounts", () => {
           makeNote({ favorite: true }),
           makeNote({ pinned: true }),
           makeNote({ deletedAt: 1 }),
+          makeNote({ archivedAt: 1 }),
+          makeNote({ archivedAt: 2, favorite: true, pinned: true }),
         ],
       }),
       makeNotebook({ id: "plain-nb", notes: [makeNote()] }),
@@ -35,6 +37,7 @@ describe("computeSidebarCounts", () => {
     expect(counts.favoriteCount).toBe(1);
     expect(counts.pinnedCount).toBe(1);
     expect(counts.recentCount).toBe(3);
+    expect(counts.archivedCount).toBe(2);
   });
 
   it("derives move flags within pinned groups", () => {
@@ -56,6 +59,22 @@ describe("computeSidebarCounts", () => {
       true,
       false,
     ]);
+  });
+
+  it("ignores archived notes inside trashed notebooks", () => {
+    const notebooks = [
+      makeNotebook({
+        id: "active",
+        notes: [makeNote({ archivedAt: 1 })],
+      }),
+      makeNotebook({
+        id: "trashed",
+        deletedAt: 1,
+        notes: [makeNote({ archivedAt: 1 })],
+      }),
+    ];
+
+    expect(computeSidebarCounts(notebooks).archivedCount).toBe(1);
   });
 
   it("caps recent count at the recent-view limit", () => {

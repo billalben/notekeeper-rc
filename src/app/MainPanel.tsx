@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
+import { ArchiveView } from "@/features/archive/components/ArchiveView";
 import { TagFilterBar } from "@/features/tags/components/TagFilterBar";
-import { NoteList } from "@/features/notes/components/NoteList";
 import { NotesPanel } from "@/features/notes/components/NotesPanel";
 import { TrashView } from "@/features/trash/components/TrashView";
 import type {
@@ -37,7 +37,10 @@ export interface MainPanelProps {
   hasVisibleNotebooks: boolean;
   isSplitEnabled: boolean;
   selectedNoteId: string | null;
+  selectionDisabled: boolean;
   handlers: NoteListHandlers;
+  onArchiveSelected: (notes: Note[]) => void;
+  onUnarchiveSelected: (notes: Note[]) => void;
   onOpenRecent: (note: Note) => void;
   onOpenStatsNote: (note: Note) => void;
   onNewNote: () => void;
@@ -62,7 +65,10 @@ export const MainPanel = ({
   hasVisibleNotebooks,
   isSplitEnabled,
   selectedNoteId,
+  selectionDisabled,
   handlers,
+  onArchiveSelected,
+  onUnarchiveSelected,
   onOpenRecent,
   onOpenStatsNote,
   onNewNote,
@@ -80,15 +86,27 @@ export const MainPanel = ({
 
   if (view === "trash") return <TrashView />;
 
+  if (view === "archive") {
+    return (
+      <ArchiveView
+        handlers={handlers}
+        onUnarchiveSelected={onUnarchiveSelected}
+      />
+    );
+  }
+
   const listProps = {
     canMoveToNotebook,
     selectedNoteId: isSplitEnabled ? selectedNoteId : undefined,
+    onArchiveSelected,
+    selectionDisabled,
     ...handlers,
   };
 
   if (view === "all") {
     return (
       <NotesPanel
+        key="all"
         title={t("notes.allNotes")}
         notes={allNotes}
         notebookNames={notebookNames}
@@ -102,6 +120,7 @@ export const MainPanel = ({
   if (view === "recent") {
     return (
       <NotesPanel
+        key="recent"
         title={t("notes.recent")}
         notes={recentNotes}
         notebookNames={notebookNames}
@@ -116,6 +135,7 @@ export const MainPanel = ({
   if (view === "pinned") {
     return (
       <NotesPanel
+        key="pinned"
         title={t("notes.pinned")}
         notes={pinnedNotes}
         notebookNames={notebookNames}
@@ -129,6 +149,7 @@ export const MainPanel = ({
   if (view === "favorites") {
     return (
       <NotesPanel
+        key="favorites"
         title={t("notes.favorites")}
         notes={favoriteNotes}
         notebookNames={notebookNames}
@@ -141,37 +162,16 @@ export const MainPanel = ({
 
   return (
     <>
-      <h2 className="title text-title-medium" data-note-panel-title>
-        {isFiltering
-          ? t("notes.notesTagged", { tags: tagFilterLabel })
-          : activeNotebookName}
-      </h2>
-
-      <TagFilterBar
-        tags={allTags}
-        activeTags={activeTags}
-        onToggle={onToggleTag}
-      />
-
-      {!hasVisibleNotebooks ? (
-        <div className="note-list" data-note-panel>
-          <div className="empty-notes">
-            <MaterialIcon name="note_stack" />
-            <div className="text-headline-small">{t("notes.noNotebooks")}</div>
-            <button
-              className="btn fill"
-              type="button"
-              onClick={onCreateNotebook}
-            >
-              <span className="text-label-large">
-                {t("notes.createNotebook")}
-              </span>
-              <div className="state-layer" />
-            </button>
-          </div>
-        </div>
-      ) : (
-        <NoteList
+      {hasVisibleNotebooks ? (
+        <NotesPanel
+          key={`notebook-${activeNotebookName}-${
+            isFiltering ? activeTags.join(",") : "all"
+          }`}
+          title={
+            isFiltering
+              ? t("notes.notesTagged", { tags: tagFilterLabel })
+              : activeNotebookName
+          }
           notes={activeNotes}
           notebookNames={isFiltering ? notebookNames : undefined}
           emptyMessage={
@@ -180,7 +180,46 @@ export const MainPanel = ({
               : t("notes.noNotes")
           }
           {...listProps}
-        />
+        >
+          <TagFilterBar
+            tags={allTags}
+            activeTags={activeTags}
+            onToggle={onToggleTag}
+          />
+        </NotesPanel>
+      ) : (
+        <>
+          <h2 className="title text-title-medium" data-note-panel-title>
+            {isFiltering
+              ? t("notes.notesTagged", { tags: tagFilterLabel })
+              : activeNotebookName}
+          </h2>
+
+          <TagFilterBar
+            tags={allTags}
+            activeTags={activeTags}
+            onToggle={onToggleTag}
+          />
+
+          <div className="note-list" data-note-panel>
+            <div className="empty-notes">
+              <MaterialIcon name="note_stack" />
+              <div className="text-headline-small">
+                {t("notes.noNotebooks")}
+              </div>
+              <button
+                className="btn fill"
+                type="button"
+                onClick={onCreateNotebook}
+              >
+                <span className="text-label-large">
+                  {t("notes.createNotebook")}
+                </span>
+                <div className="state-layer" />
+              </button>
+            </div>
+          </div>
+        </>
       )}
 
       <Fab

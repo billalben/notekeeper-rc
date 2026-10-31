@@ -13,6 +13,7 @@ const SECTION_VIEWS: Record<string, BaseView> = {
   favorites: "favorites",
   stats: "stats",
   trash: "trash",
+  archive: "archive",
 };
 
 const SETTINGS_SECTIONS: SettingsSection[] = [

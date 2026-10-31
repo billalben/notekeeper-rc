@@ -1,5 +1,6 @@
 import Fuse, { type IFuseOptions, type RangeTuple } from "fuse.js";
 import type { Note, Notebook } from "@/shared/types";
+import { isActiveNote } from "@/shared/lib/notes";
 import { stripMarkdown } from "@/shared/lib/text";
 
 export interface SearchEntry {
@@ -37,7 +38,7 @@ export const collectSearchEntries = (notebooks: Notebook[]): SearchEntry[] =>
     .filter((notebook) => notebook.deletedAt === null)
     .flatMap((notebook) =>
       notebook.notes
-        .filter((note) => note.deletedAt === null)
+        .filter(isActiveNote)
         .map((note) => ({ note, notebookName: notebook.name })),
     );
 

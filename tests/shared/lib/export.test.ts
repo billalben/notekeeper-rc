@@ -42,7 +42,7 @@ describe("slugify", () => {
 });
 
 describe("downloadBackupFile", () => {
-  it("exports visible notebooks only and a stable schema", async () => {
+  it("exports non-trashed notebooks, including archived notes", async () => {
     const notebooks = [
       makeNotebook({
         id: "nb1",
@@ -50,12 +50,13 @@ describe("downloadBackupFile", () => {
         notes: [
           makeNote({ id: "n1", title: "Keep", tags: ["work"] }),
           makeNote({ id: "n2", deletedAt: 1 }),
+          makeNote({ id: "n3", title: "Archived", archivedAt: 50 }),
         ],
       }),
       makeNotebook({
         id: "nb2",
         deletedAt: 1,
-        notes: [makeNote({ id: "n3" })],
+        notes: [makeNote({ id: "n4" })],
       }),
     ];
 
@@ -66,15 +67,16 @@ describe("downloadBackupFile", () => {
     expect(filename).toMatch(/^notekeeper-backup-\d{4}-\d{2}-\d{2}\.json$/);
 
     const payload = JSON.parse(await blobs[0].text());
-    expect(payload).toMatchObject({ app: "notekeeper", schemaVersion: 1 });
+    expect(payload).toMatchObject({ app: "notekeeper", schemaVersion: 2 });
     expect(typeof payload.exportedAt).toBe("string");
     expect(payload.tags).toEqual(["work", "home"]);
     expect(payload.notebooks).toHaveLength(1);
     expect(payload.notebooks[0]).toMatchObject({ id: "nb1", name: "Work" });
     expect(
       payload.notebooks[0].notes.map((note: { id: string }) => note.id),
-    ).toEqual(["n1"]);
+    ).toEqual(["n1", "n3"]);
     expect(payload.notebooks[0].notes[0].tags).toEqual(["work"]);
+    expect(payload.notebooks[0].notes[1].archivedAt).toBe(50);
   });
 });
 
@@ -82,7 +84,10 @@ describe("downloadNotebookFile", () => {
   const notebook = makeNotebook({
     id: "nb1",
     name: "My Notebook",
-    notes: [makeNote({ title: "First", text: "body text" })],
+    notes: [
+      makeNote({ title: "First", text: "body text" }),
+      makeNote({ title: "Archived", text: "archived body", archivedAt: 10 }),
+    ],
   });
 
   it("writes a JSON file named after the notebook", async () => {
@@ -105,6 +110,8 @@ describe("downloadNotebookFile", () => {
     const markdown = await blobs[0].text();
     expect(markdown).toContain('notebook: "My Notebook"');
     expect(markdown).toContain("body text");
+    expect(markdown).toContain("archived: true");
+    expect(markdown).toContain("archived body");
   });
 });
 

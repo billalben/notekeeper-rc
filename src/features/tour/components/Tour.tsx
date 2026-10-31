@@ -81,7 +81,9 @@ export const Tour = ({
   );
   const hasNotebooks = liveNotebooks.length > 0;
   const hasNotes = liveNotebooks.some((notebook) =>
-    notebook.notes.some((note) => note.deletedAt === null),
+    notebook.notes.some(
+      (note) => note.deletedAt === null && note.archivedAt === null,
+    ),
   );
   const hasTags = tags.length > 0;
 

@@ -6,6 +6,7 @@ import {
   collectPinnedNotes,
   collectRecentNotes,
   filterNotesByTags,
+  isActiveNote,
   sortByPinned,
   withMoveFlags,
 } from "@/shared/lib/notes";
@@ -35,10 +36,7 @@ export const useNoteCollections = ({
     const activeNotes = isFiltering
       ? withoutMoveFlags(sortByPinned(filterNotesByTags(notebooks, activeTags)))
       : withMoveFlags(
-          sortByPinned(
-            activeNotebook?.notes.filter((note) => note.deletedAt === null) ??
-              [],
-          ),
+          sortByPinned(activeNotebook?.notes.filter(isActiveNote) ?? []),
         );
 
     return {

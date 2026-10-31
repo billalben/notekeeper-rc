@@ -25,6 +25,7 @@ describe("withDefaults", () => {
     expect(notebook.notes[0]).toMatchObject({
       updatedOn: 100,
       deletedAt: null,
+      archivedAt: null,
       pinned: false,
       favorite: false,
       tags: [],
@@ -40,6 +41,7 @@ describe("withDefaults", () => {
         notes: [
           makeNote({
             updatedOn: 50,
+            archivedAt: 75,
             favorite: true,
             tags: null as unknown as string[],
           }),
@@ -52,6 +54,7 @@ describe("withDefaults", () => {
     expect(notebook.pinned).toBe(true);
     expect(notebook.deletedAt).toBe(5);
     expect(notebook.notes[0].updatedOn).toBe(50);
+    expect(notebook.notes[0].archivedAt).toBe(75);
     expect(notebook.notes[0].favorite).toBe(true);
     expect(notebook.notes[0].tags).toEqual([]);
   });

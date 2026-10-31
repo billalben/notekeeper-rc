@@ -19,6 +19,7 @@ export interface NoteListHandlers {
   onOpen: (note: Note) => void;
   onTogglePin: (note: Note) => void;
   onToggleFavorite: (note: Note) => void;
+  onToggleArchive: (note: Note) => void;
   onMove: (note: Note, direction: MoveDirection) => void;
   onRequestMove: (note: Note) => void;
   onRequestDelete: (note: Note) => void;
