@@ -1,0 +1,20 @@
+export const commands = {
+  title: "لوحة الأوامر",
+  placeholder: "ابحث في الملاحظات أو نفّذ أمرًا…",
+  notes: "الملاحظات",
+  empty: "لا توجد أوامر أو ملاحظات تطابق «{{query}}»",
+  hint: "اكتب للبحث في الملاحظات، أو > لتشغيل الأوامر فقط.",
+  newNotebook: "دفتر جديد",
+  exportBackup: "تصدير نسخة احتياطية",
+  importBackup: "استيراد ملاحظات…",
+  startTour: "إعادة الجولة",
+  switchToNotebook: "الانتقال إلى «{{name}}»",
+  clearTagFilters: "مسح مرشحات الوسوم",
+  groups: {
+    create: "إنشاء",
+    navigate: "الانتقال إلى",
+    notebooks: "الدفاتر",
+    settings: "الإعدادات",
+    app: "التطبيق",
+  },
+} as const;

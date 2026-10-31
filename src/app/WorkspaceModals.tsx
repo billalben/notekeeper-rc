@@ -13,9 +13,9 @@ const SettingsModal = lazy(() =>
     default: module.SettingsModal,
   })),
 );
-const SearchPalette = lazy(() =>
-  import("@/features/search/components/SearchPalette").then((module) => ({
-    default: module.SearchPalette,
+const CommandPalette = lazy(() =>
+  import("@/features/commands/components/CommandPalette").then((module) => ({
+    default: module.CommandPalette,
   })),
 );
 const ShortcutHelpOverlay = lazy(() =>
@@ -32,6 +32,8 @@ interface WorkspaceModalsProps {
   isSearchOpen: boolean;
   onOpenSearchNote: (note: Note) => void;
   onCloseSearch: () => void;
+  onNewNote: () => void;
+  onCreateNotebook: () => void;
   isShortcutHelpOpen: boolean;
   onCloseShortcutHelp: () => void;
   showNoteModal: boolean;
@@ -64,6 +66,8 @@ export const WorkspaceModals = ({
   isSearchOpen,
   onOpenSearchNote,
   onCloseSearch,
+  onNewNote,
+  onCreateNotebook,
   isShortcutHelpOpen,
   onCloseShortcutHelp,
   showNoteModal,
@@ -148,9 +152,11 @@ export const WorkspaceModals = ({
 
       {isSearchOpen && (
         <Suspense fallback={null}>
-          <SearchPalette
+          <CommandPalette
             onOpenNote={onOpenSearchNote}
             onClose={onCloseSearch}
+            onNewNote={onNewNote}
+            onCreateNotebook={onCreateNotebook}
           />
         </Suspense>
       )}

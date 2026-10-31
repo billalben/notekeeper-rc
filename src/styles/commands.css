@@ -1,0 +1,80 @@
+/* ?=== #COMMANDS === */
+.command-body {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.command-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--spacing-1);
+}
+
+.command-group-label {
+  padding: var(--spacing-2) var(--spacing-3) var(--spacing-1);
+  color: var(--on-surface-variant);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  list-style: none;
+}
+
+.command-result {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.command-icon {
+  flex-shrink: 0;
+  color: var(--on-surface-variant);
+  font-size: 2rem;
+}
+
+.command-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex-grow: 1;
+}
+
+.command-label {
+  font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.command-description {
+  color: var(--on-surface-variant);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.command-kbd {
+  flex-shrink: 0;
+}
+
+.command-result.active .command-icon,
+.command-result.active .command-description {
+  color: inherit;
+  opacity: 0.85;
+}
+
+.command-result.is-disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.command-result.is-disabled.active {
+  background-color: var(--surface-container-low);
+  color: var(--on-surface-variant);
+}
+
+.command-recent {
+  padding-block-end: var(--spacing-2);
+}

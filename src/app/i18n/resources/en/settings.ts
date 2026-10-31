@@ -115,8 +115,8 @@ export const settings = {
         description: "Create a note in the active notebook.",
       },
       openSearch: {
-        label: "Search notes",
-        description: "Open the search palette.",
+        label: "Command palette",
+        description: "Search notes or run an action.",
       },
       toggleTheme: {
         label: "Toggle theme",

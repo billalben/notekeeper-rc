@@ -1,6 +1,7 @@
 import { common, header, sidebar, confirm, toasts, pwa, errors } from "./core";
 import { notes, card, editor, tags, move, history } from "./notes";
 import { archive, search, selection, trash, stats } from "./panels";
+import { commands } from "./commands";
 import { settings } from "./settings";
 import { tour } from "./tour";
 
@@ -13,6 +14,7 @@ const fr = {
   editor,
   tags,
   search,
+  commands,
   trash,
   archive,
   selection,

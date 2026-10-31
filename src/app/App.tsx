@@ -364,6 +364,8 @@ const App = () => {
         isSearchOpen={isSearchOpen}
         onOpenSearchNote={openSearchNote}
         onCloseSearch={closeSearch}
+        onNewNote={openCreateNote}
+        onCreateNotebook={handleCreateNotebook}
         isShortcutHelpOpen={isShortcutHelpOpen}
         onCloseShortcutHelp={closeShortcutHelp}
         showNoteModal={showNoteModal}

@@ -113,8 +113,8 @@ export const settings = {
         description: "إنشاء ملاحظة في الدفتر النشط.",
       },
       openSearch: {
-        label: "البحث في الملاحظات",
-        description: "فتح لوحة البحث.",
+        label: "لوحة الأوامر",
+        description: "البحث في الملاحظات أو تنفيذ إجراء.",
       },
       toggleTheme: {
         label: "تبديل السمة",

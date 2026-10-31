@@ -118,8 +118,8 @@ export const settings = {
         description: "Créer une note dans le carnet actif.",
       },
       openSearch: {
-        label: "Rechercher des notes",
-        description: "Ouvrir la palette de recherche.",
+        label: "Palette de commandes",
+        description: "Rechercher des notes ou lancer une action.",
       },
       toggleTheme: {
         label: "Basculer le thème",

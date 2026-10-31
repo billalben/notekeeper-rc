@@ -141,11 +141,18 @@ const applyRoute = (route: Route, isWide: boolean): void => {
     ui.closeNoteModal();
   }
 
+  // Overlays are mutually exclusive: deep links should never leave two open.
   if (route.overlay?.kind === "settings") {
+    ui.closeSearch();
+    ui.closeShortcutHelp();
     ui.openSettings(route.overlay.section);
   } else if (route.overlay?.kind === "search") {
+    ui.closeSettings();
+    ui.closeShortcutHelp();
     ui.openSearch();
   } else if (route.overlay?.kind === "shortcuts") {
+    ui.closeSettings();
+    ui.closeSearch();
     ui.openShortcutHelp();
   } else {
     ui.closeSettings();
@@ -153,6 +160,14 @@ const applyRoute = (route: Route, isWide: boolean): void => {
     ui.closeShortcutHelp();
   }
 };
+
+/**
+ * Hash we expect from our own `history.back()`. A back traversal emits both
+ * `popstate` and `hashchange`, so count both before dropping the expectation;
+ * neither event should re-apply a route the store already reflects.
+ */
+let expectedBackHash: string | null = null;
+let expectedBackEvents = 0;
 
 const writeHash = (): void => {
   const next = buildHash(routeFromState());
@@ -165,8 +180,16 @@ const writeHash = (): void => {
   if (nextDepth > currentDepth) {
     pushRoute(next);
   } else if (nextDepth < currentDepth) {
-    if (canGoBackTo(next)) goBack();
-    else replaceRoute(next);
+    if (canGoBackTo(next)) {
+      // The store already reflects `next`, so applying the route after this
+      // popstate would undo state opened by the action that closed the overlay
+      // (for example, a command palette creating a new note).
+      expectedBackHash = next;
+      expectedBackEvents = 2;
+      goBack();
+    } else {
+      replaceRoute(next);
+    }
   } else if (baseKey(parseHash(next)) !== baseKey(parseHash(current))) {
     pushRoute(next);
   } else {
@@ -219,10 +242,20 @@ export const useHashRoute = (isWide: boolean): void => {
 
     const handleLocationChange = () => {
       const current = normalizeHash(window.location.hash);
+      const isOwnBack = expectedBackHash === current && expectedBackEvents > 0;
+      if (isOwnBack) {
+        expectedBackEvents -= 1;
+        if (expectedBackEvents === 0) expectedBackHash = null;
+      } else {
+        expectedBackHash = null;
+        expectedBackEvents = 0;
+      }
       syncFromLocation(current);
-      applyingRef.current = true;
-      applyRoute(parseHash(current), isWideRef.current);
-      applyingRef.current = false;
+      if (!isOwnBack) {
+        applyingRef.current = true;
+        applyRoute(parseHash(current), isWideRef.current);
+        applyingRef.current = false;
+      }
       const target = buildHash(routeFromState());
       if (target !== current) replaceRoute(target);
     };

@@ -16,7 +16,22 @@ export const AddNotebookRow = () => {
   const hasCommittedRef = useRef(false);
 
   useEffect(() => {
-    inputRef.current?.focus();
+    const input = inputRef.current;
+    if (!input) return;
+
+    let frame = 0;
+    let attempts = 0;
+    const focusInput = () => {
+      input.focus();
+      attempts += 1;
+      // On mobile the sidebar can still be resolving its `visibility: hidden`
+      // transition for the first frames after opening, where focus() is a no-op.
+      if (document.activeElement !== input && attempts < 3) {
+        frame = requestAnimationFrame(focusInput);
+      }
+    };
+    focusInput();
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   const commitAdd = () => {

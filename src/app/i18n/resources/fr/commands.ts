@@ -1,0 +1,20 @@
+export const commands = {
+  title: "Palette de commandes",
+  placeholder: "Rechercher des notes ou lancer une commande…",
+  notes: "Notes",
+  empty: "Aucune commande ni note ne correspond à « {{query}} »",
+  hint: "Saisissez pour rechercher des notes, ou > pour les commandes seules.",
+  newNotebook: "Nouveau carnet",
+  exportBackup: "Exporter la sauvegarde",
+  importBackup: "Importer des notes…",
+  startTour: "Refaire la visite",
+  switchToNotebook: "Aller à « {{name}} »",
+  clearTagFilters: "Effacer les filtres de tags",
+  groups: {
+    create: "Créer",
+    navigate: "Aller à",
+    notebooks: "Carnets",
+    settings: "Paramètres",
+    app: "Application",
+  },
+} as const;

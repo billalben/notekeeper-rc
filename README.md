@@ -26,7 +26,8 @@ modern React + TypeScript + Vite PWA.
 - **Editor presentations** — open notes in a modal, full screen, or a
   resizable split pane beside the list. Autosave and a word count are
   available as options.
-- **Search palette** — fuzzy full-text search across every notebook.
+- **Command palette** — fuzzy full-text search across every notebook and
+  quick actions like new notebook, theme toggle, and backup export.
 - **Statistics** — per-notebook and tag-level insights into your notes.
 - **Export & import** — download everything, a single notebook, or one note as
   JSON or Markdown. Restore a full JSON backup from Settings → Data; imported
@@ -106,7 +107,8 @@ modern React + TypeScript + Vite PWA.
 │   │   ├── notes/              # Note list, card, editor, tags, toolbar
 │   │   ├── notebooks/          # Sidebar + notebook navigation
 │   │   ├── tags/               # Tag filter bar
-│   │   ├── search/             # Search palette + Fuse index
+│   │   ├── search/             # Note search + Fuse index
+│   │   ├── commands/           # Command palette + action registry
 │   │   ├── statistics/         # Statistics view, cards, stats math
 │   │   ├── trash/              # Trash view
 │   │   ├── shortcuts/          # Shortcut help + hotkey binding
