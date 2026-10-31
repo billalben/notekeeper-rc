@@ -32,8 +32,8 @@ export default defineConfig({
         clientsClaim: true,
         runtimeCaching: [
           {
-            // Google Fonts stylesheets (Kumbh Sans, Noto Sans Arabic, and the
-            // Material Symbols icon font) — needed so icons/text render offline.
+            // Material Symbols icon font (the only remaining remote web font;
+            // text fonts are self-hosted through @fontsource).
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: "StaleWhileRevalidate",
             options: {

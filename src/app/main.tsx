@@ -1,5 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import "@fontsource-variable/kumbh-sans";
+import "@fontsource-variable/noto-sans-arabic";
 import "@/styles/index.css";
 import "./i18n";
 import i18n, { loadLanguage } from "@/app/i18n";

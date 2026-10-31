@@ -1,7 +1,8 @@
 /* Right-to-left support (Arabic). Layout mostly uses logical properties;
    the rules below cover the few direction-specific cases. */
 html[dir="rtl"] {
-  --font-primary: "Noto Sans Arabic", "Kumbh Sans", sans-serif;
+  --font-primary:
+    "Noto Sans Arabic Variable", "Kumbh Sans Variable", sans-serif;
 }
 
 /* The sidebar drawer slides in from the inline-end edge. */
