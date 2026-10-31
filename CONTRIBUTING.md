@@ -5,7 +5,7 @@ workflow and the checks your change should pass before it is merged.
 
 ## Prerequisites
 
-- Node.js 20+ (see `.nvmrc`)
+- Node.js 22+ (see `.nvmrc`)
 - [pnpm](https://pnpm.io) — enforced via `only-allow`; other package managers
   are blocked at install time
 
