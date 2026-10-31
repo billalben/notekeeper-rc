@@ -61,6 +61,29 @@
   gap: var(--spacing-2);
 }
 
+/* Large lists mount only the rows near the viewport. The container gets an
+   inline height while each row keeps the same responsive grid as the static
+   list above. */
+.note-list.is-virtualized {
+  display: block;
+  overflow-anchor: none;
+}
+
+.note-list-row {
+  position: absolute;
+  top: 0;
+  inset-inline: 0;
+  display: grid;
+  align-items: stretch;
+  gap: var(--spacing-2);
+}
+
+/* Virtualization already limits mounted cards, so let every visible card
+   render normally and report its real height to the row observer. */
+.note-list.is-virtualized .card {
+  content-visibility: visible;
+}
+
 .main .fab {
   position: fixed;
   bottom: var(--spacing-4);
