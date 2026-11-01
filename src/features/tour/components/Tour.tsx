@@ -29,6 +29,7 @@ interface TourPalette {
 }
 
 const AUTO_START_DELAY_MS = 800;
+/** Mirrors `--z-tour` in `src/styles/variables.css`. */
 const Z_INDEX = 150;
 
 const readPalette = (

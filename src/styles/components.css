@@ -257,7 +257,7 @@ button.tag-chip {
   border-radius: var(--radius-large);
   padding: var(--spacing-6);
   box-shadow: var(--shadow-3);
-  z-index: 8;
+  z-index: var(--z-modal);
   animation: modal-open var(--tr-duration-medium) var(--tr-easing-emphasized)
     forwards;
 }
@@ -282,11 +282,11 @@ button.tag-chip {
 }
 
 .modal.modal-stacked {
-  z-index: 10;
+  z-index: var(--z-modal-stacked);
 }
 
 .modal-overlay.modal-stacked {
-  z-index: 9;
+  z-index: var(--z-overlay-stacked);
 }
 
 .modal-title {
@@ -372,7 +372,7 @@ button.tag-chip {
 
 .tooltip {
   position: fixed;
-  z-index: 4;
+  z-index: var(--z-tooltip);
   height: 24px;
   display: grid;
   align-items: center;
@@ -407,7 +407,7 @@ button.tag-chip {
 
 .item-menu {
   position: fixed;
-  z-index: 30;
+  z-index: var(--z-menu);
   min-width: 180px;
   max-width: min(260px, calc(100vw - 16px));
   max-height: calc(100vh - 16px);

@@ -138,6 +138,23 @@
   --tr-easing-linear: cubic-bezier(0, 0, 1, 1);
   --tr-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
 
+  /* ? Stacking */
+  --z-below: -1; /* behind its own control (state layer) */
+  --z-content: 1; /* local lift inside a component */
+  --z-raised: 2; /* sticky header, FAB, popovers, resize handles */
+  --z-scrim: 3; /* mobile sidebar scrim */
+  --z-sidebar: 4;
+  --z-tooltip: 4;
+  --z-pane: 5; /* split-view editor pane */
+  --z-overlay: 6; /* modal / editor / archive scrim */
+  --z-modal: 8; /* dialog above its scrim */
+  --z-overlay-stacked: 9; /* scrim above an open dialog */
+  --z-modal-stacked: 10; /* dialog opened from a dialog */
+  --z-search: 11; /* command palette */
+  --z-menu: 30; /* portalled item menu */
+  --z-toast: 100;
+  --z-tour: 150;
+
   /* ? Others */
   --sidebar-width: 360px;
   --sidebar-current: var(--sidebar-width);

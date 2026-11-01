@@ -22,7 +22,7 @@
   inset: 0;
   background-color: var(--state-layer-bg);
   opacity: 0;
-  z-index: -1;
+  z-index: var(--z-below);
   transition: opacity var(--tr-duration-short) var(--tr-easing-linear);
 }
 
@@ -60,7 +60,7 @@
   height: 100vh;
   height: 100svh;
   background-color: var(--black);
-  z-index: 3;
+  z-index: var(--z-scrim);
   opacity: 0;
   visibility: hidden;
   transition-property: opacity, visibility;
@@ -72,7 +72,7 @@
 }
 
 .modal-overlay {
-  z-index: 6;
+  z-index: var(--z-overlay);
   visibility: visible;
   animation: fade-overlay var(--tr-duration-short) var(--tr-easing-linear)
     forwards;

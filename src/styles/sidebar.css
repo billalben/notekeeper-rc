@@ -10,7 +10,7 @@
   max-width: var(--sidebar-width);
   width: 100%;
   padding: var(--spacing-3);
-  z-index: 4;
+  z-index: var(--z-sidebar);
   visibility: hidden;
   transition: var(--tr-duration-long) var(--tr-easing-emphasized);
   transition-property: visibility, transform;
