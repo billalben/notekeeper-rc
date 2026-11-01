@@ -138,28 +138,6 @@
   overflow: hidden;
 }
 
-.card .card-text.markdown-body :where(h1, h2, h3, h4, h5, h6) {
-  font-size: var(--fs-body-large);
-  margin-block: var(--spacing-1) var(--spacing-05);
-}
-
-.card .card-text.markdown-body :where(p, ul, ol, pre, blockquote, table) {
-  margin-block: var(--spacing-2);
-}
-
-.card .card-text.markdown-body pre {
-  padding: var(--spacing-2) var(--spacing-3);
-  border: 1px solid var(--outline-variant);
-  background-color: var(--surface-container-low);
-  overflow-x: auto;
-}
-
-.card .card-text.markdown-body pre code {
-  white-space: pre;
-  overflow-wrap: normal;
-  word-break: normal;
-}
-
 .card .wrapper {
   display: flex;
   justify-content: flex-end;

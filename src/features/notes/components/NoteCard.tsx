@@ -7,7 +7,7 @@ import { useRelativeTime } from "@/shared/hooks/useRelativeTime";
 import type { MoveDirection } from "@/shared/lib/notes";
 import { downloadNoteFile } from "@/shared/lib/export";
 import { ItemMenu } from "@/shared/ui/ItemMenu";
-import { MarkdownContent } from "@/shared/markdown/MarkdownContent";
+import { PlainText } from "@/shared/markdown/PlainText";
 
 interface NoteCardProps {
   note: Note;
@@ -214,10 +214,7 @@ export const NoteCard = memo(function NoteCard({
           </span>
         )}
       </div>
-      <MarkdownContent
-        text={note.text}
-        className="card-text markdown-body text-body-large"
-      />
+      <PlainText text={note.text} className="card-text text-body-large" />
       {(note.tags.length > 0 || notebookName) && (
         <div className="card-tags">
           {notebookName && (
