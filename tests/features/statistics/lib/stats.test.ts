@@ -118,6 +118,9 @@ describe("computeLibraryStats", () => {
 
     expect(stats.weekCreated).toBe(3);
     expect(stats.weekEdited).toBe(2);
+    expect(
+      stats.weekActivity.every((day) => new Date(day.date).getHours() === 0),
+    ).toBe(true);
     expect(stats.weekActivity[1]).toMatchObject({
       date: DAY_START - 5 * DAY_MS,
       created: 1,

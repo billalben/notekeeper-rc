@@ -1,5 +1,4 @@
 import type { Note, Notebook } from "@/shared/types";
-import { DAY_MS } from "@/shared/lib/constants";
 import { isActiveNote } from "@/shared/lib/notes";
 import { countWords } from "@/shared/lib/text";
 
@@ -66,6 +65,16 @@ const startOfDay = (milliseconds: number): number => {
 };
 
 /**
+ * Local-calendar day arithmetic. Adding `24 * 60 * 60 * 1000` would drift by an
+ * hour across a DST transition, moving bucket edges off local midnight.
+ */
+const addLocalDays = (milliseconds: number, days: number): number => {
+  const date = new Date(milliseconds);
+  date.setDate(date.getDate() + days);
+  return date.getTime();
+};
+
+/**
  * Created/edited counts for the last seven days, oldest first. The final bucket
  * is today; a note counts as edited only when it changed after it was created.
  */
@@ -74,8 +83,8 @@ const buildWeekActivity = (notes: Note[], now: number): DayActivity[] => {
   const days: DayActivity[] = [];
 
   for (let offset = WEEK_LENGTH - 1; offset >= 0; offset -= 1) {
-    const date = todayStart - offset * DAY_MS;
-    const end = date + DAY_MS;
+    const date = addLocalDays(todayStart, -offset);
+    const end = addLocalDays(date, 1);
     const isToday = offset === 0;
 
     days.push({
