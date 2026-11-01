@@ -79,7 +79,7 @@
 }
 
 /* Virtualization already limits mounted cards, so let every visible card
-   render normally and report its real height to the row observer. */
+   render normally and report its real height to the row virtualizer. */
 .note-list.is-virtualized .card {
   content-visibility: visible;
 }

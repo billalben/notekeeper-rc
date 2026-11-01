@@ -86,7 +86,7 @@ const StaticNoteList = (props: NoteListProps) => {
 
 const VirtualNoteList = (props: NoteListProps) => {
   const { notes, isSelecting = false } = props;
-  const { containerRef, columns, visibleRows, totalHeight } =
+  const { containerRef, columns, visibleRows, totalHeight, measureRow } =
     useVirtualNoteGrid(notes, DEFAULT_NOTE_ROW_HEIGHT);
 
   return (
@@ -100,14 +100,15 @@ const VirtualNoteList = (props: NoteListProps) => {
         height: totalHeight + (isSelecting ? NOTE_SELECTION_BAR_SPACE : 0),
       }}
     >
-      {visibleRows.map(({ index, items, top }) => (
+      {visibleRows.map(({ index, items, start }) => (
         <div
           key={items.map((note) => note.id).join("|")}
+          ref={measureRow}
           className="note-list-row"
-          data-virtual-row={String(index)}
+          data-index={String(index)}
           style={{
             gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-            transform: `translateY(${top}px)`,
+            transform: `translateY(${start}px)`,
           }}
         >
           {items.map((note) => renderNoteCard(note, props))}

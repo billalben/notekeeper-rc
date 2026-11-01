@@ -8,7 +8,7 @@ export const NOTE_GRID_GAP = 8;
 export const DEFAULT_NOTE_ROW_HEIGHT = 240;
 
 /** Extra rows rendered above and below the viewport. */
-const NOTE_ROW_OVERSCAN = 2;
+export const NOTE_ROW_OVERSCAN = 2;
 
 /**
  * Below this many notes, the native CSS grid is cheaper than setting up scroll
@@ -41,66 +41,4 @@ export const chunkRows = <T>(items: T[], columns: number): T[][] => {
   }
 
   return rows;
-};
-
-/**
- * Cumulative top position of every row, plus the total height. Gaps sit
- * between rows only, so the final entry is the exact content height.
- */
-export const buildRowOffsets = (
-  rowCount: number,
-  getRowHeight: (index: number) => number,
-  gap = NOTE_GRID_GAP,
-): number[] => {
-  const offsets = [0];
-
-  for (let index = 0; index < rowCount; index += 1) {
-    const height = Math.max(1, getRowHeight(index));
-    const trailingGap = index < rowCount - 1 ? gap : 0;
-    offsets.push(offsets[index] + height + trailingGap);
-  }
-
-  return offsets;
-};
-
-/** Index of the row containing `position` (gaps belong to the row above). */
-const findRowAt = (offsets: number[], position: number): number => {
-  const rowCount = offsets.length - 1;
-  if (rowCount <= 0) return 0;
-  if (position <= offsets[0]) return 0;
-  if (position >= offsets[rowCount]) return rowCount - 1;
-
-  let low = 0;
-  let high = rowCount - 1;
-
-  while (low < high) {
-    const middle = Math.ceil((low + high) / 2);
-    if (offsets[middle] <= position) low = middle;
-    else high = middle - 1;
-  }
-
-  return low;
-};
-
-/**
- * Inclusive start / exclusive end of the rows intersecting the viewport,
- * padded by `overscan` rows on both sides.
- */
-export const findVisibleRowRange = (
-  offsets: number[],
-  viewportStart: number,
-  viewportEnd: number,
-  overscan = NOTE_ROW_OVERSCAN,
-): { start: number; end: number } => {
-  const rowCount = offsets.length - 1;
-  if (rowCount <= 0) return { start: 0, end: 0 };
-
-  const padding = Math.max(0, Math.floor(overscan));
-  const first = findRowAt(offsets, viewportStart);
-  const last = findRowAt(offsets, viewportEnd);
-
-  return {
-    start: Math.max(0, first - padding),
-    end: Math.min(rowCount, last + padding + 1),
-  };
 };
