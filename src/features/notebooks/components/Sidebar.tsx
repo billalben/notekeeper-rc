@@ -7,7 +7,11 @@ import { computeSidebarCounts } from "@/features/notebooks/lib/sidebarCounts";
 import { isActiveNote } from "@/shared/lib/notes";
 import { formatChord } from "@/shared/lib/shortcuts";
 import { useNoteStore } from "@/shared/stores/useNoteStore";
-import { useSettingsStore } from "@/shared/stores/useSettingsStore";
+import {
+  SIDEBAR_WIDTH_MAX,
+  SIDEBAR_WIDTH_MIN,
+  useSettingsStore,
+} from "@/shared/stores/useSettingsStore";
 import type { Notebook } from "@/shared/types";
 import { useUIStore } from "@/shared/stores/useUIStore";
 import { IconButton } from "@/shared/ui/IconButton";
@@ -53,7 +57,12 @@ export const Sidebar = ({
   const showNotes = useUIStore((state) => state.showNotes);
   const clearTagFilter = useUIStore((state) => state.clearTagFilter);
 
-  const { isResizing, startResize } = useSidebarResize();
+  const sidebarWidth = useSettingsStore((state) => state.sidebar.width);
+  const {
+    isResizing,
+    startResize,
+    onKeyDown: onResizeKeyDown,
+  } = useSidebarResize();
 
   const {
     visibleNotebooks,
@@ -222,7 +231,12 @@ export const Sidebar = ({
         role="separator"
         aria-orientation="vertical"
         aria-label={t("sidebar.resize")}
+        aria-valuemin={SIDEBAR_WIDTH_MIN}
+        aria-valuemax={SIDEBAR_WIDTH_MAX}
+        aria-valuenow={sidebarWidth}
+        tabIndex={0}
         onPointerDown={startResize}
+        onKeyDown={onResizeKeyDown}
       />
     </header>
   );
